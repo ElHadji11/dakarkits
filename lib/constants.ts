@@ -1,0 +1,37 @@
+/**
+ * Plain values shared by the schema, the Zod validators and client components.
+ * Kept free of imports so a client bundle never pulls Drizzle in behind them.
+ */
+
+export const SIZES = ['S', 'M', 'L', 'XL', 'XXL'] as const
+export type Size = (typeof SIZES)[number]
+
+export const KIT_TYPES = [
+  { value: 'home', label: 'Domicile' },
+  { value: 'away', label: 'Extérieur' },
+  { value: 'third', label: 'Third' },
+] as const
+
+export const TEAM_TYPES = [
+  { value: 'club', label: 'Club' },
+  { value: 'national', label: 'Sélection' },
+] as const
+
+export const PRODUCT_STATUSES = [
+  { value: 'draft', label: 'Brouillon' },
+  { value: 'published', label: 'Publié' },
+] as const
+
+/**
+ * Canonical origin, without a trailing slash. Used by `metadataBase`, the
+ * sitemap and robots.txt — three places that must never disagree, or a shared
+ * link points at one host and its canonical tag at another.
+ */
+export function siteUrl(): string {
+  return (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://louyomb.com').replace(/\/+$/, '')
+}
+
+/** Francs CFA, always integers: "8 000 F". */
+export function formatCfa(amount: number): string {
+  return `${new Intl.NumberFormat('fr-FR').format(amount).replace(/ | /g, ' ')} F`
+}

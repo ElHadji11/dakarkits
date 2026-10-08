@@ -1,34 +1,66 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# DakarKits
 
-## Getting Started
+Maillots de foot à Dakar, payés à la livraison. Next.js 16 · Neon · Drizzle ·
+Tailwind + shadcn (Cosmic Night) · ImageKit · Resend · Telegram.
 
-First, run the development server:
+Les règles du projet sont dans [AGENTS.md](AGENTS.md). Les lire avant de coder.
+
+## Démarrer
 
 ```bash
+npm install
+cp .env.example .env.local   # remplir
+npm run db:migrate
+npm run db:seed              # compte admin + réglages
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Commandes
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| | |
+|---|---|
+| `npm run dev` · `build` · `start` | développement, build, production |
+| `npm run typecheck` · `lint` | types et ESLint |
+| `npm test` | 56 tests (prix, pack, recherche, téléphone, stock) |
+| `npm run test:e2e` | parcours complet Playwright |
+| `npm run photos` | prépare `references/` → `references-pretes/` |
+| `npm run db:generate` · `migrate` · `seed` · `studio` | base |
 
-## Learn More
+`npm run photos` ne fait rien sans `--go` : il annonce d'abord le coût
+(10 unités ImageKit par photo, 650 par mois). Filtre possible :
+`npm run photos -- --go aston fulham`. **À l'envoi dans l'admin, décocher
+« Retirer le fond »** — il est déjà retiré.
 
-To learn more about Next.js, take a look at the following resources:
+`npm run test:e2e` crée une vraie commande à chaque exécution.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Configuration
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Secrets dans `.env.local` (jamais dans `.env.example`, suivi par git) :
+`DATABASE_URL`, `AUTH_SECRET`, `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD`,
+`NEXT_PUBLIC_SITE_URL`, les trois clés ImageKit, `RESEND_API_KEY`,
+`RESEND_FROM`, `TELEGRAM_BOT_TOKEN`.
 
-## Deploy on Vercel
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"  # AUTH_SECRET
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Réglages non secrets dans **`/admin/profil`** : email de réception des
+commandes, numéros affichés, identifiant Telegram. Et dans
+**`/admin/reglages`** : pack, livraison, seuil de stock faible.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Écrans
+
+Boutique : `/` `/selections` `/retro` · `/maillot/[slug]` · `/favoris`
+`/panier` `/commande` · `/confidentialite`
+
+Admin : `/admin/commandes` `/admin/produits` `/admin/equipes` `/admin/stats`
+`/admin/reglages` `/admin/profil`
+
+## Mise en ligne
+
+1. Importer dans Vercel, renseigner les variables avec
+   `NEXT_PUBLIC_SITE_URL=https://louyomb.com`.
+2. Ajouter le domaine dans Vercel, créer le DNS chez le registrar de
+   `louyomb.com`.
+3. `npm run db:migrate` puis `npm run db:seed` contre la base de production.
+4. Renseigner `/admin/profil`.
