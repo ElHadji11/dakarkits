@@ -25,7 +25,7 @@ export default async function ShopLayout({ children }: { children: React.ReactNo
       </Suspense>
       <MetaPixel />
       <div className="flex min-h-dvh flex-col">
-        <SiteHeader />
+        <SiteHeader settings={settings} />
         <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-4">{children}</main>
         <SiteFooter settings={settings} />
       </div>

@@ -5,9 +5,11 @@ import { AdminGuard } from '@/components/admin/admin-guard'
 import { DeleteProductButton } from '@/components/admin/delete-product-button'
 import { FlashToast } from '@/components/admin/flash-toast'
 import { ProductForm } from '@/components/admin/product-form'
+import { isConfigured as isAiConfigured } from '@/lib/ai/openai'
 import { getProduct, listLeagues, listTeams } from '@/lib/catalog'
 import { isConfigured, urlEndpoint } from '@/lib/imagekit'
 import { toProductValues } from '@/lib/product-form-values'
+import { getSettings } from '@/lib/settings'
 
 export const metadata: Metadata = { title: 'Modifier un maillot' }
 
@@ -30,10 +32,11 @@ async function EditProductScreen({
   const numericId = Number(id)
   if (!Number.isInteger(numericId)) notFound()
 
-  const [product, teams, leagues, query] = await Promise.all([
+  const [product, teams, leagues, settings, query] = await Promise.all([
     getProduct(numericId),
     listTeams(),
     listLeagues(),
+    getSettings(),
     searchParams,
   ])
   if (!product) notFound()
@@ -52,6 +55,8 @@ async function EditProductScreen({
         teams={teams}
         leagues={leagues}
         imagekitConfigured={isConfigured()}
+        aiConfigured={isAiConfigured()}
+        shipping={{ mode: settings.shippingMode, fee: settings.shippingFee }}
       />
     </div>
   )

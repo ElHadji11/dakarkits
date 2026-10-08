@@ -2,6 +2,7 @@
 
 import { useId, useState } from 'react'
 
+import { useFieldPatch } from '@/components/admin/field-patch'
 import { Label } from '@/components/ui/label'
 import {
   Select,
@@ -31,6 +32,8 @@ export function SelectField({
 }) {
   const [value, setValue] = useState(defaultValue ?? (allowEmpty ? NONE : options[0]!.value))
   const id = useId()
+
+  useFieldPatch(name, (patched) => setValue(patched === '' ? NONE : patched))
 
   return (
     <div className="space-y-2">

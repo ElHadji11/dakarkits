@@ -236,12 +236,17 @@ export function ImageUploader({
                   />
                 </div>
 
-                <div className="flex items-center justify-between gap-1">
+                {/* Quatre cibles de 44 px en ligne demandent 188 px ; la carte
+                    n'en fait que 147 sur un téléphone de 375 px (deux colonnes,
+                    gouttière et padding déduits), et les boutons débordaient sur
+                    la carte voisine. Deux rangées de deux : la cible reste
+                    entière, la ligne redevient simple dès qu'il y a la place. */}
+                <div className="grid grid-cols-2 gap-1 sm:grid-cols-4">
                   <Button
                     type="button"
                     size="icon"
                     variant="ghost"
-                    className="size-11"
+                    className="h-11 w-full"
                     aria-label="Déplacer vers la gauche"
                     onClick={() => move(index, index - 1)}
                   >
@@ -250,8 +255,18 @@ export function ImageUploader({
                   <Button
                     type="button"
                     size="icon"
+                    variant="ghost"
+                    className="h-11 w-full"
+                    aria-label="Déplacer vers la droite"
+                    onClick={() => move(index, index + 1)}
+                  >
+                    <ArrowRight className="size-4" aria-hidden />
+                  </Button>
+                  <Button
+                    type="button"
+                    size="icon"
                     variant={index === primary ? 'default' : 'ghost'}
-                    className="size-11"
+                    className="h-11 w-full"
                     aria-label="Définir comme photo principale"
                     aria-pressed={index === primary}
                     onClick={() => setPrimary(index)}
@@ -262,17 +277,7 @@ export function ImageUploader({
                     type="button"
                     size="icon"
                     variant="ghost"
-                    className="size-11"
-                    aria-label="Déplacer vers la droite"
-                    onClick={() => move(index, index + 1)}
-                  >
-                    <ArrowRight className="size-4" aria-hidden />
-                  </Button>
-                  <Button
-                    type="button"
-                    size="icon"
-                    variant="ghost"
-                    className="size-11 text-destructive"
+                    className="h-11 w-full text-destructive"
                     aria-label="Retirer cette photo"
                     onClick={() => remove(index)}
                   >

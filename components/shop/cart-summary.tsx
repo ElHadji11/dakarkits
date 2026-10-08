@@ -28,13 +28,12 @@ export function CartSummary({
         {pricing.packDiscount > 0 ? (
           <Row label="Remise pack" value={`− ${formatCfa(pricing.packDiscount)}`} accent />
         ) : null}
+        {/* Ce que la livraison coûte vraiment sur ce panier, pas le nom du
+            réglage : un mode « frais » à 0 F affichait « 0 F ». Même mot que le
+            bandeau de l’en-tête, sinon le client lit deux promesses. */}
         <Row
           label="Livraison"
-          value={
-            settings.shippingMode === 'included'
-              ? 'Incluse partout à Dakar'
-              : formatCfa(pricing.shippingFee)
-          }
+          value={pricing.shippingFee === 0 ? 'Gratuite' : formatCfa(pricing.shippingFee)}
         />
         <div className="flex items-baseline justify-between border-t border-border pt-2">
           <dt className="font-medium">À payer à la livraison</dt>

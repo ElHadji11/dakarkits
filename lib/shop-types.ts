@@ -1,4 +1,4 @@
-import type { Size } from '@/lib/constants'
+import { formatCfa, type Size } from '@/lib/constants'
 
 /**
  * Shapes shared by the server queries and the client components.
@@ -50,10 +50,11 @@ export type ShopSettings = {
   shopWhatsapp: string | null
 }
 
-export type Category = 'clubs' | 'selections' | 'retro'
+export type Category = 'tous' | 'clubs' | 'selections' | 'retro'
 
 export const CATEGORIES: Array<{ value: Category; label: string; href: string }> = [
-  { value: 'clubs', label: 'Clubs', href: '/' },
+  { value: 'tous', label: 'Tous', href: '/' },
+  { value: 'clubs', label: 'Clubs', href: '/clubs' },
   { value: 'selections', label: 'Sélections', href: '/selections' },
   { value: 'retro', label: 'Rétro', href: '/retro' },
 ]
@@ -64,8 +65,12 @@ export const CATEGORIES: Array<{ value: Category; label: string; href: string }>
  * Rétro is a mood, not an exclusive bucket: a retro Barcelona shirt belongs in
  * Clubs *and* Rétro. "Clubs" also catches jerseys with no team at all, so that
  * nothing published can end up unreachable — team is an optional field.
+ *
+ * « Tous » ne filtre rien : c'est l'onglet d'accueil, et le seul endroit où un
+ * maillot publié est visible quoi qu'il arrive à son équipe.
  */
 export function inCategory(product: ShopProduct, category: Category): boolean {
+  if (category === 'tous') return true
   if (category === 'retro') return product.isRetro
   if (category === 'selections') return product.teamType === 'national'
   return product.teamType !== 'national'
@@ -95,4 +100,22 @@ export function discountPercent(product: ShopProduct): number | null {
     ((product.compareAtPrice! - product.price) / product.compareAtPrice!) * 100,
   )
   return percent > 0 ? percent : null
+}
+
+/**
+ * La promesse de livraison, en une seule phrase et en un seul endroit.
+ *
+ * Le bandeau de l’en-tête, la fiche produit et le panier la récitent tous les
+ * trois : s’ils la formulaient chacun de leur côté, un passage en livraison
+ * payante en laisserait un qui promet le gratuit alors que `calculatePricing`
+ * facture. Un mode « frais » à 0 F est gratuit lui aussi — c’est ce que le
+ * client paie qui compte, pas le nom du réglage.
+ */
+export function deliveryPromise(
+  settings: Pick<ShopSettings, 'shippingMode' | 'shippingFee'>,
+): string {
+  const free = settings.shippingMode === 'included' || settings.shippingFee === 0
+  return free
+    ? 'Livraison gratuite partout à Dakar'
+    : `Livraison à Dakar : ${formatCfa(settings.shippingFee)}`
 }

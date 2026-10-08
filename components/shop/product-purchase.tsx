@@ -9,7 +9,13 @@ import { FavoriteButton } from '@/components/shop/favorite-button'
 import { Button } from '@/components/ui/button'
 import { formatCfa, type Size } from '@/lib/constants'
 import { trackAddToCart } from '@/lib/pixel'
-import { isOnSale, isSoldOut, type ShopProduct, type ShopSettings } from '@/lib/shop-types'
+import {
+  deliveryPromise,
+  isOnSale,
+  isSoldOut,
+  type ShopProduct,
+  type ShopSettings,
+} from '@/lib/shop-types'
 import { useCart } from '@/stores/cart'
 import { cn } from '@/lib/utils'
 
@@ -87,9 +93,7 @@ export function ProductPurchase({
         </li>
         <li className="flex items-center gap-2">
           <Truck className="size-4 shrink-0" aria-hidden />
-          {settings.shippingMode === 'included'
-            ? 'Livraison incluse partout à Dakar.'
-            : `Livraison à Dakar : ${formatCfa(settings.shippingFee)}.`}
+          {deliveryPromise(settings)}.
         </li>
       </ul>
 

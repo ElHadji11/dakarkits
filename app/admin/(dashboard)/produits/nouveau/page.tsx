@@ -2,9 +2,11 @@ import type { Metadata } from 'next'
 
 import { AdminGuard } from '@/components/admin/admin-guard'
 import { ProductForm } from '@/components/admin/product-form'
+import { isConfigured as isAiConfigured } from '@/lib/ai/openai'
 import { listLeagues, listTeams } from '@/lib/catalog'
 import { isConfigured } from '@/lib/imagekit'
 import { emptyProductValues } from '@/lib/product-form-values'
+import { getSettings } from '@/lib/settings'
 
 export const metadata: Metadata = { title: 'Nouveau maillot' }
 
@@ -17,7 +19,7 @@ export default function NewProductPage() {
 }
 
 async function NewProductScreen() {
-  const [teams, leagues] = await Promise.all([listTeams(), listLeagues()])
+  const [teams, leagues, settings] = await Promise.all([listTeams(), listLeagues(), getSettings()])
 
   return (
     <div className="space-y-6 py-4">
@@ -27,6 +29,8 @@ async function NewProductScreen() {
         teams={teams}
         leagues={leagues}
         imagekitConfigured={isConfigured()}
+        aiConfigured={isAiConfigured()}
+        shipping={{ mode: settings.shippingMode, fee: settings.shippingFee }}
       />
     </div>
   )

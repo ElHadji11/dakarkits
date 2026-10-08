@@ -5,6 +5,7 @@ import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
 
 import { quickCreateTeam } from '@/app/admin/_actions/catalog'
+import { useFieldPatch } from '@/components/admin/field-patch'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -42,6 +43,8 @@ export function TeamPicker({
   const [type, setType] = useState<'club' | 'national'>('club')
   const [leagueId, setLeagueId] = useState(NONE)
   const [pending, startTransition] = useTransition()
+
+  useFieldPatch('teamId', (patched) => setValue(patched === '' ? NONE : patched))
 
   const create = () => {
     const trimmed = name.trim()

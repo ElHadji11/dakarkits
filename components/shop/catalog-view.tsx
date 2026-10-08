@@ -201,7 +201,9 @@ export function CatalogView({ category }: { category: Category }) {
           <p className="text-sm text-muted-foreground">
             {active > 0 || query
               ? 'Aucun maillot ne correspond. Essaie d’élargir ta recherche.'
-              : 'Aucun maillot dans cette catégorie pour l’instant.'}
+              : category === 'tous'
+                ? 'Aucun maillot en ligne pour l’instant.'
+                : 'Aucun maillot dans cette catégorie pour l’instant.'}
           </p>
           {active > 0 || query ? (
             <Button

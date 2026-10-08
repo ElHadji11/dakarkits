@@ -3,15 +3,16 @@ import { Suspense } from 'react'
 
 import { CatalogView } from '@/components/shop/catalog-view'
 import { StaticGrid } from '@/components/shop/static-grid'
+import type { Category } from '@/lib/shop-types'
 
 export const metadata: Metadata = {
-  title: 'Maillots de clubs',
+  title: 'Tous les maillots',
   description:
-    'Maillots de clubs livrés à Dakar, payés à la livraison. Filtre par équipe, ligue, taille et prix.',
+    'Tous les maillots disponibles — clubs, sélections et rétro — livrés à Dakar et payés à la livraison. Filtre par équipe, ligue, taille et prix.',
 }
 
-export default function ClubsPage() {
-  return <CatalogPage category="clubs" />
+export default function AllKitsPage() {
+  return <CatalogPage category="tous" />
 }
 
 /**
@@ -19,7 +20,7 @@ export default function ClubsPage() {
  * a boundary. Its fallback is the real server-rendered grid rather than a
  * skeleton: the images are then in the HTML from the first byte.
  */
-export function CatalogPage({ category }: { category: 'clubs' | 'selections' | 'retro' }) {
+export function CatalogPage({ category }: { category: Category }) {
   return (
     <Suspense fallback={<CatalogShell category={category} />}>
       <CatalogView category={category} />
@@ -27,11 +28,11 @@ export function CatalogPage({ category }: { category: 'clubs' | 'selections' | '
   )
 }
 
-function CatalogShell({ category }: { category: 'clubs' | 'selections' | 'retro' }) {
+function CatalogShell({ category }: { category: Category }) {
   return (
     <div className="space-y-4">
       <div className="flex gap-2" aria-hidden>
-        {[0, 1, 2].map((i) => (
+        {[0, 1, 2, 3].map((i) => (
           <div key={i} className="h-11 w-28 rounded-full bg-muted" />
         ))}
       </div>

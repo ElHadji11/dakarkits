@@ -27,7 +27,7 @@ const SHOP_DEFAULTS = {
   packSize: 2,
   packPrice: 13_000,
   shippingMode: 'fee',
-  shippingFee: 1_000,
+  shippingFee: 2_000,
   lowStockThreshold: 2,
   shopPhone: '+221774354688',
   shopWhatsapp: '+221774354688',

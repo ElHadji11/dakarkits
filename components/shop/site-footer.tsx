@@ -30,7 +30,8 @@ function formatPhone(value: string): string {
 }
 
 const LINKS = [
-  { href: '/', label: 'Clubs' },
+  { href: '/', label: 'Tous' },
+  { href: '/clubs', label: 'Clubs' },
   { href: '/selections', label: 'Sélections' },
   { href: '/retro', label: 'Rétro' },
   { href: '/favoris', label: 'Favoris' },
@@ -55,8 +56,14 @@ const fineClass =
 
 export function SiteFooter({ settings }: { settings: ShopSettings }) {
   return (
-    <footer className="mt-10 bg-card">
-      {/* Filet dégradé : la même séparation que `border-t`, en moins net. */}
+    /* `footer-surface` (globals.css) : le dégradé démarre pile sur ce bord —
+       son stop 0 % vaut `--background`, donc rien ne trahit la jointure — et
+       descend vers le violet jusqu'au bas de la page. Il remplace l'ancien
+       `bg-card` : le pied de page n'est plus une carte posée sur la page,
+       c'est la page qui s'éteint dedans. */
+    <footer className="footer-surface mt-10">
+      {/* Filet dégradé : la même séparation que `border-t`, en moins net. Seul
+          repère du haut du pied de page, maintenant que le fond est continu. */}
       <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
 
       <div className="footer-reveal mx-auto w-full max-w-6xl px-4">
@@ -101,7 +108,12 @@ export function SiteFooter({ settings }: { settings: ShopSettings }) {
           </div>
         </div>
 
-        <div className="flex flex-col items-center gap-2 border-t border-border py-5 text-center text-xs text-muted-foreground sm:flex-row sm:justify-between sm:text-left">
+        {/* `foreground/80` et non `muted-foreground` : cette rangée tombe sur
+            le point le plus clair du dégradé (~oklch 0.44). `muted-foreground`
+            y descendrait à 3:1, sous le seuil AA ; `foreground/80` tient 4,9:1.
+            Même raison pour la bordure, qui suit le fond au lieu de `--border`,
+            calculé lui pour une surface sombre et unie. */}
+        <div className="flex flex-col items-center gap-2 border-t border-foreground/10 py-5 text-center text-xs text-foreground/80 sm:flex-row sm:justify-between sm:text-left">
           <p className="flex flex-wrap items-center justify-center gap-x-2">
             <span>© {YEAR} DakarKits. Tous droits réservés.</span>
             <a href={INSTAGRAM_URL} target="_blank" rel="noreferrer" className={fineClass}>

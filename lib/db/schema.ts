@@ -219,7 +219,7 @@ export const settings = pgTable('settings', {
   packSize: integer('pack_size').notNull().default(2),
   packPrice: integer('pack_price').notNull().default(13000),
   shippingMode: shippingModeEnum('shipping_mode').notNull().default('fee'),
-  shippingFee: integer('shipping_fee').notNull().default(1000),
+  shippingFee: integer('shipping_fee').notNull().default(2000),
   lowStockThreshold: integer('low_stock_threshold').notNull().default(2),
   shopPhone: varchar('shop_phone', { length: 20 }),
   shopWhatsapp: varchar('shop_whatsapp', { length: 20 }),

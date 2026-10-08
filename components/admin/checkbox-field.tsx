@@ -2,6 +2,7 @@
 
 import { useId, useState } from 'react'
 
+import { useFieldPatch } from '@/components/admin/field-patch'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 
@@ -23,6 +24,8 @@ export function CheckboxField({
 }) {
   const [checked, setChecked] = useState(defaultChecked)
   const id = useId()
+
+  useFieldPatch(name, (patched) => setChecked(patched === 'on'))
 
   return (
     <div className="flex items-start gap-3">

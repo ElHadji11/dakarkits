@@ -240,3 +240,65 @@
     transform: none;
   }
 }
+
+/* Dégradé du pied de page.
+
+   Le dégradé commence exactement au bord haut du `<footer>` — stop 0 % =
+   `--background`, donc aucune couture avec la page — et s'approfondit en
+   violet jusqu'au bas. Trois couches dans un seul `background-image`, du
+   dessus vers le dessous : le grain, une lueur radiale centrée sous le pied
+   de page, puis le dégradé vertical.
+
+   Le grain n'est pas décoratif : un dégradé sombre → violet sur 400 px
+   affiche des bandes franches sur un écran Android 6 bits, ce qui est le
+   parc de nos visiteurs. Le bruit les casse. 500 octets en ligne, aucune
+   requête, aucun JavaScript.
+
+   Quatre arrêts et non deux : un dégradé en deux couleurs sur les 226 px d'un
+   pied de page de bureau monte trop vite et se lit comme une bande bicolore.
+   Le palier à 26 % retient le sombre, la montée ne commence vraiment qu'après.
+   Sur téléphone, où le pied de page empilé fait le double, la même courbe
+   devient simplement plus douce.
+
+   Les couleurs sont dérivées de `--primary` et `--background` : si le thème
+   change, le pied de page suit. Contrairement à `app/icon.svg`, à
+   `opengraph-image.tsx` et au `themeColor` du layout, il n'y a rien à
+   resynchroniser ici. */
+.footer-surface {
+    /* Repli universel. `color-mix` garde la teinte de `--primary` mais perd
+       en chroma : le résultat est un indigo grisé, acceptable. */
+    --footer-dim: color-mix(in oklab, var(--primary) 9%, var(--background));
+    --footer-mid: color-mix(in oklab, var(--primary) 25%, var(--background));
+    --footer-end: color-mix(in oklab, var(--primary) 48%, var(--background));
+    --footer-bloom: color-mix(in oklab, var(--primary) 26%, transparent);
+
+    background-color: var(--background);
+    background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23g)' opacity='0.55'/%3E%3C/svg%3E"),
+        radial-gradient(120% 72% at 50% 116%, var(--footer-bloom), transparent 64%),
+        linear-gradient(
+            to bottom,
+            var(--background) 0%,
+            var(--footer-dim) 26%,
+            var(--footer-mid) 62%,
+            var(--footer-end) 100%
+        );
+    background-repeat: repeat, no-repeat, no-repeat;
+    background-size: 180px 180px, 100% 100%, 100% 100%;
+    background-blend-mode: soft-light, screen, normal;
+}
+
+/* Syntaxe de couleur relative : on reprend la teinte de `--primary` mais on
+   impose clarté et chroma. C'est ce qui fait la différence entre un indigo
+   délavé et un vrai violet. En `@supports` et non en double déclaration de
+   custom property : une custom property accepte n'importe quels jetons à
+   l'analyse, donc un repli déclaré avant serait écrasé puis invalidé à la
+   substitution — et le dégradé disparaîtrait entièrement. */
+@supports (color: oklch(from white l c h)) {
+    .footer-surface {
+        --footer-dim: oklch(from var(--primary) 0.21 0.042 h);
+        --footer-mid: oklch(from var(--primary) 0.30 0.092 h);
+        --footer-end: oklch(from var(--primary) 0.44 0.152 h);
+    }
+}
+

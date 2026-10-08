@@ -1,0 +1,1 @@
+ALTER TABLE "settings" ALTER COLUMN "shipping_fee" SET DEFAULT 2000;
