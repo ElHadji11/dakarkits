@@ -24,7 +24,7 @@ export function CartSheet({
   open: boolean
   onOpenChange: (open: boolean) => void
 }) {
-  const { lines, pricing, settings, packCompareAt } = useCartLines()
+  const { lines, pricing, nudge } = useCartLines()
   const setOpen = onOpenChange
 
   return (
@@ -49,7 +49,7 @@ export function CartSheet({
               <CartLines lines={lines} onNavigate={() => setOpen(false)} />
             </div>
             <SheetFooter className="gap-3 border-t border-border">
-              <CartSummary pricing={pricing} settings={settings} packCompareAt={packCompareAt} />
+              <CartSummary pricing={pricing} nudge={nudge} />
               <Button asChild variant="cta" className="h-12 w-full" onClick={() => setOpen(false)}>
                 <Link href="/commande">Commander</Link>
               </Button>

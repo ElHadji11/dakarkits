@@ -46,8 +46,7 @@ export function LegalIdentity() {
         <Strong>THIOR Elhadji Babacar</Strong> (enseigne EL HAAJI NDANANE TECH), immatriculée au
         registre du commerce et du crédit mobilier de Dakar sous le numéro{' '}
         <Strong>SN.DKR.2025.A.43110</Strong> et identifiée par le NINEA{' '}
-        <Strong>012582377</Strong>, dont l&apos;établissement est sis Hann Mariste 2/D, Villa n° 53,
-        Îlot P, Dakar, Sénégal.
+        <Strong>012582377</Strong>
       </P>
       <P>
         Téléphone <A href="tel:+221774354688">+221 77 435 46 88</A> · courriel{' '}

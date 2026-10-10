@@ -29,6 +29,13 @@
       "when": 1791475032889,
       "tag": "0003_shipping_fee_2000",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791643569270,
+      "tag": "0004_pack_tiers",
+      "breakpoints": true
     }
   ]
 }

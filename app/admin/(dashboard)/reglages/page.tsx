@@ -23,8 +23,9 @@ async function SettingsScreen() {
       <SettingsForm
         values={{
           packEnabled: settings.packEnabled,
-          packSize: String(settings.packSize),
-          packPrice: String(settings.packPrice),
+          packPrices: Object.fromEntries(
+            settings.packTiers.map((tier) => [tier.size, String(tier.price)]),
+          ),
           shippingMode: settings.shippingMode,
           shippingFee: String(settings.shippingFee),
           lowStockThreshold: String(settings.lowStockThreshold),

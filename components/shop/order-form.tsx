@@ -17,7 +17,7 @@ import { trackInitiateCheckout } from '@/lib/pixel'
 import { useAttribution } from '@/stores/attribution'
 
 export function OrderForm() {
-  const { hydrated, lines, pricing, settings, packCompareAt } = useCartLines()
+  const { hydrated, lines, pricing, nudge } = useCartLines()
   const attribution = useAttribution()
   const [state, formAction, pending] = useActionState(placeOrder, idle)
 
@@ -83,7 +83,7 @@ export function OrderForm() {
       <section className="space-y-4 rounded-lg border border-border p-4">
         <h2 className="text-sm font-medium text-muted-foreground">Récapitulatif</h2>
         <CartLines lines={lines} />
-        <CartSummary pricing={pricing} settings={settings} packCompareAt={packCompareAt} />
+        <CartSummary pricing={pricing} nudge={nudge} />
       </section>
 
       <section className="space-y-4">

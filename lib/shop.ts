@@ -5,7 +5,15 @@ import { cacheLife, cacheTag } from 'next/cache'
 
 import { buildHaystack } from '@/lib/search'
 import { db } from '@/lib/db'
-import { leagues, productImages, productSizes, products, settings, teams } from '@/lib/db/schema'
+import {
+  leagues,
+  packTiers,
+  productImages,
+  productSizes,
+  products,
+  settings,
+  teams,
+} from '@/lib/db/schema'
 import type { ShopProduct, ShopProductDetail, ShopSettings } from '@/lib/shop-types'
 
 export type {
@@ -129,13 +137,15 @@ export async function getShopSettings(): Promise<ShopSettings> {
   cacheLife('max')
   cacheTag('settings')
 
-  const [row] = await db.select().from(settings).where(eq(settings.id, 1)).limit(1)
+  const [[row], tiers] = await Promise.all([
+    db.select().from(settings).where(eq(settings.id, 1)).limit(1),
+    db.select().from(packTiers).orderBy(asc(packTiers.size)),
+  ])
   if (!row) throw new Error('Settings row 1 is missing. Run `npm run db:seed`.')
 
   return {
     packEnabled: row.packEnabled,
-    packSize: row.packSize,
-    packPrice: row.packPrice,
+    packTiers: tiers,
     shippingMode: row.shippingMode,
     shippingFee: row.shippingFee,
     lowStockThreshold: row.lowStockThreshold,

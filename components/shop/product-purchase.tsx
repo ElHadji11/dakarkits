@@ -2,7 +2,7 @@
 
 import { Check, ShoppingBag, Truck, Wallet } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { Fragment, useState } from 'react'
 import { toast } from 'sonner'
 
 import { FavoriteButton } from '@/components/shop/favorite-button'
@@ -13,6 +13,7 @@ import {
   deliveryPromise,
   isOnSale,
   isSoldOut,
+  packLadder,
   type ShopProduct,
   type ShopSettings,
 } from '@/lib/shop-types'
@@ -62,6 +63,7 @@ export function ProductPurchase({
   }
 
   const blocked = soldOut || (hasSizes && selected === null)
+  const ladder = packLadder(settings)
 
   return (
     <div className="space-y-5">
@@ -142,17 +144,27 @@ export function ProductPurchase({
         </Button>
       </div>
 
-      {settings.packEnabled ? (
+      {ladder.length > 0 ? (
         <p className="flex items-center gap-2 text-sm text-muted-foreground">
           <Check className="size-4 shrink-0 text-primary" aria-hidden />
           {/* Toute la phrase dans un seul élément : le parent est un flex avec
               `gap-2`, et un montant sorti à nu y deviendrait un élément flex
               de plus — 8 px de gouttière avant le point. */}
           <span>
-            {settings.packSize} maillots au choix pour{' '}
-            <span className="font-display text-lg leading-none tracking-wide text-foreground">
-              {formatCfa(settings.packPrice)}
-            </span>
+            {ladder.map((tier, index) => (
+              <Fragment key={tier.size}>
+                {index > 0 ? ', ' : ''}
+                {/* `formatCfa` sépare les milliers par une espace ordinaire,
+                    donc « 19 500 F » se coupe n'importe où. Sur 375 px, le
+                    barème passait à la ligne en laissant un « F. » orphelin. */}
+                <span className="whitespace-nowrap">
+                  {tier.lead}
+                  <span className="font-display text-lg leading-none tracking-wide text-foreground">
+                    {tier.price}
+                  </span>
+                </span>
+              </Fragment>
+            ))}
             .
           </span>
         </p>

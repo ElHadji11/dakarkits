@@ -9,11 +9,12 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { idle } from '@/lib/action-state'
+import { PACK_TIER_SIZES, packPriceField } from '@/lib/constants'
 
 export type ShopSettingsValues = {
   packEnabled: boolean
-  packSize: string
-  packPrice: string
+  /** Le prix de chaque palier, indexé par nombre de maillots. '' = éteint. */
+  packPrices: Record<number, string>
   shippingMode: string
   shippingFee: string
   lowStockThreshold: string
@@ -36,35 +37,32 @@ export function SettingsForm({ values }: { values: ShopSettingsValues }) {
           defaultChecked={values.packEnabled}
         />
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-2">
-            <Label htmlFor="packSize">Maillots par pack</Label>
-            <Input
-              id="packSize"
-              name="packSize"
-              type="number"
-              min={2}
-              max={10}
-              inputMode="numeric"
-              defaultValue={kept('packSize', values.packSize)}
-              className="h-12"
-            />
-            <FieldError message={error('packSize')} />
-          </div>
+        <p className="text-xs text-muted-foreground">
+          Un prix global par nombre de maillots. Laisse vide pour éteindre un palier. Le panier
+          prend toujours le barème le plus avantageux pour le client, et jamais s&apos;il dépasse
+          la somme des prix affichés.
+        </p>
 
-          <div className="space-y-2">
-            <Label htmlFor="packPrice">Prix du pack (F CFA)</Label>
-            <Input
-              id="packPrice"
-              name="packPrice"
-              type="number"
-              min={0}
-              inputMode="numeric"
-              defaultValue={kept('packPrice', values.packPrice)}
-              className="h-12"
-            />
-            <FieldError message={error('packPrice')} />
-          </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          {PACK_TIER_SIZES.map((size) => {
+            const field = packPriceField(size)
+            return (
+              <div key={size} className="space-y-2">
+                <Label htmlFor={field}>{size} maillots (F CFA)</Label>
+                <Input
+                  id={field}
+                  name={field}
+                  type="number"
+                  min={1}
+                  inputMode="numeric"
+                  placeholder="Pas de pack"
+                  defaultValue={kept(field, values.packPrices[size] ?? '')}
+                  className="h-12"
+                />
+                <FieldError message={error(field)} />
+              </div>
+            )
+          })}
         </div>
       </section>
 

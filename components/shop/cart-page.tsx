@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { useCartLines } from '@/hooks/use-cart-lines'
 
 export function CartPage() {
-  const { hydrated, lines, pricing, settings, packCompareAt } = useCartLines()
+  const { hydrated, lines, pricing, nudge } = useCartLines()
 
   if (!hydrated) {
     return <div className="h-64 animate-pulse rounded-lg bg-muted" aria-hidden />
@@ -40,7 +40,7 @@ export function CartPage() {
         <CartLines lines={lines} />
 
         <div className="space-y-4 lg:sticky lg:top-20 lg:self-start">
-          <CartSummary pricing={pricing} settings={settings} packCompareAt={packCompareAt} />
+          <CartSummary pricing={pricing} nudge={nudge} />
           <Button asChild variant="cta" className="hidden h-12 w-full sm:flex">
             <Link href="/commande">Commander</Link>
           </Button>

@@ -216,8 +216,6 @@ export const orderItems = pgTable(
 export const settings = pgTable('settings', {
   id: integer('id').primaryKey().default(1),
   packEnabled: boolean('pack_enabled').notNull().default(true),
-  packSize: integer('pack_size').notNull().default(2),
-  packPrice: integer('pack_price').notNull().default(13000),
   shippingMode: shippingModeEnum('shipping_mode').notNull().default('fee'),
   shippingFee: integer('shipping_fee').notNull().default(2000),
   lowStockThreshold: integer('low_stock_threshold').notNull().default(2),
@@ -226,6 +224,24 @@ export const settings = pgTable('settings', {
   orderEmail: varchar('order_email', { length: 255 }),
   telegramChatId: varchar('telegram_chat_id', { length: 64 }),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
+/**
+ * Le barème : un prix global par nombre de maillots. Une ligne par palier,
+ * `size` servant de clé — il n'y a qu'un seul prix possible pour « 3 maillots ».
+ *
+ * C'était un couple `pack_size` / `pack_price` sur `settings`, donc un seul
+ * palier. Trois maillots retombaient alors sur 13 000 + 8 000 = 21 000 F, soit
+ * 7 000 F le maillot contre 6 500 F dans le pack de deux : le troisième coûtait
+ * plus cher que les deux premiers. Un client ne comprend pas ça, et il a
+ * raison. Chaque palier porte donc son prix, et `app/admin/_actions/settings`
+ * refuse un barème où un pack plus grand revient plus cher au maillot.
+ */
+export const packTiers = pgTable('pack_tiers', {
+  /** Nombre de maillots couverts. Toujours 2 ou plus. */
+  size: integer('size').primaryKey(),
+  /** Ce que ces maillots coûtent ensemble. Francs CFA, entier. */
+  price: integer('price').notNull(),
 })
 
 /* ------------------------------------------------------------ rate limit --- */
@@ -251,6 +267,7 @@ export type AdminUser = typeof adminUsers.$inferSelect
 export type Order = typeof orders.$inferSelect
 export type OrderItem = typeof orderItems.$inferSelect
 export type Settings = typeof settings.$inferSelect
+export type PackTierRow = typeof packTiers.$inferSelect
 export type { Size } from '@/lib/constants'
 export type OrderStatus = (typeof orderStatusEnum.enumValues)[number]
 

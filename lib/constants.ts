@@ -17,6 +17,19 @@ export const TEAM_TYPES = [
   { value: 'national', label: 'Sélection' },
 ] as const
 
+/**
+ * Les tailles de pack réglables dans l'admin. Le barème est un prix global par
+ * nombre de maillots : 2 pour 13 000, 3 pour 19 500. Au-delà de six maillots,
+ * le panier n'existe pas dans la vraie vie — et une ligne de plus au formulaire
+ * est une ligne de plus à scroller sur un téléphone.
+ */
+export const PACK_TIER_SIZES = [2, 3, 4, 5, 6] as const
+
+/** Le champ du formulaire de réglages qui porte le prix du pack de `size`. */
+export function packPriceField(size: number): string {
+  return `packPrice${size}`
+}
+
 export const PRODUCT_STATUSES = [
   { value: 'draft', label: 'Brouillon' },
   { value: 'published', label: 'Publié' },

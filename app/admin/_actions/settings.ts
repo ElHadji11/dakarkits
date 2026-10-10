@@ -1,14 +1,16 @@
 'use server'
 
-import { eq } from 'drizzle-orm'
+import { eq, notInArray, sql } from 'drizzle-orm'
 import { refresh, updateTag } from 'next/cache'
 import { z } from 'zod'
 
 import { submittedValues, type ActionState } from '@/lib/action-state'
 import { hashPassword, verifyPassword } from '@/lib/auth/password'
 import { createSession, requireAdmin } from '@/lib/auth/session'
+import { PACK_TIER_SIZES, packPriceField } from '@/lib/constants'
 import { db } from '@/lib/db'
-import { adminUsers, settings } from '@/lib/db/schema'
+import { ladderIssues } from '@/lib/pricing'
+import { adminUsers, packTiers, settings } from '@/lib/db/schema'
 import { emailField } from '@/lib/validation/auth'
 import { normalisePhone } from '@/lib/validation/order'
 
@@ -44,21 +46,58 @@ function flatten(error: z.ZodError, values: Record<string, string>): ActionState
 
 /* -------------------------------------------------------------- réglages --- */
 
+/** Un prix de palier : vide = pas de pack de cette taille. */
+const tierPrice = z.preprocess(
+  blankToNull,
+  z.union([z.coerce.number().int().min(1).max(100_000_000), z.null()]),
+)
+
+/**
+ * Les prix de palier vivent à plat, sous le nom exact de leur champ
+ * (`packPrice3`), parce que `flatten` fabrique les `fieldErrors` depuis le
+ * chemin Zod : imbriqués, le message sortirait sous `tiers.3` et le formulaire
+ * ne saurait pas à quel input l'accrocher.
+ */
 const shopSchema = z
   .object({
     packEnabled: checkbox,
-    packSize: z.coerce.number().int().min(2).max(10),
-    packPrice: amount,
     shippingMode: z.enum(['fee', 'included']),
     shippingFee: amount,
     lowStockThreshold: z.coerce.number().int().min(0).max(100),
+    ...Object.fromEntries(PACK_TIER_SIZES.map((size) => [packPriceField(size), tierPrice])),
   })
-  .refine((v) => !v.packEnabled || v.packPrice > 0, {
-    path: ['packPrice'],
-    error: 'Le prix du pack doit être supérieur à zéro.',
+  .superRefine((values, ctx) => {
+    const active = activeTiers(values)
+
+    if (values.packEnabled && active.length === 0) {
+      ctx.addIssue({
+        code: 'custom',
+        path: [packPriceField(PACK_TIER_SIZES[0])],
+        message: 'Renseigne au moins un prix de pack, ou décoche « Pack actif ».',
+      })
+      return
+    }
+
+    // Le barème doit se tenir debout de palier en palier — la règle vit avec
+    // le calcul qu'elle protège, dans `lib/pricing`, et elle y est testée.
+    for (const issue of ladderIssues(active)) {
+      ctx.addIssue({ code: 'custom', path: [packPriceField(issue.size)], message: issue.message })
+    }
   })
 
-const SHOP_FIELDS = ['packSize', 'packPrice', 'shippingFee', 'lowStockThreshold']
+/** Les paliers renseignés, du plus petit au plus grand. */
+function activeTiers(values: Record<string, unknown>): Array<{ size: number; price: number }> {
+  return PACK_TIER_SIZES.flatMap((size) => {
+    const price = values[packPriceField(size)]
+    return typeof price === 'number' ? [{ size, price }] : []
+  })
+}
+
+const SHOP_FIELDS = [
+  ...PACK_TIER_SIZES.map((size) => packPriceField(size)),
+  'shippingFee',
+  'lowStockThreshold',
+]
 
 export async function saveShopSettings(
   _previous: ActionState,
@@ -68,18 +107,45 @@ export async function saveShopSettings(
 
   const parsed = shopSchema.safeParse({
     packEnabled: formData.get('packEnabled'),
-    packSize: formData.get('packSize'),
-    packPrice: formData.get('packPrice'),
     shippingMode: formData.get('shippingMode'),
     shippingFee: formData.get('shippingFee'),
     lowStockThreshold: formData.get('lowStockThreshold'),
+    ...Object.fromEntries(
+      PACK_TIER_SIZES.map((size) => [packPriceField(size), formData.get(packPriceField(size))]),
+    ),
   })
   if (!parsed.success) return flatten(parsed.error, submittedValues(formData, SHOP_FIELDS))
 
-  await db
-    .update(settings)
-    .set({ ...parsed.data, updatedAt: new Date() })
-    .where(eq(settings.id, 1))
+  const { packEnabled, shippingMode, shippingFee, lowStockThreshold } = parsed.data
+  const kept = activeTiers(parsed.data)
+
+  // Une transaction, parce que le barème passe par deux ordres : un palier
+  // effacé et l'autre réécrit laisseraient une seconde la boutique à un prix
+  // que personne n'a choisi.
+  await db.transaction(async (tx) => {
+    await tx
+      .update(settings)
+      .set({ packEnabled, shippingMode, shippingFee, lowStockThreshold, updatedAt: new Date() })
+      .where(eq(settings.id, 1))
+
+    // Un prix vidé supprime son palier : il n'y a rien à conserver dans une
+    // ligne sans prix, contrairement aux tailles d'un maillot.
+    await tx.delete(packTiers).where(
+      kept.length > 0
+        ? notInArray(
+            packTiers.size,
+            kept.map((tier) => tier.size),
+          )
+        : sql`true`,
+    )
+
+    if (kept.length > 0) {
+      await tx
+        .insert(packTiers)
+        .values(kept)
+        .onConflictDoUpdate({ target: packTiers.size, set: { price: sql`excluded.price` } })
+    }
+  })
 
   // The shop reads these amounts from a cached shell; both tags must go.
   updateTag('settings')

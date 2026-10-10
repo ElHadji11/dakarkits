@@ -24,8 +24,6 @@ config({ path: '.env.local', quiet: true })
  */
 const SHOP_DEFAULTS = {
   packEnabled: true,
-  packSize: 2,
-  packPrice: 13_000,
   shippingMode: 'fee',
   shippingFee: 2_000,
   lowStockThreshold: 2,
@@ -34,6 +32,16 @@ const SHOP_DEFAULTS = {
   orderEmail: 'babacar.thior19@gmail.com',
   telegramChatId: '8622372610',
 } as const
+
+/**
+ * Le barème de départ : 8 000 F le maillot, 13 000 F les deux, 19 500 F les
+ * trois. Soit 6 500 F le maillot dès la paire, et le même tarif pour le
+ * troisième — c'est tout l'intérêt d'un palier par taille.
+ */
+const PACK_TIERS = [
+  { size: 2, price: 13_000 },
+  { size: 3, price: 19_500 },
+] as const
 
 /** Les champs dont l'absence casse quelque chose en silence. */
 const CRITICAL = ['orderEmail', 'telegramChatId', 'shopPhone', 'shopWhatsapp'] as const
@@ -51,7 +59,7 @@ async function main() {
 
   // Imported after dotenv so DATABASE_URL is already in the environment.
   const { db } = await import('../lib/db')
-  const { adminUsers, settings } = await import('../lib/db/schema')
+  const { adminUsers, packTiers, settings } = await import('../lib/db/schema')
   const { hashPassword } = await import('../lib/auth/password')
 
   const [existing] = await db
@@ -72,6 +80,21 @@ async function main() {
     .values({ id: 1, ...SHOP_DEFAULTS })
     .onConflictDoNothing()
     .returning()
+
+  // Le barème, lui, est repoussé à chaque seed : contrairement aux réglages,
+  // il n'existe pas par défaut au schéma, et une base migrée sans lui vendrait
+  // chaque maillot plein tarif sans que rien ne le signale.
+  const inserted = await db
+    .insert(packTiers)
+    .values([...PACK_TIERS])
+    .onConflictDoNothing()
+    .returning()
+
+  if (inserted.length > 0) {
+    console.log(`pack: created ${inserted.map((tier) => tier.size).join(', ')} maillot(s)`)
+  } else {
+    console.log('pack: barème déjà en place, laissé tel quel')
+  }
 
   if (settingsRow) {
     console.log('settings: created row 1 with the launch defaults')

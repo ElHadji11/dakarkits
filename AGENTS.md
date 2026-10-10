@@ -25,6 +25,38 @@ l'arbre de la page elle-même. Et chaque Server Action admin appelle
 
 Jamais de `'use cache'` dans `/admin`.
 
+### Le pack est un barème, pas un seul palier
+
+Un prix global **par nombre de maillots**, une ligne par palier dans
+`pack_tiers` : 2 pour 13 000 F, 3 pour 19 500 F. Les deux sont réglables dans
+`/admin/réglages`, tailles 2 à 6 (`PACK_TIER_SIZES`).
+
+C'était un couple `pack_size` / `pack_price` sur `settings`, donc un seul
+palier, et le troisième maillot retombait à son prix plein : 21 000 F les
+trois, soit **7 000 F le maillot contre 6 500 F dans la paire**. Le troisième
+coûtait plus cher que les deux premiers. Décision du 2026-10-10 : le prix au
+maillot ne remonte jamais.
+
+`ladderIssues()` (`lib/pricing.ts`) fait respecter ça à l'enregistrement — un
+pack plus grand ne peut ni coûter moins cher en tout, ni revenir plus cher au
+maillot que celui d'en dessous. `calculatePricing` s'en passerait, il prend
+toujours le moins cher pour le client ; mais la fiche produit et le panier
+*annoncent* les paliers, et annoncer une offre que personne n'a intérêt à
+prendre est pire que ne rien annoncer.
+
+Le calcul est une programmation dynamique sur les prix triés décroissants : les
+maillots les plus chers vont dans les mêmes groupes, c'est ce qui fait gagner
+le plus, et un palier n'est jamais facturé au-dessus de la somme réelle. Un
+panier à prix mixtes reste donc cohérent.
+
+**Si tu ajoutes un palier, rien à écrire ailleurs** : `packLadder()`
+(`lib/shop-types.ts`) est la source unique de la phrase « 2 maillots au choix
+pour 13 000 F, 3 pour 19 500 F », et la relance du panier sort de
+`nextPackStep()`. Elle compare ce que coûteraient `n + m` maillots au barème et
+ce qu'ils coûteraient en payant les ajoutés au prix affiché — donc elle sait
+encore proposer le troisième à qui en a déjà deux, ce que l'ancien pack ne
+savait pas faire.
+
 ### Autres invariants
 
 - Montants en francs CFA, entiers. Jamais de flottant.

@@ -3,8 +3,7 @@
 import { Sparkles } from 'lucide-react'
 
 import { formatCfa } from '@/lib/constants'
-import type { PricingResult } from '@/lib/pricing'
-import type { ShopSettings } from '@/lib/shop-types'
+import type { PackNudge as PackNudgeOffer, PricingResult } from '@/lib/pricing'
 
 /**
  * Always shows the four lines the brief asks for: sous-total, remise pack,
@@ -12,16 +11,14 @@ import type { ShopSettings } from '@/lib/shop-types'
  */
 export function CartSummary({
   pricing,
-  settings,
-  packCompareAt,
+  nudge,
 }: {
   pricing: PricingResult
-  settings: ShopSettings
-  packCompareAt: number | null
+  nudge: PackNudgeOffer | null
 }) {
   return (
     <div className="space-y-3">
-      <PackNudge pricing={pricing} settings={settings} packCompareAt={packCompareAt} />
+      <PackNudge pricing={pricing} nudge={nudge} />
 
       <dl className="space-y-1.5 text-sm">
         <Row label="Sous-total" value={formatCfa(pricing.subtotal)} />
@@ -53,32 +50,34 @@ function Row({ label, value, accent }: { label: string; value: string; accent?: 
   )
 }
 
+/**
+ * « Ajoute un maillot : 19 500 F les 3 au lieu de 21 000 F. »
+ *
+ * Les deux montants sortent de `nextPackStep`, qui ne renvoie une offre que
+ * lorsqu'elle fait vraiment gagner quelque chose — il n'y a donc rien à
+ * arbitrer ici, et rien à cacher non plus.
+ */
 function PackNudge({
   pricing,
-  settings,
-  packCompareAt,
+  nudge,
 }: {
   pricing: PricingResult
-  settings: ShopSettings
-  packCompareAt: number | null
+  nudge: PackNudgeOffer | null
 }) {
-  if (!settings.packEnabled || pricing.itemsToNextPack === null) return null
-  // Nothing to nudge about on an empty basket, nor when the pack saves nothing.
-  if (pricing.subtotal === 0 || packCompareAt === null) return null
-  if (packCompareAt <= settings.packPrice) return null
-
-  const needed = pricing.itemsToNextPack
+  if (nudge === null || pricing.subtotal === 0) return null
 
   return (
     <p className="flex items-start gap-2 rounded-lg border border-primary/40 bg-primary/10 p-3 text-sm">
       <Sparkles className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
+      {/* Toute la phrase dans un seul enfant du flex : un montant sorti à nu y
+          deviendrait un élément flex de plus, donc 8 px de gouttière avant le
+          mot suivant. */}
       <span>
-        Ajoute {needed === 1 ? 'un maillot' : `${needed} maillots`} :{' '}
+        Ajoute {nudge.itemsNeeded === 1 ? 'un maillot' : `${nudge.itemsNeeded} maillots`} :{' '}
         <strong className="font-display text-lg leading-none tracking-wide">
-          {formatCfa(settings.packPrice)}
+          {formatCfa(nudge.packPrice)}
         </strong>{' '}
-        les {settings.packSize} au lieu de{' '}
-        {formatCfa(packCompareAt)}.
+        les {nudge.totalItems} au lieu de {formatCfa(nudge.insteadOf)}.
       </span>
     </p>
   )

@@ -92,10 +92,12 @@ export default function TermsPage() {
           page de confirmation avant tout paiement.
         </P>
         <P>
-          Une offre groupée (« pack ») peut être active : un nombre défini de maillots pour un prix
-          global, appliqué automatiquement quand ton panier y donne droit et quand il t&apos;est
-          favorable. Son activation, sa taille et son prix sont susceptibles de changer à tout
-          moment ; seuls les montants affichés au moment de ta commande t&apos;engagent.
+          Une offre groupée (« pack ») peut être active : un barème de prix globaux, un par nombre
+          de maillots. Le serveur retient de lui-même la combinaison la moins chère pour toi, et
+          n&apos;applique jamais un palier qui coûterait plus que la somme des prix affichés. Les
+          maillots exclus du pack n&apos;y entrent pas. L&apos;activation du pack, ses paliers et
+          leurs prix sont susceptibles de changer à tout moment ; seuls les montants affichés au
+          moment de ta commande t&apos;engagent.
         </P>
         <P>
           Les frais de livraison sont soit ajoutés au total, soit inclus dans les prix affichés. Le

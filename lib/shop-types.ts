@@ -1,4 +1,5 @@
 import { formatCfa, type Size } from '@/lib/constants'
+import type { PackTier } from '@/lib/pricing'
 
 /**
  * Shapes shared by the server queries and the client components.
@@ -41,8 +42,8 @@ export type ShopProductDetail = ShopProduct & {
 
 export type ShopSettings = {
   packEnabled: boolean
-  packSize: number
-  packPrice: number
+  /** Le barème, trié par taille croissante. Vide quand il n'y a aucun palier. */
+  packTiers: PackTier[]
   shippingMode: 'fee' | 'included'
   shippingFee: number
   lowStockThreshold: number
@@ -118,4 +119,25 @@ export function deliveryPromise(
   return free
     ? 'Livraison gratuite partout à Dakar'
     : `Livraison à Dakar : ${formatCfa(settings.shippingFee)}`
+}
+
+/**
+ * Le barème tel qu'il s'annonce : « 2 maillots au choix pour 13 000 F, 3 pour
+ * 19 500 F ». Un seul endroit, parce que la fiche produit, le panier et les
+ * bannières doivent citer les mêmes paliers — un palier ajouté dans l'admin et
+ * oublié dans une phrase, c'est une promesse fausse.
+ *
+ * Les segments sortent séparés pour que l'appelant mette les montants en
+ * `font-display` sans couper la phrase en plusieurs enfants d'un flex.
+ */
+export function packLadder(
+  settings: Pick<ShopSettings, 'packEnabled' | 'packTiers'>,
+): Array<{ size: number; lead: string; price: string }> {
+  if (!settings.packEnabled) return []
+
+  return settings.packTiers.map((tier, index) => ({
+    size: tier.size,
+    lead: index === 0 ? `${tier.size} maillots au choix pour ` : `${tier.size} pour `,
+    price: formatCfa(tier.price),
+  }))
 }
