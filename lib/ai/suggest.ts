@@ -67,6 +67,13 @@ export function forbiddenWord(...texts: Array<string | null | undefined>): strin
   return null
 }
 
+/** Football seasons run August to May, so a date is enough to name one. */
+export function currentSeason(now: Date): string {
+  const year = now.getUTCFullYear()
+  const start = now.getUTCMonth() >= 7 ? year : year - 1
+  return `${start}/${String((start + 1) % 100).padStart(2, '0')}`
+}
+
 /** Blank, missing and absurdly long values all become null, never an error. */
 function optionalText(max: number) {
   return z.preprocess((value) => {
@@ -90,6 +97,7 @@ export const rawSuggestionSchema = z.object({
   title: optionalText(160),
   description: optionalText(1200),
   notes: optionalText(200),
+  sourceUrl: optionalText(500),
 })
 
 /**
@@ -127,6 +135,17 @@ export function composeTitle(
 
   const label = KIT_TYPES.find((option) => option.value === kitType)?.label.toLowerCase()
   return [team, label, season].filter(Boolean).join(' ')
+}
+
+/** Only http(s) reaches the admin's screen as a link. */
+export function httpUrl(value: string | null): string | null {
+  if (!value) return null
+  try {
+    const url = new URL(value)
+    return url.protocol === 'http:' || url.protocol === 'https:' ? url.toString() : null
+  } catch {
+    return null
+  }
 }
 
 export type TeamRow = { id: number; name: string; slug: string; aliases: string | null }
@@ -177,6 +196,12 @@ export type Suggestion = {
   unknownTeam: string | null
   /** The model's own caveat, shown as is: "écusson illisible". */
   notes: string | null
+  /**
+   * The page the model says establishes the season. Shown to the admin so a
+   * season can be checked in one click rather than trusted — a model that
+   * searched and a model that remembered look identical otherwise.
+   */
+  sourceUrl: string | null
   /** The word that got a text dropped, if one did. */
   refused: string | null
 }
@@ -200,6 +225,7 @@ export function buildSuggestion(raw: unknown, teams: TeamRow[]): Suggestion {
       },
       unknownTeam: null,
       notes: null,
+      sourceUrl: null,
       refused: null,
     }
   }
@@ -226,6 +252,7 @@ export function buildSuggestion(raw: unknown, teams: TeamRow[]): Suggestion {
     },
     unknownTeam: team && !matched ? team : null,
     notes,
+    sourceUrl: httpUrl(parsed.data.sourceUrl),
     refused: refusedTitle ?? refusedDescription,
   }
 }

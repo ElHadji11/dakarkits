@@ -3,7 +3,9 @@ import { describe, expect, it } from 'vitest'
 import {
   buildSuggestion,
   composeTitle,
+  currentSeason,
   forbiddenWord,
+  httpUrl,
   matchTeam,
   normaliseSeason,
   type TeamRow,
@@ -181,5 +183,53 @@ describe('building a suggestion', () => {
       expect(suggestion.fields.title).toBeNull()
       expect(suggestion.fields.isRetro).toBe(false)
     }
+  })
+})
+
+describe('the season we tell the model we are in', () => {
+  it.each([
+    ['2026-10-09', '2026/27'],
+    ['2026-08-01', '2026/27'],
+    ['2026-07-31', '2025/26'],
+    ['2027-05-20', '2026/27'],
+    ['2029-09-01', '2029/30'],
+  ])('%s falls in %s', (date, expected) => {
+    expect(currentSeason(new Date(`${date}T12:00:00Z`))).toBe(expected)
+  })
+})
+
+describe('the source link', () => {
+  it('keeps http and https', () => {
+    expect(httpUrl('https://www.fcbarcelona.com/en/news/4106653')).toBe(
+      'https://www.fcbarcelona.com/en/news/4106653',
+    )
+    expect(httpUrl('http://example.com/')).toBe('http://example.com/')
+  })
+
+  it.each(['javascript:alert(1)', 'data:text/html,<script>', 'fcbarcelona.com', '', 'null'])(
+    'refuses %s',
+    (value) => {
+      expect(httpUrl(value)).toBeNull()
+    },
+  )
+
+  it('carries through a suggestion, and only when it is a real link', () => {
+    const base = {
+      team: 'Sénégal',
+      kitType: 'home',
+      isRetro: null,
+      title: null,
+      description: 'Vert, col rond.',
+      notes: null,
+    }
+
+    expect(
+      buildSuggestion({ ...base, season: '2026/27', sourceUrl: 'https://fsfoot.sn/maillot' }, teams)
+        .sourceUrl,
+    ).toBe('https://fsfoot.sn/maillot')
+
+    expect(
+      buildSuggestion({ ...base, season: '2026/27', sourceUrl: 'de mémoire' }, teams).sourceUrl,
+    ).toBeNull()
   })
 })

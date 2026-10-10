@@ -27,7 +27,17 @@ type Outcome = {
   filled: string[]
   unknownTeam: string | null
   notes: string | null
+  sourceUrl: string | null
   refused: string | null
+}
+
+/** "www.fcbarcelona.com/en/news/…" shown as "fcbarcelona.com". */
+function hostOf(url: string): string {
+  try {
+    return new URL(url).hostname.replace(/^www\./, '')
+  } catch {
+    return url
+  }
 }
 
 function input(form: HTMLFormElement, name: string) {
@@ -80,7 +90,7 @@ export function AiFillButton() {
         return
       }
 
-      const { fields, unknownTeam, notes, refused } = result.suggestion
+      const { fields, unknownTeam, notes, sourceUrl, refused } = result.suggestion
       const taken: Record<string, string> = {}
       for (const name of [...TEXT_FIELDS, ...PATCHED_FIELDS]) taken[name] = current(form, name)
 
@@ -113,7 +123,7 @@ export function AiFillButton() {
 
       if (Object.keys(patch).length > 0) applyPatch(patch)
       setSnapshot(filled.length > 0 ? taken : null)
-      setOutcome({ filled, unknownTeam, notes, refused })
+      setOutcome({ filled, unknownTeam, notes, sourceUrl, refused })
     })
   }
 
@@ -137,8 +147,9 @@ export function AiFillButton() {
         <div className="space-y-0.5">
           <p className="text-sm font-medium">Remplir depuis la photo</p>
           <p className="text-xs text-muted-foreground">
-            Propose titre, description, équipe, type et saison. Ne touche jamais au prix, ni aux
-            champs déjà remplis. À relire avant d’enregistrer.
+            Lit la photo, cherche le maillot sur le web, puis propose titre, description, équipe,
+            type et saison. Ne touche jamais au prix, ni aux champs déjà remplis. Compte une
+            dizaine de secondes, et relis avant d’enregistrer.
           </p>
         </div>
         <Button
@@ -154,7 +165,7 @@ export function AiFillButton() {
           ) : (
             <Sparkles className="size-4" aria-hidden />
           )}
-          {pending ? 'Lecture…' : 'Proposer'}
+          {pending ? 'Recherche…' : 'Proposer'}
         </Button>
       </div>
 
@@ -173,7 +184,22 @@ export function AiFillButton() {
             </p>
           ) : null}
 
-          {outcome.notes ? <p className="text-muted-foreground">Réserve de l’IA : {outcome.notes}.</p> : null}
+          {outcome.notes ? <p className="text-muted-foreground">Réserve de l’IA : {outcome.notes}</p> : null}
+
+          {outcome.sourceUrl ? (
+            <p className="text-muted-foreground">
+              Saison tirée de{' '}
+              <a
+                href={outcome.sourceUrl}
+                target="_blank"
+                rel="noreferrer noopener"
+                className="underline underline-offset-2"
+              >
+                {hostOf(outcome.sourceUrl)}
+              </a>
+              . À vérifier d’un clic.
+            </p>
+          ) : null}
 
           {outcome.refused ? (
             <p className="text-muted-foreground">

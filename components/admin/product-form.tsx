@@ -70,6 +70,17 @@ export function ProductForm({
         {values.id ? <input type="hidden" name="id" value={values.id} /> : null}
 
         <section className="space-y-4">
+          <h2 className="text-sm font-medium text-muted-foreground">Photos</h2>
+          <ImageUploader
+            configured={imagekitConfigured}
+            initial={values.images}
+            initialPrimary={values.primaryIndex}
+          />
+          <FieldError message={error('images')} />
+          {aiConfigured && imagekitConfigured ? <AiFillButton /> : null}
+        </section>
+
+        <section className="space-y-4">
           <h2 className="text-sm font-medium text-muted-foreground">L’essentiel</h2>
 
           <div className="space-y-2">
@@ -125,17 +136,6 @@ export function ProductForm({
           </div>
 
           <ShippingNote shipping={shipping} />
-        </section>
-
-        <section className="space-y-4">
-          <h2 className="text-sm font-medium text-muted-foreground">Photos</h2>
-          <ImageUploader
-            configured={imagekitConfigured}
-            initial={values.images}
-            initialPrimary={values.primaryIndex}
-          />
-          <FieldError message={error('images')} />
-          {aiConfigured && imagekitConfigured ? <AiFillButton /> : null}
         </section>
 
         <section className="space-y-4">
