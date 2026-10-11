@@ -10,6 +10,7 @@
 import { z } from 'zod'
 
 import { KIT_TYPES } from '@/lib/constants'
+import { composeName } from '@/lib/shop-types'
 import { slugify } from '@/lib/slug'
 
 export type KitType = (typeof KIT_TYPES)[number]['value']
@@ -120,21 +121,25 @@ export function normaliseSeason(input: string | null): string | null {
 }
 
 /**
- * "Sénégal domicile 2024/25", assembled the same way every time.
+ * « Sénégal · Domicile 2024/25 », assemblé de la même façon à chaque fois.
  *
- * It never starts with "Maillot": the whole catalogue is jerseys, so the word
- * carries nothing and pushes the club out of the first glance — on a phone
- * card, out of the visible line entirely.
+ * Le format vient de `composeName` (`lib/shop-types`), celui-là même que les
+ * cartes et la fiche produit utilisent pour afficher un nom : le titre proposé
+ * par l'IA naît donc déjà sous la forme que la boutique affichera, et un
+ * changement de format n'a qu'un seul endroit à toucher. C'est ce qui a
+ * remplacé « Aston villa third 2024/25 » — minuscules et anglais mélangés,
+ * parce que le libellé du type était recopié en bas de casse ici.
+ *
+ * Il ne commence jamais par « Maillot » : tout le catalogue en est, le mot ne
+ * porte rien et pousse le club hors du premier regard — sur une carte de
+ * téléphone, hors de la ligne visible.
  */
 export function composeTitle(
   team: string | null,
   kitType: KitType | null,
   season: string | null,
 ): string | null {
-  if (!team) return null
-
-  const label = KIT_TYPES.find((option) => option.value === kitType)?.label.toLowerCase()
-  return [team, label, season].filter(Boolean).join(' ')
+  return composeName(team, kitType, season)
 }
 
 /** Only http(s) reaches the admin's screen as a link. */

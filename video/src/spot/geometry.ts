@@ -1,0 +1,300 @@
+/**
+ * Genere par `npm run capture` — ne pas editer a la main.
+ *
+ * La geometrie reelle de louyomb.com dans un cadrage 1920x1080,
+ * relevee le 2026-10-11. Le curseur du spot vise ces boites : il
+ * clique la ou le bouton se trouve vraiment, et les pieces de l’interface
+ * volent a leur vraie place.
+ */
+export type Box = { x: number; y: number; w: number; h: number }
+
+export const SHOT = { w: 1920, h: 1080 } as const
+
+export const G = {
+  "home": {
+    "promo": {
+      "x": 0,
+      "y": 0,
+      "w": 1920,
+      "h": 36
+    },
+    "delivery": {
+      "x": 0,
+      "y": 36,
+      "w": 1920,
+      "h": 29
+    },
+    "logo": {
+      "x": 400,
+      "y": 81,
+      "w": 134.1,
+      "h": 24
+    },
+    "search": {
+      "x": 550.1,
+      "y": 71,
+      "w": 869.9,
+      "h": 44
+    },
+    "icons": {
+      "x": 1428,
+      "y": 71,
+      "w": 92,
+      "h": 44
+    },
+    "nav": {
+      "x": 400,
+      "y": 138,
+      "w": 1120,
+      "h": 48
+    },
+    "tools": {
+      "x": 400,
+      "y": 202,
+      "w": 1120,
+      "h": 44
+    },
+    "count": {
+      "x": 1447.5,
+      "y": 214,
+      "w": 72.5,
+      "h": 20
+    },
+    "cards": [
+      {
+        "x": 400,
+        "y": 262,
+        "w": 271,
+        "h": 339,
+        "title": "Olympique de Marseille 2023/24",
+        "href": "/maillot/olympique-de-marseille-2023-24"
+      },
+      {
+        "x": 683,
+        "y": 262,
+        "w": 271,
+        "h": 339,
+        "title": "RB Leipzig third 2024/25",
+        "href": "/maillot/rb-leipzig-third-2024-25"
+      },
+      {
+        "x": 966,
+        "y": 262,
+        "w": 271,
+        "h": 339,
+        "title": "Stade Rennais domicile 2020/21",
+        "href": "/maillot/stade-rennais-domicile-2020-21"
+      },
+      {
+        "x": 1249,
+        "y": 262,
+        "w": 271,
+        "h": 339,
+        "title": "Liverpool extérieur 2026/27",
+        "href": "/maillot/liverpool-exterieur-2026-27"
+      },
+      {
+        "x": 400,
+        "y": 625,
+        "w": 271,
+        "h": 339,
+        "title": "Real Madrid third 2025/26",
+        "href": "/maillot/real-madrid-third-2025-26"
+      },
+      {
+        "x": 683,
+        "y": 625,
+        "w": 271,
+        "h": 339,
+        "title": "Inter Milan",
+        "href": "/maillot/inter-milan"
+      },
+      {
+        "x": 966,
+        "y": 625,
+        "w": 271,
+        "h": 339,
+        "title": "Atlético de Madrid third 2024/25",
+        "href": "/maillot/atletico-de-madrid-third-2024-25"
+      },
+      {
+        "x": 1249,
+        "y": 625,
+        "w": 271,
+        "h": 339,
+        "title": "Benfica extérieur 2026/27",
+        "href": "/maillot/benfica-exterieur-2026-27"
+      }
+    ],
+    "countText": "25 maillots",
+    "viewport": {
+      "w": 1920,
+      "h": 1080
+    }
+  },
+  "searchColor": "#2e2e53",
+  "search": {
+    "field": {
+      "x": 550.1,
+      "y": 71,
+      "w": 869.9,
+      "h": 44
+    },
+    "listbox": {
+      "x": 550.1,
+      "y": 123,
+      "w": 869.9,
+      "h": 66
+    },
+    "firstResult": {
+      "x": 551.1,
+      "y": 124,
+      "w": 867.9,
+      "h": 64
+    }
+  },
+  "product": {
+    "title": {
+      "x": 980,
+      "y": 138,
+      "w": 268.3,
+      "h": 32
+    },
+    "price": {
+      "x": 980,
+      "y": 214,
+      "w": 111.4,
+      "h": 36
+    },
+    "photo": {
+      "x": 400,
+      "y": 138,
+      "w": 540,
+      "h": 540
+    },
+    "sizeGroup": {
+      "x": 980,
+      "y": 337,
+      "w": 540,
+      "h": 76
+    },
+    "sizeS": {
+      "x": 980,
+      "y": 365,
+      "w": 56,
+      "h": 48
+    },
+    "sizeM": {
+      "x": 1044,
+      "y": 365,
+      "w": 56,
+      "h": 48
+    },
+    "sizeL": {
+      "x": 1108,
+      "y": 365,
+      "w": 56,
+      "h": 48
+    },
+    "sizeXL": {
+      "x": 1172,
+      "y": 365,
+      "w": 56,
+      "h": 48
+    },
+    "orderNow": {
+      "x": 980,
+      "y": 433,
+      "w": 264,
+      "h": 48
+    },
+    "addToCart": {
+      "x": 1256,
+      "y": 433,
+      "w": 264,
+      "h": 48
+    },
+    "pack": {
+      "x": 1004,
+      "y": 502,
+      "w": 212.7,
+      "h": 17
+    },
+    "cartIcon": {
+      "x": 1428,
+      "y": 71,
+      "w": 92,
+      "h": 44
+    }
+  },
+  "cart": {
+    "relance": {
+      "x": 1237,
+      "y": 207,
+      "w": 270,
+      "h": 40
+    },
+    "totalBlock": {
+      "x": 1200,
+      "y": 350,
+      "w": 320,
+      "h": 37
+    },
+    "totalLine": {
+      "x": 1200,
+      "y": 364,
+      "w": 138.6,
+      "h": 20
+    },
+    "order": {
+      "x": 1200,
+      "y": 403,
+      "w": 320,
+      "h": 48
+    },
+    "line1": {
+      "x": 400,
+      "y": 194,
+      "w": 768,
+      "h": 141
+    }
+  },
+  "form": {
+    "legend": {
+      "x": 400,
+      "y": 476,
+      "w": 1120,
+      "h": 20
+    },
+    "name": {
+      "x": 400,
+      "y": 534,
+      "w": 1120,
+      "h": 48
+    },
+    "phone": {
+      "x": 400,
+      "y": 620,
+      "w": 1120,
+      "h": 48
+    },
+    "address": {
+      "x": 400,
+      "y": 730,
+      "w": 1120,
+      "h": 64
+    },
+    "confirm": {
+      "x": 400,
+      "y": 826,
+      "w": 1120,
+      "h": 48
+    },
+    "scrollY": 298
+  },
+  "colors": {
+    "input": "#2e2e53",
+    "textarea": "#2e2e53",
+    "page": "#0f0f1a"
+  }
+} as const

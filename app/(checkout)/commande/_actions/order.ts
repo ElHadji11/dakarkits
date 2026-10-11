@@ -10,12 +10,13 @@ import { z } from 'zod'
 import { submittedValues, type ActionState } from '@/lib/action-state'
 import { siteUrl } from '@/lib/constants'
 import { db } from '@/lib/db'
-import { orderItems, orders, productSizes, products } from '@/lib/db/schema'
+import { orderItems, orders, productSizes, products, teams } from '@/lib/db/schema'
 import { sendPurchaseToCapi } from '@/lib/meta'
 import { notifyNewOrder, type OrderNotification } from '@/lib/notify'
 import { calculatePricing, type PricingLine } from '@/lib/pricing'
 import { clientIp, consume } from '@/lib/rate-limit'
 import { getSettings } from '@/lib/settings'
+import { composeName } from '@/lib/shop-types'
 import { cartLineSchema, orderSchema } from '@/lib/validation/order'
 
 const FIELDS = ['customerName', 'phone', 'address']
@@ -28,6 +29,25 @@ const DUPLICATE_WINDOW_MINUTES = 10
 
 function fail(error: string, formData: FormData, fieldErrors?: Record<string, string>): ActionState {
   return { ok: false, error, fieldErrors, values: submittedValues(formData, FIELDS) }
+}
+
+/**
+ * Le nom à figer sur la commande : celui que le client a sous les yeux.
+ *
+ * `products.title` est la valeur enregistrée, et elle n'est pas garantie au
+ * format — c'est tout l'objet de `composeName`, qui recompose
+ * « Club · Domicile 2026/27 » à partir de l'équipe liée. Le client a lu ce
+ * nom-là sur la carte, sur la fiche et dans son panier ; son bon de commande,
+ * sa notification Telegram et la fiche de préparation doivent dire le même,
+ * sinon c'est au moment d'aller chercher le maillot que l'écart se paie.
+ */
+function nameOf(product: {
+  title: string
+  teamName: string | null
+  kitType: 'home' | 'away' | 'third' | null
+  season: string | null
+}): string {
+  return composeName(product.teamName, product.kitType, product.season) ?? product.title
 }
 
 /** Identifies a basket, so the same one sent twice can be recognised. */
@@ -98,14 +118,24 @@ export async function placeOrder(
     const ids = [...new Set(input.lines.map((line) => line.productId))]
     const [rows, sizes, settings] = await Promise.all([
       db
+        /* L'équipe, le type et la saison en plus du titre : la commande doit
+           figer le nom **tel que le client l'a lu** (voir `nameOf`), et c'est
+           `composeName` qui le produit à l'écran. Sans ce join, le bon de
+           commande dirait « Barcelona » d'un maillot présenté partout comme
+           « FC Barcelone · Domicile 2026/27 » — et c'est sur ce bon que
+           quelqu'un va chercher le maillot dans le stock. */
         .select({
           id: products.id,
           title: products.title,
           price: products.price,
           packEligible: products.packEligible,
           status: products.status,
+          season: products.season,
+          kitType: products.kitType,
+          teamName: teams.name,
         })
         .from(products)
+        .leftJoin(teams, eq(products.teamId, teams.id))
         .where(inArray(products.id, ids)),
       db.select().from(productSizes).where(inArray(productSizes.productId, ids)),
       getSettings(),
@@ -130,14 +160,14 @@ export async function placeOrder(
       }
 
       if (productSizeRows.every((size) => !size.available)) {
-        return fail(`« ${product.title} » est épuisé. Retire-le de ton panier.`, formData)
+        return fail(`« ${nameOf(product)} » est épuisé. Retire-le de ton panier.`, formData)
       }
       if (line.size === null) {
-        return fail(`Choisis une taille pour « ${product.title} ».`, formData)
+        return fail(`Choisis une taille pour « ${nameOf(product)} ».`, formData)
       }
       if (!productSizeRows.some((size) => size.size === line.size && size.available)) {
         return fail(
-          `La taille ${line.size} de « ${product.title} » n’est plus disponible.`,
+          `La taille ${line.size} de « ${nameOf(product)} » n’est plus disponible.`,
           formData,
         )
       }
@@ -226,7 +256,7 @@ export async function placeOrder(
             quantity: line.quantity,
             // Frozen: editing the product later never changes this order.
             unitPrice: product.price,
-            title: product.title,
+            title: nameOf(product),
           }
         }),
       )
@@ -242,7 +272,7 @@ export async function placeOrder(
       items: input.lines.map((line) => {
         const product = byId.get(line.productId)!
         return {
-          title: product.title,
+          title: nameOf(product),
           size: line.size,
           quantity: line.quantity,
           unitPrice: product.price,

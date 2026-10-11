@@ -5,19 +5,30 @@ import { staticFile } from 'remotion'
  * Satori, les SVG statiques et Remotion ne lisent pas les variables CSS du
  * thème : comme `app/icon.svg`, ce fichier en garde une copie. Si le thème
  * bouge, il ne suivra pas tout seul.
+ *
+ * Vérifiées le 2026-10-11 sur louyomb.com en production. Le navigateur rend
+ * ces variables en `lab()` : pour les relire, lui faire faire la conversion
+ * (`ctx.fillStyle = …` puis `getImageData`, comme dans `capture.mjs`) plutôt
+ * que de convertir soi-même — une conversion Lab→sRGB faite à la main s'est
+ * trompée de deux à trois points sur chaque canal, assez pour que le violet
+ * du film ne soit plus celui du site.
+ *
+ * `field` est le fond des champs de saisie : le film doit pouvoir effacer le
+ * texte d'invite d'un champ capturé vide avant d'y poser sa frappe.
  */
 export const C = {
   bg: '#0F0F1A',
   bgDeep: '#07070E',
-  card: '#1B1A2B',
-  cardHi: '#232139',
-  border: '#322F4D',
+  card: '#1A1A2E',
+  cardHi: '#222244',
+  border: '#303052',
+  field: '#2E2E53',
   fg: '#E2E2F5',
   muted: '#A0A0C0',
   primary: '#A48FFF',
   primaryDeep: '#6C4FE8',
   cyan: '#58B6E8',
-  pink: '#F779B4',
+  pink: '#FF5470',
 } as const
 
 export const FPS = 30

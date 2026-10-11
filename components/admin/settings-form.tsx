@@ -18,6 +18,11 @@ export type ShopSettingsValues = {
   shippingMode: string
   shippingFee: string
   lowStockThreshold: string
+  heroEnabled: boolean
+  heroTitle: string
+  heroSubtitle: string
+  heroHref: string
+  heroImageUrl: string
 }
 
 export function SettingsForm({ values }: { values: ShopSettingsValues }) {
@@ -115,6 +120,78 @@ export function SettingsForm({ values }: { values: ShopSettingsValues }) {
             En dessous ou à égalité, la fiche affiche « Plus que N en taille M » et la taille
             remonte dans les alertes.
           </p>
+        </div>
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-sm font-medium text-muted-foreground">Bannière d&apos;accueil</h2>
+
+        <CheckboxField
+          name="heroEnabled"
+          label="Bannière active"
+          hint="Décoche pour que l’accueil ouvre directement sur la grille."
+          defaultChecked={values.heroEnabled}
+        />
+
+        <div className="space-y-2">
+          <Label htmlFor="heroTitle">Titre</Label>
+          <Input
+            id="heroTitle"
+            name="heroTitle"
+            maxLength={80}
+            placeholder="Ex : La collection Sénégal"
+            defaultValue={kept('heroTitle', values.heroTitle)}
+            className="h-12"
+          />
+          <p className="text-xs text-muted-foreground">
+            Affiché en capitales condensées : la police d’affichage n’a pas de minuscules.
+          </p>
+          <FieldError message={error('heroTitle')} />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="heroSubtitle">Sous-titre</Label>
+          <Input
+            id="heroSubtitle"
+            name="heroSubtitle"
+            maxLength={160}
+            placeholder="Ex : Domicile, extérieur et rétro, livrés à Dakar"
+            defaultValue={kept('heroSubtitle', values.heroSubtitle)}
+            className="h-12"
+          />
+          <FieldError message={error('heroSubtitle')} />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="heroHref">Lien</Label>
+          <Input
+            id="heroHref"
+            name="heroHref"
+            placeholder="/selections"
+            defaultValue={kept('heroHref', values.heroHref)}
+            className="h-12"
+          />
+          <p className="text-xs text-muted-foreground">
+            Un chemin du site : <code>/selections</code>, <code>/clubs</code>, <code>/retro</code>,
+            ou un filtre comme <code>/?equipe=3</code>. Jamais une adresse extérieure.
+          </p>
+          <FieldError message={error('heroHref')} />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="heroImageUrl">Photo (facultatif)</Label>
+          <Input
+            id="heroImageUrl"
+            name="heroImageUrl"
+            placeholder="Laisse vide : la photo du maillot le plus récent du lien"
+            defaultValue={kept('heroImageUrl', values.heroImageUrl)}
+            className="h-12"
+          />
+          <p className="text-xs text-muted-foreground">
+            Une URL d’image de la boutique uniquement — copie-la depuis les photos d’un maillot.
+            Jamais une photo trouvée sur Internet : c’est le visuel que Meta regarde en premier.
+          </p>
+          <FieldError message={error('heroImageUrl')} />
         </div>
       </section>
 

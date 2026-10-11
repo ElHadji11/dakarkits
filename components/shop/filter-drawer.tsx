@@ -122,7 +122,7 @@ export function FilterDrawer({
 
             <fieldset className="space-y-2">
               <legend className="text-sm font-medium">Prix (F CFA)</legend>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-4">
                 <div className="flex-1 space-y-1">
                   <Label htmlFor="filter-min" className="text-xs text-muted-foreground">
                     Minimum
@@ -157,7 +157,7 @@ export function FilterDrawer({
             </fieldset>
           </div>
 
-          <DrawerFooter className="flex-row gap-3">
+          <DrawerFooter className="flex-row gap-4">
             <Button variant="ghost" className="h-12 flex-1" onClick={reset}>
               Tout effacer
             </Button>

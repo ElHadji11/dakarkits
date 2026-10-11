@@ -47,7 +47,7 @@ export function CartPage() {
         </div>
       </div>
 
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/95 p-3 backdrop-blur sm:hidden">
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/95 p-4 backdrop-blur sm:hidden">
         <Button asChild variant="cta" className="h-12 w-full">
           <Link href="/commande">Commander</Link>
         </Button>

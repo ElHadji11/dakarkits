@@ -36,6 +36,13 @@
       "when": 1791643569270,
       "tag": "0004_pack_tiers",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1791718340803,
+      "tag": "0005_hero_banner",
+      "breakpoints": true
     }
   ]
 }

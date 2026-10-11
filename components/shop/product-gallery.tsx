@@ -29,7 +29,7 @@ export function ProductGallery({
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       <ul
         className="flex snap-x snap-mandatory gap-2 overflow-x-auto rounded-lg [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         onScroll={(event) => {
@@ -47,7 +47,7 @@ export function ProductGallery({
                 sizes="(max-width: 1024px) 100vw, 560px"
                 priority={index === 0}
                 loading={index === 0 ? undefined : 'lazy'}
-                className="object-contain p-3"
+                className="object-contain p-4"
               />
             </div>
           </li>
@@ -55,7 +55,7 @@ export function ProductGallery({
       </ul>
 
       {images.length > 1 ? (
-        <div className="flex justify-center gap-1.5" aria-hidden>
+        <div className="flex justify-center gap-2" aria-hidden>
           {images.map((image, index) => (
             <span
               key={image.id}

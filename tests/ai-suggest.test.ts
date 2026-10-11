@@ -62,13 +62,19 @@ describe('season', () => {
 
 describe('title', () => {
   it('assembles what it has, club first', () => {
-    expect(composeTitle('Sénégal', 'home', '2024/25')).toBe('Sénégal domicile 2024/25')
-    expect(composeTitle('Sénégal', 'away', null)).toBe('Sénégal extérieur')
+    expect(composeTitle('Sénégal', 'home', '2024/25')).toBe('Sénégal · Domicile 2024/25')
+    expect(composeTitle('Sénégal', 'away', null)).toBe('Sénégal · Extérieur')
     expect(composeTitle('Real Madrid', null, null)).toBe('Real Madrid')
   })
 
   it('never starts with "Maillot"', () => {
-    expect(composeTitle('Aston Villa', 'third', '2024/25')).toBe('Aston Villa third 2024/25')
+    expect(composeTitle('Aston Villa', 'third', '2024/25')).toBe('Aston Villa · Third 2024/25')
+  })
+
+  // Le libellé du type était recopié en minuscules ici, d'où « Aston villa
+  // third » : un seul format, et il vient de `composeName`.
+  it('keeps the kit type in French, capitalised', () => {
+    expect(composeTitle('Aston Villa', 'away', null)).toBe('Aston Villa · Extérieur')
   })
 
   it('composes nothing without a team', () => {
@@ -120,7 +126,7 @@ describe('building a suggestion', () => {
 
     expect(suggestion.fields).toEqual({
       // Our own wording, not the model's, as soon as a team is named.
-      title: 'Barça extérieur 2024/25',
+      title: 'Barça · Extérieur 2024/25',
       description: 'Col rond, manches courtes, rayures bleu et grenat.',
       season: '2024/25',
       kitType: 'away',
@@ -139,7 +145,7 @@ describe('building a suggestion', () => {
     )
 
     expect(suggestion.fields.teamId).toBeNull()
-    expect(suggestion.fields.title).toBe('Al Nassr domicile')
+    expect(suggestion.fields.title).toBe('Al Nassr · Domicile')
     expect(suggestion.fields.kitType).toBe('home')
     expect(suggestion.unknownTeam).toBe('Al Nassr')
   })
@@ -161,7 +167,7 @@ describe('building a suggestion', () => {
     expect(suggestion.fields.description).toBeNull()
     expect(suggestion.refused).toBe('authentique')
     // The fields that were fine are kept.
-    expect(suggestion.fields.title).toBe('Sénégal domicile')
+    expect(suggestion.fields.title).toBe('Sénégal · Domicile')
     expect(suggestion.fields.teamId).toBe(1)
   })
 

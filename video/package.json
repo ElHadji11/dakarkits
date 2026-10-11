@@ -5,9 +5,15 @@
   "description": "Showreel motion graphics for louyomb.com (DakarKits)",
   "scripts": {
     "dev": "remotion studio",
-    "render": "remotion render Showreel out/dakarkits-showreel-vertical.mp4 --concurrency 4",
-    "still": "remotion still Showreel out/frame.png",
-    "audio": "node scripts/make-audio.mjs"
+    "capture": "node scripts/capture.mjs",
+    "assets": "node scripts/optimize-assets.mjs",
+    "audio": "node scripts/make-audio.mjs && node scripts/make-spot-audio.mjs",
+    "sheet": "node scripts/contact-sheet.mjs",
+    "render": "npm run render:16x9 && npm run render:1x1 && npm run render:9x16",
+    "render:16x9": "remotion render Spot out/dakarkits-spot-16x9.mp4 --concurrency 4",
+    "render:1x1": "remotion render SpotSquare out/dakarkits-spot-1x1.mp4 --concurrency 4",
+    "render:9x16": "remotion render SpotVertical out/dakarkits-spot-9x16.mp4 --concurrency 4",
+    "render:showreel": "remotion render Showreel out/dakarkits-showreel-vertical.mp4 --concurrency 4"
   },
   "dependencies": {
     "@remotion/cli": "4.0.534",

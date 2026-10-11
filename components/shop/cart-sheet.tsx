@@ -36,7 +36,7 @@ export function CartSheet({
         </SheetHeader>
 
         {lines.length === 0 ? (
-          <div className="flex flex-1 flex-col items-center justify-center gap-3 px-4 text-center">
+          <div className="flex flex-1 flex-col items-center justify-center gap-4 px-4 text-center">
             <ShoppingBag className="size-8 text-muted-foreground" aria-hidden />
             <p className="text-sm text-muted-foreground">Ton panier est vide.</p>
             <Button asChild variant="outline" className="h-11" onClick={() => setOpen(false)}>
@@ -48,7 +48,7 @@ export function CartSheet({
             <div className="flex-1 overflow-y-auto px-4">
               <CartLines lines={lines} onNavigate={() => setOpen(false)} />
             </div>
-            <SheetFooter className="gap-3 border-t border-border">
+            <SheetFooter className="gap-4 border-t border-border">
               <CartSummary pricing={pricing} nudge={nudge} />
               <Button asChild variant="cta" className="h-12 w-full" onClick={() => setOpen(false)}>
                 <Link href="/commande">Commander</Link>

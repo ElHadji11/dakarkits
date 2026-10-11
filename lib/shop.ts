@@ -14,10 +14,12 @@ import {
   settings,
   teams,
 } from '@/lib/db/schema'
-import type { ShopProduct, ShopProductDetail, ShopSettings } from '@/lib/shop-types'
+import { kitTypeLabel } from '@/lib/shop-types'
+import type { ShopHero, ShopProduct, ShopProductDetail, ShopSettings } from '@/lib/shop-types'
 
 export type {
   Category,
+  ShopHero,
   ShopProduct,
   ShopProductDetail,
   ShopSettings,
@@ -94,12 +96,17 @@ export async function getCatalog(): Promise<ShopProduct[]> {
       sizes: sizes
         .filter((size) => size.productId === row.id)
         .map((size) => ({ size: size.size, available: size.available, quantity: size.quantity })),
+      // `kitTypeLabel` et pas seulement `row.title` : le titre enregistré
+      // n'est pas garanti au format (« Barcelona », « Chelsea »), et sans ça
+      // une recherche sur « domicile » ou « extérieur » — les deux mots que le
+      // nom affiché contient — ne trouvait rien.
       haystack: buildHaystack([
         row.title,
         row.teamName,
         row.leagueName,
         row.season,
         row.teamAliases,
+        kitTypeLabel(row.kitType),
       ]),
       createdAt: row.createdAt.toISOString(),
     }
@@ -151,5 +158,32 @@ export async function getShopSettings(): Promise<ShopSettings> {
     lowStockThreshold: row.lowStockThreshold,
     shopPhone: row.shopPhone,
     shopWhatsapp: row.shopWhatsapp,
+    hero: heroOf(row),
+  }
+}
+
+/**
+ * La bannière, ou `null`.
+ *
+ * Trois conditions, toutes nécessaires : la case cochée, un titre, un lien.
+ * Le reste est facultatif — sans sous-titre la bannière se lit encore, sans
+ * photo elle emprunte celle du maillot le plus récent du lien visé (voir
+ * `ShopHero`). Rassembler le test ici, et pas dans le composant, évite qu'une
+ * page le fasse et une autre l'oublie.
+ */
+function heroOf(row: {
+  heroEnabled: boolean
+  heroTitle: string | null
+  heroSubtitle: string | null
+  heroHref: string | null
+  heroImageUrl: string | null
+}): ShopHero | null {
+  if (!row.heroEnabled || !row.heroTitle || !row.heroHref) return null
+
+  return {
+    title: row.heroTitle,
+    subtitle: row.heroSubtitle,
+    href: row.heroHref,
+    imageUrl: row.heroImageUrl,
   }
 }

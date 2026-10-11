@@ -46,6 +46,12 @@
     --color-card: var(--card);
     --color-foreground: var(--foreground);
     --color-background: var(--background);
+    /* 16 px, le rayon des cartes produit — un cran au-dessus de
+       `--radius-2xl` (14,4 px), qui tombe entre deux valeurs de l'échelle.
+       Un jeton plutôt qu'un `rounded-[16px]` recopié sur chaque carte : le
+       catalogue, les favoris et la rangée « Dans le même esprit » rendent la
+       même carte et doivent garder le même rayon. */
+    --radius-card: 1rem;
     --radius-sm: calc(var(--radius) * 0.6);
     --radius-md: calc(var(--radius) * 0.8);
     --radius-lg: var(--radius);
@@ -203,6 +209,28 @@
   html {
     @apply font-sans;
     }
+}
+
+/* Mouvement réduit : la préférence système coupe tout.
+
+   Les durées ne tombent pas à zéro mais à 0,01 ms, et ce détail compte : Radix
+   attend l'événement `animationend` pour démonter un Drawer ou un Dialog. À
+   `animation: none`, cet événement ne part jamais et le panneau Filtres reste
+   coincé à l'écran. À 0,01 ms, il part tout de suite — le mouvement disparaît,
+   la mécanique continue de tourner.
+
+   Réglage système, pas une case de la boutique : sur iOS « Réduire les
+   animations » est déjà cochée par les visiteurs que le mouvement gêne, et
+   leur redemander dans un coin du site ne servirait personne. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* Apparition du pied de page quand il entre dans l'écran.

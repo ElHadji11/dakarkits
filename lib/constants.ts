@@ -61,3 +61,34 @@ export function siteUrl(): string {
 export function formatCfa(amount: number): string {
   return `${new Intl.NumberFormat('fr-FR').format(amount).replace(/ | /g, ' ')} F`
 }
+
+/**
+ * Le délai de livraison, en une seule phrase et en un seul endroit.
+ *
+ * Il vit ici et pas dans les réglages parce que ce n'est pas un prix : c'est
+ * la promesse opérationnelle de la boutique, et elle ne change pas d'un
+ * maillot à l'autre. `deliveryPromise` dit *combien* coûte la livraison,
+ * celle-ci dit *quand* elle arrive — les deux se lisent côte à côte sur la
+ * fiche produit, au moment où la taille est choisie.
+ */
+export const DELIVERY_ETA = 'Livré en 24/48h à Dakar'
+
+/**
+ * Le guide des tailles, mesures à plat en centimètres.
+ *
+ * **Volontairement annoncé comme indicatif.** Ce sont des répliques venues de
+ * plusieurs fournisseurs : deux maillots marqués « L » ne tombent pas au même
+ * centimètre. Annoncer une mesure au centimètre près qu'on ne contrôle pas,
+ * c'est fabriquer un motif de refus à la livraison — exactement ce que la
+ * règle sur les photos cherche déjà à éviter.
+ *
+ * `chest` est la largeur d'une aisselle à l'autre, maillot posé à plat, donc
+ * la moitié du tour de poitrine. `length` part de la base du col.
+ */
+export const SIZE_GUIDE = [
+  { size: 'S', chest: '48–50', length: '68' },
+  { size: 'M', chest: '51–53', length: '71' },
+  { size: 'L', chest: '54–56', length: '74' },
+  { size: 'XL', chest: '57–59', length: '76' },
+  { size: 'XXL', chest: '60–62', length: '79' },
+] as const

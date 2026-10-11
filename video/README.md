@@ -1,10 +1,127 @@
-# Spot louyomb.com — 15 s, vertical
+# Films louyomb.com — Remotion
 
-Film de 15 secondes (450 frames, **1080 × 1920**, 30 fps) sur la boutique
-DakarKits, rendu avec Remotion. Projet npm autonome : il ne touche ni au
-`package.json` de l'app, ni à son `node_modules`.
+Deux films sur la boutique DakarKits, dans un projet npm autonome : il ne
+touche ni au `package.json` de l'app, ni à son `node_modules`. Tutoiement
+partout.
 
-Format 9:16, pensé pour TikTok et les Reels. Tutoiement partout.
+| Composition | Format | Durée | Ce que c'est |
+| --- | --- | --- | --- |
+| `Spot` | 1920 × 1080 | 20 s | Le spot showreel, **un seul montage, trois formats** |
+| `SpotSquare` | 1080 × 1080 | 20 s | Le même, recadré |
+| `SpotVertical` | 1080 × 1920 | 20 s | Le même, recadré |
+| `Showreel` | 1080 × 1920 | 15 s | Le premier film, vertical |
+
+```bash
+cd video
+npm install
+npm run capture   # Playwright -> assets/shots (le vrai site)
+npm run assets    # assets/shots -> public/shots en WebP
+npm run audio     # (re)fabrique public/audio/*.wav
+npm run sheet     # planche-contact : une image par plan
+npm run dev       # studio Remotion
+npm run render    # les trois formats du spot
+```
+
+`capture` et `assets` sont **obligatoires avant le premier rendu** : les
+captures ne sont pas dans le dépôt (30 Mo de PNG), seules la géométrie et le
+manifeste le sont.
+
+---
+
+# Le spot 20 s
+
+600 frames, 30 fps, **cinq plans**. Rien de l'interface n'y est redessiné :
+chaque pixel de produit vient d'une capture Playwright de louyomb.com en
+production.
+
+## Un seul montage, trois formats
+
+Le film n'est pas dessiné en 16:9 puis rogné. Chaque plan demande à cadrer
+**une région réelle de la capture** — « 1 150 px de page autour du champ de
+recherche » — et c'est le format qui décide du reste (`spanBox` et
+`windowRect`, dans `src/spot/stage.ts`).
+
+- **16:9** : l'interface remplit le cadre, le texte est posé dessus sur un
+  voile.
+- **1:1 et 9:16** : l'interface devient une **fenêtre** et le texte vit
+  dessous. Étaler une page de 1 920 px sur un cadre de 1 080 px de large n'en
+  montrerait que la colonne de gauche.
+
+Les tailles de texte suivent `u`, l'unité typographique du format : un titre à
+`74 * u` occupe la même part de la largeur dans les trois cadres.
+
+## Le découpage
+
+Bornes dans `src/spot/timeline.ts`, **toutes multiples de 30 frames** — deux
+temps à 120 BPM. La musique est écrite sur les mêmes nombres.
+
+| Frames | Plan | Ce qu'il dit |
+| --- | --- | --- |
+| 0–90 | `Hook` | « UN MAILLOT NEUF / TROP CHER », barré |
+| 90–210 | `Assemble` | L'interface se monte pièce par pièce |
+| 210–270 | `Search` | Taper « barca », la liste tombe |
+| 270–330 | `Size` | Choisir M, ajouter au panier |
+| 330–390 | `Order` | Trois champs, puis « Confirmer » |
+| 390–480 | `Metric` | 15 500 F → **13 000 F** |
+| 480–600 | `Lockup` | Monogramme, louyomb.com, appel |
+
+## Les captures sont la source, pas une illustration
+
+`npm run capture` rejoue un vrai parcours d'achat sur la production et relève
+**la géométrie de chaque élément** (`src/spot/geometry.ts`, généré). Le
+curseur du film vise ces boîtes : il clique là où le bouton se trouve
+vraiment, et les pièces de l'interface volent à leur vraie coordonnée. C'est
+pour ça que le fondu vers la capture entière, à la fin du plan 2, ne se voit
+pas — les pièces posées **sont** la capture, au pixel près.
+
+**Rien n'est envoyé au serveur.** La recherche, le choix de taille et le
+panier sont côté client ; le formulaire est capturé vide et la frappe est
+animée dans Remotion. Aucune commande n'a jamais été créée depuis la
+production.
+
+Trois choses seulement ne viennent pas d'une capture, et chacune est
+justifiée dans le code : le monogramme (un tracé, pour qu'il s'écrive), la
+pastille `louyomb.com` (absente de la page), et l'aplat qui efface le texte
+d'invite d'un champ avant d'y poser la frappe — dans la couleur du champ,
+relevée au canvas (`C.field`).
+
+## Ce que le film affirme
+
+Tout vient de la capture du 2026-10-11, visible dans `assets/shots` :
+
+- **7 500 F**, barré 10 000 F, sur la fiche Barcelona.
+- **« 2 maillots au choix pour 13 000 F, 3 pour 19 500 F »** : la phrase du
+  site, mot pour mot.
+- **15 500 F − 2 500 F = 13 000 F**, et « livraison gratuite » : le panier de
+  `d-cart-2`, lisible dans le coin du plan 4.
+- **« soit 6 500 F le maillot »** : 13 000 ÷ 2, la seule ligne calculée.
+- « Une taille épuisée est grisée » décrit la fonction, pas ce maillot-là —
+  sur Barcelona les cinq tailles sont disponibles.
+- **Le nombre de maillots n'est écrit nulle part dans le film.** Les formats
+  verticaux l'affichent en gros à côté de la pastille du site qui dit la même
+  chose : deux sources pour un même nombre divergent le jour où le catalogue
+  bouge. Il vient de `G.home.countText`, relevé à la capture. Le premier film
+  porte déjà cette dette — il annonce « +20 maillots » pour 13 publiés.
+
+Rien n'y qualifie un maillot d'« officiel » ni d'« authentique ».
+
+## Le son du spot
+
+`scripts/make-spot-audio.mjs`, même boîte à outils que le premier film
+(`scripts/synth.mjs`). Les clics ne sont pas posés « à peu près sur la
+musique » : `src/spot/SpotAudio.tsx` les place **aux frames où le curseur
+enfonce le bouton**, et ces frames tombent sur des temps.
+
+Le morceau perd ses percussions sur le plan du chiffre (13 s) et passe en
+Dm7 — trois secondes de vide, pour que le compteur ait toute la place, puis
+le log drum revient sur la signature.
+
+---
+
+# Le showreel 15 s vertical
+
+Film de 15 secondes (450 frames, **1080 × 1920**, 30 fps), rendu par
+`npm run render:showreel`. Format 9:16, pensé pour TikTok et les Reels.
 
 ## Zones de sécurité
 
@@ -16,14 +133,6 @@ plein cadre.
 **La première image porte déjà la marque et la promesse.** Pas de fondu
 d'ouverture, pas d'éclat plein cadre : sur un fil, une première image vide ou
 délavée est une image perdue.
-
-```bash
-cd video
-npm install
-npm run audio    # (re)fabrique public/audio/*.wav
-npm run dev      # studio Remotion, prévisualisation image par image
-npm run render   # out/dakarkits-spot-vertical.mp4
-```
 
 ## Le son
 

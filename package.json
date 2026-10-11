@@ -15,7 +15,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "photos": "tsx scripts/photos.ts"
+    "photos": "tsx scripts/photos.ts",
+    "db:rename-products": "tsx scripts/rename-products.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.2.0",

@@ -1,0 +1,398 @@
+{
+  "base": "https://louyomb.com",
+  "capturedAt": "2026-10-11T11:19:23.631Z",
+  "viewport": {
+    "width": 1920,
+    "height": 1080
+  },
+  "shots": [
+    {
+      "name": "d-home",
+      "url": "https://louyomb.com/",
+      "dpr": 2,
+      "note": "catalogue, haut de page"
+    },
+    {
+      "name": "d-home-full",
+      "url": "https://louyomb.com/",
+      "dpr": 2,
+      "note": "catalogue entier"
+    },
+    {
+      "name": "d-header",
+      "url": "https://louyomb.com/",
+      "dpr": 2,
+      "note": "en-tete + logo"
+    },
+    {
+      "name": "d-card",
+      "url": "https://louyomb.com/",
+      "dpr": 2,
+      "note": "une carte produit"
+    },
+    {
+      "name": "p-promo",
+      "url": "https://louyomb.com/",
+      "dpr": 2,
+      "note": "piece promo",
+      "box": {
+        "x": 0,
+        "y": 0,
+        "w": 1920,
+        "h": 36
+      }
+    },
+    {
+      "name": "p-delivery",
+      "url": "https://louyomb.com/",
+      "dpr": 2,
+      "note": "piece delivery",
+      "box": {
+        "x": 0,
+        "y": 36,
+        "w": 1920,
+        "h": 29
+      }
+    },
+    {
+      "name": "p-logo",
+      "url": "https://louyomb.com/",
+      "dpr": 2,
+      "note": "piece logo",
+      "box": {
+        "x": 400,
+        "y": 81,
+        "w": 134.1,
+        "h": 24
+      }
+    },
+    {
+      "name": "p-search",
+      "url": "https://louyomb.com/",
+      "dpr": 2,
+      "note": "piece search",
+      "box": {
+        "x": 550.1,
+        "y": 71,
+        "w": 869.9,
+        "h": 44
+      }
+    },
+    {
+      "name": "p-icons",
+      "url": "https://louyomb.com/",
+      "dpr": 2,
+      "note": "piece icons",
+      "box": {
+        "x": 1428,
+        "y": 71,
+        "w": 92,
+        "h": 44
+      }
+    },
+    {
+      "name": "p-nav",
+      "url": "https://louyomb.com/",
+      "dpr": 2,
+      "note": "piece nav",
+      "box": {
+        "x": 400,
+        "y": 138,
+        "w": 1120,
+        "h": 48
+      }
+    },
+    {
+      "name": "p-tools",
+      "url": "https://louyomb.com/",
+      "dpr": 2,
+      "note": "piece tools",
+      "box": {
+        "x": 400,
+        "y": 202,
+        "w": 1120,
+        "h": 44
+      }
+    },
+    {
+      "name": "p-count",
+      "url": "https://louyomb.com/",
+      "dpr": 2,
+      "note": "piece count",
+      "box": {
+        "x": 1447.5,
+        "y": 214,
+        "w": 72.5,
+        "h": 20
+      }
+    },
+    {
+      "name": "p-card-1",
+      "url": "https://louyomb.com/",
+      "dpr": 2,
+      "note": "carte Olympique de Marseille 2023/24",
+      "box": {
+        "x": 400,
+        "y": 262,
+        "w": 271,
+        "h": 339,
+        "title": "Olympique de Marseille 2023/24",
+        "href": "/maillot/olympique-de-marseille-2023-24"
+      }
+    },
+    {
+      "name": "p-card-2",
+      "url": "https://louyomb.com/",
+      "dpr": 2,
+      "note": "carte RB Leipzig third 2024/25",
+      "box": {
+        "x": 683,
+        "y": 262,
+        "w": 271,
+        "h": 339,
+        "title": "RB Leipzig third 2024/25",
+        "href": "/maillot/rb-leipzig-third-2024-25"
+      }
+    },
+    {
+      "name": "p-card-3",
+      "url": "https://louyomb.com/",
+      "dpr": 2,
+      "note": "carte Stade Rennais domicile 2020/21",
+      "box": {
+        "x": 966,
+        "y": 262,
+        "w": 271,
+        "h": 339,
+        "title": "Stade Rennais domicile 2020/21",
+        "href": "/maillot/stade-rennais-domicile-2020-21"
+      }
+    },
+    {
+      "name": "p-card-4",
+      "url": "https://louyomb.com/",
+      "dpr": 2,
+      "note": "carte Liverpool extérieur 2026/27",
+      "box": {
+        "x": 1249,
+        "y": 262,
+        "w": 271,
+        "h": 339,
+        "title": "Liverpool extérieur 2026/27",
+        "href": "/maillot/liverpool-exterieur-2026-27"
+      }
+    },
+    {
+      "name": "p-card-5",
+      "url": "https://louyomb.com/",
+      "dpr": 2,
+      "note": "carte Real Madrid third 2025/26",
+      "box": {
+        "x": 400,
+        "y": 625,
+        "w": 271,
+        "h": 339,
+        "title": "Real Madrid third 2025/26",
+        "href": "/maillot/real-madrid-third-2025-26"
+      }
+    },
+    {
+      "name": "p-card-6",
+      "url": "https://louyomb.com/",
+      "dpr": 2,
+      "note": "carte Inter Milan",
+      "box": {
+        "x": 683,
+        "y": 625,
+        "w": 271,
+        "h": 339,
+        "title": "Inter Milan",
+        "href": "/maillot/inter-milan"
+      }
+    },
+    {
+      "name": "p-card-7",
+      "url": "https://louyomb.com/",
+      "dpr": 2,
+      "note": "carte Atlético de Madrid third 2024/25",
+      "box": {
+        "x": 966,
+        "y": 625,
+        "w": 271,
+        "h": 339,
+        "title": "Atlético de Madrid third 2024/25",
+        "href": "/maillot/atletico-de-madrid-third-2024-25"
+      }
+    },
+    {
+      "name": "p-card-8",
+      "url": "https://louyomb.com/",
+      "dpr": 2,
+      "note": "carte Benfica extérieur 2026/27",
+      "box": {
+        "x": 1249,
+        "y": 625,
+        "w": 271,
+        "h": 339,
+        "title": "Benfica extérieur 2026/27",
+        "href": "/maillot/benfica-exterieur-2026-27"
+      }
+    },
+    {
+      "name": "d-search-open",
+      "url": "https://louyomb.com/",
+      "dpr": 2,
+      "note": "champ de recherche actif"
+    },
+    {
+      "name": "d-search-barca",
+      "url": "https://louyomb.com/",
+      "dpr": 2,
+      "note": "resultats instantanes pour barca"
+    },
+    {
+      "name": "d-search-listbox",
+      "url": "https://louyomb.com/",
+      "dpr": 2,
+      "note": "la liste de resultats seule"
+    },
+    {
+      "name": "d-product",
+      "url": "https://louyomb.com/maillot/barcelona",
+      "dpr": 2,
+      "note": "fiche produit"
+    },
+    {
+      "name": "d-product-full",
+      "url": "https://louyomb.com/maillot/barcelona",
+      "dpr": 2,
+      "note": ""
+    },
+    {
+      "name": "d-add-button",
+      "url": "https://louyomb.com/maillot/barcelona",
+      "dpr": 2,
+      "note": "bouton Ajouter au panier"
+    },
+    {
+      "name": "d-added",
+      "url": "https://louyomb.com/maillot/barcelona",
+      "dpr": 2,
+      "note": "apres l ajout, panier a 1"
+    },
+    {
+      "name": "p-icons-1",
+      "url": "https://louyomb.com/maillot/barcelona",
+      "dpr": 2,
+      "note": "en-tete apres l ajout, pastille a 1"
+    },
+    {
+      "name": "d-cart-1",
+      "url": "https://louyomb.com/panier",
+      "dpr": 2,
+      "note": "panier, un maillot"
+    },
+    {
+      "name": "d-cart-1-full",
+      "url": "https://louyomb.com/panier",
+      "dpr": 2,
+      "note": ""
+    },
+    {
+      "name": "d-cart-2",
+      "url": "https://louyomb.com/panier",
+      "dpr": 2,
+      "note": "panier a deux, le prix du pack s applique"
+    },
+    {
+      "name": "d-cart-2-full",
+      "url": "https://louyomb.com/panier",
+      "dpr": 2,
+      "note": ""
+    },
+    {
+      "name": "d-total",
+      "url": "https://louyomb.com/panier",
+      "dpr": 2,
+      "note": "le bloc du total"
+    },
+    {
+      "name": "p-relance",
+      "url": "https://louyomb.com/panier",
+      "dpr": 2,
+      "note": "piece panier relance"
+    },
+    {
+      "name": "p-order",
+      "url": "https://louyomb.com/panier",
+      "dpr": 2,
+      "note": "piece panier order"
+    },
+    {
+      "name": "d-form",
+      "url": "https://louyomb.com/commande",
+      "dpr": 2,
+      "note": "formulaire de commande, vide et non envoye"
+    },
+    {
+      "name": "d-form-full",
+      "url": "https://louyomb.com/commande",
+      "dpr": 2,
+      "note": ""
+    },
+    {
+      "name": "d-confirm-button",
+      "url": "https://louyomb.com/commande",
+      "dpr": 2,
+      "note": "bouton Confirmer, non clique"
+    },
+    {
+      "name": "d-form-fields",
+      "url": "https://louyomb.com/commande",
+      "dpr": 2,
+      "note": "les trois champs et le bouton, en un cadre"
+    },
+    {
+      "name": "f-name",
+      "url": "https://louyomb.com/commande",
+      "dpr": 2,
+      "note": "champ name"
+    },
+    {
+      "name": "f-phone",
+      "url": "https://louyomb.com/commande",
+      "dpr": 2,
+      "note": "champ phone"
+    },
+    {
+      "name": "f-address",
+      "url": "https://louyomb.com/commande",
+      "dpr": 2,
+      "note": "champ address"
+    },
+    {
+      "name": "m-home",
+      "url": "https://louyomb.com/",
+      "dpr": 3,
+      "note": "telephone /"
+    },
+    {
+      "name": "m-selections",
+      "url": "https://louyomb.com/selections",
+      "dpr": 3,
+      "note": "telephone /selections"
+    },
+    {
+      "name": "m-cart",
+      "url": "https://louyomb.com/panier",
+      "dpr": 3,
+      "note": "telephone /panier"
+    },
+    {
+      "name": "m-form",
+      "url": "https://louyomb.com/commande",
+      "dpr": 3,
+      "note": "telephone /commande"
+    }
+  ]
+}

@@ -58,7 +58,7 @@ export function LegalIdentity() {
 
 export function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="space-y-3">
+    <section className="space-y-4">
       <h2 className="text-lg font-medium">{title}</h2>
       {children}
     </section>
@@ -82,7 +82,7 @@ export function A({ href, children }: { href: string; children: React.ReactNode 
 }
 
 export function List({ children }: { children: React.ReactNode }) {
-  return <ul className="space-y-3 text-sm leading-relaxed text-foreground/80">{children}</ul>
+  return <ul className="space-y-4 text-sm leading-relaxed text-foreground/80">{children}</ul>
 }
 
 export function Li({ label, children }: { label?: string; children: React.ReactNode }) {

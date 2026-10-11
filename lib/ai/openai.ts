@@ -64,6 +64,7 @@ Règles absolues :
 - Ne nomme jamais l'équipementier (Nike, adidas, Puma, et les autres), ni dans le titre ni dans la description, même si son logo est sur la photo et même si les pages trouvées le nomment. Le sponsor maillot, lui, peut être nommé.
 - La description ne décrit que ce que montre la photo. Les recherches servent à identifier, pas à enrichir : n'ajoute aucun détail de matière ou de technologie que tu ne vois pas.
 - Le titre ne commence jamais par « Maillot » : la boutique ne vend que ça. Il commence par le club ou la sélection.
+- Un seul format de titre : « Équipe · Domicile 2024/25 » — point médian, type de maillot en français avec une majuscule, saison à la fin. Omets ce que tu ne sais pas plutôt que d'inventer : « Équipe · Domicile » et « Équipe » seuls sont corrects.
 - Pas de prix, pas de taille, pas de promesse de livraison, pas de superlatif publicitaire.
 - Français, phrases neutres, trois phrases courtes au maximum pour la description.`
 }

@@ -1,0 +1,39 @@
+{
+  "htmlClass": "dark Y-dYEW_variable KmjfeG_variable",
+  "colorScheme": "normal",
+  "bodyBackground": "lab(4.61747 1.90013 -6.93944)",
+  "bodyColor": "lab(90.3151 2.64412 -9.27864)",
+  "bodyFont": "Inter, \"Inter Fallback\", Inter, sans-serif",
+  "displayFont": "\"Bebas Neue\", \"Bebas Neue Fallback\", \"Bebas Neue\", Impact, sans-serif",
+  "displayText": "DakarKits",
+  "h1Font": null,
+  "vars": {
+    "--background": "lab(4.61747% 1.90013 -6.93944)",
+    "--foreground": "lab(90.3151% 2.64412 -9.27864)",
+    "--primary": "lab(64.9759% 27.1779 -53.7667)",
+    "--primary-foreground": "lab(4.61747% 1.90013 -6.93944)",
+    "--card": "lab(10.0724% 4.71234 -13.5382)",
+    "--card-foreground": "lab(90.3151% 2.64412 -9.27864)",
+    "--muted": "lab(14.6917% 8.21616 -21.8171)",
+    "--muted-foreground": "lab(66.6881% 4.97887 -16.5318)",
+    "--border": "lab(21.1574% 7.46435 -21.023)",
+    "--accent": "lab(21.8888% 11.1921 -29.0764)",
+    "--destructive": "lab(61.3003% 66.7531 23.0195)",
+    "--radius": ".5rem",
+    "--font-display": "\"Bebas Neue\", \"Bebas Neue Fallback\", \"Bebas Neue\", Impact, sans-serif",
+    "--font-sans": "Inter, sans-serif"
+  },
+  "fontFaces": [
+    "Inter 100 900",
+    "Inter 100 900",
+    "Inter 100 900",
+    "Inter 100 900",
+    "Inter 100 900",
+    "Inter 100 900",
+    "Inter 100 900",
+    "Inter Fallback normal",
+    "Bebas Neue 400",
+    "Bebas Neue 400",
+    "Bebas Neue Fallback normal"
+  ]
+}

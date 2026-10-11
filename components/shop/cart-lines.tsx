@@ -6,6 +6,7 @@ import Link from 'next/link'
 
 import { Button } from '@/components/ui/button'
 import { formatCfa } from '@/lib/constants'
+import { productName } from '@/lib/shop-types'
 import type { ResolvedLine } from '@/hooks/use-cart-lines'
 import { useCart } from '@/stores/cart'
 
@@ -16,7 +17,7 @@ export function CartLines({ lines, onNavigate }: { lines: ResolvedLine[]; onNavi
   return (
     <ul className="divide-y divide-border">
       {lines.map((line) => (
-        <li key={`${line.productId}-${line.size ?? 'unique'}`} className="flex gap-3 py-3">
+        <li key={`${line.productId}-${line.size ?? 'unique'}`} className="flex gap-4 py-4">
           <Link
             href={`/maillot/${line.product.slug}`}
             onClick={onNavigate}
@@ -43,7 +44,7 @@ export function CartLines({ lines, onNavigate }: { lines: ResolvedLine[]; onNavi
               onClick={onNavigate}
               className="block truncate text-sm font-medium"
             >
-              {line.product.title}
+              {productName(line.product)}
             </Link>
             {line.size ? (
               <p className="text-xs text-muted-foreground">Taille {line.size}</p>
@@ -79,7 +80,7 @@ export function CartLines({ lines, onNavigate }: { lines: ResolvedLine[]; onNavi
                 size="icon"
                 variant="ghost"
                 className="ml-auto size-11 text-muted-foreground"
-                aria-label={`Supprimer ${line.product.title}`}
+                aria-label={`Supprimer ${productName(line.product)}`}
                 onClick={() => remove(line.productId, line.size)}
               >
                 <Trash2 className="size-4" aria-hidden />

@@ -56,11 +56,11 @@ async function Confirmation({
         </p>
       </div>
 
-      <section className="space-y-3 rounded-lg border border-border p-4">
+      <section className="space-y-4 rounded-lg border border-border p-4">
         <h2 className="text-sm font-medium text-muted-foreground">Ce que tu as commandé</h2>
-        <ul className="space-y-1.5 text-sm">
+        <ul className="space-y-2 text-sm">
           {order.items.map((item) => (
-            <li key={item.id} className="flex justify-between gap-3">
+            <li key={item.id} className="flex justify-between gap-4">
               <span>
                 {item.quantity} × {item.title}
                 {item.size ? <span className="text-muted-foreground"> · {item.size}</span> : null}
@@ -72,7 +72,7 @@ async function Confirmation({
           ))}
         </ul>
 
-        <dl className="space-y-1.5 border-t border-border pt-3 text-sm">
+        <dl className="space-y-2 border-t border-border pt-4 text-sm">
           <Row label="Sous-total" value={formatCfa(order.subtotal)} />
           {order.packDiscount > 0 ? (
             <Row label="Remise pack" value={`− ${formatCfa(order.packDiscount)}`} />

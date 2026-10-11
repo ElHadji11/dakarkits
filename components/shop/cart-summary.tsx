@@ -17,10 +17,10 @@ export function CartSummary({
   nudge: PackNudgeOffer | null
 }) {
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       <PackNudge pricing={pricing} nudge={nudge} />
 
-      <dl className="space-y-1.5 text-sm">
+      <dl className="space-y-2 text-sm">
         <Row label="Sous-total" value={formatCfa(pricing.subtotal)} />
         {pricing.packDiscount > 0 ? (
           <Row label="Remise pack" value={`− ${formatCfa(pricing.packDiscount)}`} accent />
@@ -67,16 +67,19 @@ function PackNudge({
   if (nudge === null || pricing.subtotal === 0) return null
 
   return (
-    <p className="flex items-start gap-2 rounded-lg border border-primary/40 bg-primary/10 p-3 text-sm">
+    <p className="flex items-start gap-2 rounded-lg border border-primary/40 bg-primary/10 p-4 text-sm">
       <Sparkles className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
       {/* Toute la phrase dans un seul enfant du flex : un montant sorti à nu y
           deviendrait un élément flex de plus, donc 8 px de gouttière avant le
           mot suivant. */}
       <span>
         Ajoute {nudge.itemsNeeded === 1 ? 'un maillot' : `${nudge.itemsNeeded} maillots`} :{' '}
-        <strong className="font-display text-lg leading-none tracking-wide">
-          {formatCfa(nudge.packPrice)}
-        </strong>{' '}
+        {/* Inter, comme tout autre prix du site. Bebas ne tenait que sur ce
+            montant-ci et sur celui de la fiche : deux prix condensés au milieu
+            d'un catalogue entier en Inter se lisaient comme une erreur, pas
+            comme une mise en avant. Et Bebas n'a pas de chiffres tabulaires,
+            donc un prix mis là ne s'aligne pas en colonne. */}
+        <strong className="tabular-nums">{formatCfa(nudge.packPrice)}</strong>{' '}
         les {nudge.totalItems} au lieu de {formatCfa(nudge.insteadOf)}.
       </span>
     </p>

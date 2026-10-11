@@ -223,6 +223,24 @@ export const settings = pgTable('settings', {
   shopWhatsapp: varchar('shop_whatsapp', { length: 20 }),
   orderEmail: varchar('order_email', { length: 255 }),
   telegramChatId: varchar('telegram_chat_id', { length: 64 }),
+
+  /* La bannière d'accueil. Réglable depuis l'admin plutôt qu'écrite dans le
+     code, parce qu'elle suit les collections : « La collection Sénégal » en
+     septembre, autre chose en janvier. Un déploiement pour changer une phrase
+     d'accueil, c'est une phrase qui ne change jamais.
+
+     `heroImageUrl` est une URL ImageKit, et la validation l'exige (`isOwnUrl`
+     dans `app/admin/_actions/settings`) : la règle sur les photos vaut pour la
+     bannière comme pour les fiches, et c'est justement le visuel qu'un compte
+     publicitaire voit en premier. Vide, la bannière prend la photo du maillot
+     le plus récent de la collection visée. */
+  heroEnabled: boolean('hero_enabled').notNull().default(false),
+  heroTitle: varchar('hero_title', { length: 80 }),
+  heroSubtitle: varchar('hero_subtitle', { length: 160 }),
+  /** Toujours un chemin interne, jamais une URL externe. */
+  heroHref: varchar('hero_href', { length: 200 }),
+  heroImageUrl: text('hero_image_url'),
+
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 })
 

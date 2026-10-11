@@ -207,11 +207,117 @@ Le jeton est `--font-display` (classe `font-display`). **Ne jamais réutiliser
 condensées le titre du panier, celui du panneau Filtres et les titres de
 cartes — y compris les noms de produits dans l'admin.
 
-Emplacements actuels : le mot-symbole « DakarKits » de l'en-tête et du pied de
-page, et le montant du pack sur la fiche et dans le panier. Les bannières à
-venir s'y ajouteront.
+Emplacements actuels : le mot-symbole « DakarKits » de l'en-tête, du pied de
+page et du tunnel de commande, et le titre de la bannière d'accueil.
+
+**Aucun prix, nulle part.** Le montant du pack y était, sur la fiche et dans le
+panier — et nulle part ailleurs : deux prix condensés au milieu d'un catalogue
+entier en Inter se lisaient comme une erreur de police, pas comme une mise en
+avant. Bebas n'a pas non plus de chiffres tabulaires, donc un prix écrit avec
+ne s'aligne pas en colonne. Un montant se met en avant par son poids et sa
+taille, et il reste en Inter.
 
 Piège payé le 2026-10-07 : sortir un montant dans son propre `<span>` à
 l'intérieur d'un `<p className="flex gap-2">` en fait un **élément flex de
 plus**, donc 8 px de gouttière avant le mot suivant. Toute la phrase doit
 tenir dans un seul enfant du flex.
+
+### Un maillot n'a qu'un nom, et il est composé à l'affichage
+
+`productName()` (`lib/shop-types.ts`) rend « FC Barcelone · Domicile 2026/27 »
+à partir de l'équipe liée, du type de maillot et de la saison. **Ne jamais
+afficher `product.title` directement** : carte, fiche, recherche, panier,
+`<title>`, aperçu OpenGraph et JSON-LD passent tous par `productName`.
+
+Le titre enregistré porte les traces de chaque saisie des derniers mois :
+« Barcelona » sous une équipe nommée « FC Barcelone », « Chelsea » répété en
+titre et en sous-titre, « Aston villa third » en minuscules et en anglais.
+Composer le nom au rendu rend ces trois cas impossibles à l'écran, sans
+dépendre de l'état de la base.
+
+Le format vit dans `composeName()`, et trois appelants le partagent : l'affichage,
+le titre proposé par l'IA (`composeTitle` dans `lib/ai/suggest.ts`) et le script
+de reprise `npm run db:rename-products` (liste par défaut, `-- --write` pour
+appliquer). Si le format change, il change là.
+
+`products.title` reste en base et reste le filet : un maillot sans équipe liée
+n'a pas de nom à reconstruire. Les lignes de commande continuent de le figer —
+mais elles figent désormais le **nom affiché** (`nameOf` dans l'action de
+commande), parce que c'est sur le bon de commande que quelqu'un va chercher le
+maillot dans le stock.
+
+Le sous-titre d'une carte est la ligue, et rien d'autre (`productSubtitle`).
+Une sélection nationale n'en a pas : une carte sans sous-titre est normale.
+
+### Le tunnel de commande est un groupe de routes à part
+
+`/commande` vit sous `app/(checkout)/`, avec son propre layout : le mot-symbole,
+le formulaire, le bouton. Ni recherche, ni favoris, ni panier, ni pied de page.
+
+Un layout imbriqué ne peut pas *retirer* ce que son parent rend — d'où le groupe
+séparé et non un `layout.tsx` sous `(shop)/commande`. Le layout garde
+`CatalogProvider` (le panier ne stocke aucun prix, le récapitulatif les lit dans
+le catalogue) et `MetaPixel` (`InitiateCheckout` et `Purchase` partent d'ici).
+`AttributionCapture` n'y est pas : les `utm_*` sont relevés à l'atterrissage.
+
+### L'en-tête s'efface au défilement, sans état React
+
+`useHideOnScroll` (`hooks/use-hide-on-scroll.ts`) écrit `data-hidden` sur le
+nœud par `ref`, et le CSS fait le reste (`data-[hidden=true]:-translate-y-full`).
+**Ne jamais remplacer ça par un `useState`** : une mise à jour d'état par image
+de défilement re-rendrait `SearchBox` et `CartButton` sur la page dont le LCP se
+joue déjà sur le fil principal.
+
+Même règle pour tout mouvement ajouté ici : `transform` et `opacity`
+uniquement — animer une hauteur, une marge ou un `top` force un recalcul de
+mise en page à chaque image et compte comme décalage. Le CSS coûte ~0 octet ;
+une bibliothèque d'animation coûterait 20 à 40 Ko *et* quelques centaines de
+millisecondes de fil principal, exactement dans la fenêtre que `StaticGrid` a
+servi à dégager.
+
+`@media (prefers-reduced-motion: reduce)` dans `globals.css` coupe tout — à
+0,01 ms et non à `none`, parce que Radix attend `animationend` pour démonter un
+Drawer. À `animation: none`, le panneau Filtres reste coincé à l'écran.
+
+### Une seule échelle d'espacement : 8 / 16 / 24 / 32
+
+Soit `2`, `4`, `6`, `8` en Tailwind. Pas de `3`, pas de `5`, pas de `1.5` pour
+de la mise en page — ils restent admis pour un décalage d'icône. Rayon des
+cartes : le jeton `--radius-card` (16 px), classe `rounded-card`.
+
+Les gardes au sol sont portées par **un seul** élément : le pied de page a
+`pb-24` sur téléphone pour la barre d'achat collée, et les pages n'ajoutent
+plus la leur. Les deux s'additionnaient — d'où le grand vide à la fin de la
+fiche produit.
+
+### La bannière d'accueil est réglable, et sa photo est forcément la nôtre
+
+Cinq colonnes sur `settings` (`hero_*`), un bloc dans `/admin/réglages`, rendue
+par la seule page d'accueil — pas par le layout : sur Clubs, Sélections et Rétro
+elle ne serait que 200 px à faire défiler.
+
+Deux contraintes que la validation fait respecter (`app/admin/_actions/settings.ts`) :
+
+- `hero_href` est un chemin interne. `//evil.example` est une URL
+  protocol-relative que le navigateur suit vers l'extérieur, et une bannière
+  plein écran est le dernier endroit où ça doit pouvoir arriver.
+- `hero_image_url` passe `isOwnUrl()`, donc une image de notre ImageKit. C'est
+  la règle sur les photos appliquée là où elle coûte le plus cher : la bannière
+  est le premier visuel qu'un robot publicitaire voit du site.
+
+Laissée vide, la bannière prend la photo du maillot le plus récent du lien visé
+(`fallbackImage` dans `components/shop/shop-hero.tsx`) — donc une des nôtres, et
+elle suit les arrivages toute seule.
+
+Elle est rendue **au-dessus** du `<Suspense>` du catalogue : son `<img>` part
+dans la coquille statique et devient le LCP de l'accueil, d'où le `priority`.
+Rendue côté client, elle reproduirait le défaut corrigé le 2026-10-07.
+
+### Le guide des tailles est annoncé indicatif, exprès
+
+`SIZE_GUIDE` (`lib/constants.ts`) donne des mesures à plat « à 2 cm près ».
+Les répliques viennent de plusieurs fournisseurs : deux « L » ne tombent pas au
+même centimètre. Un tableau présenté comme exact fabrique un motif de refus à
+la livraison, ce qui coûte plus cher qu'une vente manquée. **Si ces chiffres
+sont mesurés un jour sur le stock réel, c'est là qu'ils vont — et la mention
+« indicatives » reste tant qu'un seul fournisseur n'est pas garanti.**

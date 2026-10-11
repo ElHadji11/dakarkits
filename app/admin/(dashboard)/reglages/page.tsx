@@ -29,6 +29,11 @@ async function SettingsScreen() {
           shippingMode: settings.shippingMode,
           shippingFee: String(settings.shippingFee),
           lowStockThreshold: String(settings.lowStockThreshold),
+          heroEnabled: settings.heroEnabled,
+          heroTitle: settings.heroTitle ?? '',
+          heroSubtitle: settings.heroSubtitle ?? '',
+          heroHref: settings.heroHref ?? '',
+          heroImageUrl: settings.heroImageUrl ?? '',
         }}
       />
     </div>

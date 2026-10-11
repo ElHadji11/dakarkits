@@ -1,4 +1,4 @@
-import { formatCfa, formatPhone, type Size } from '@/lib/constants'
+import { formatCfa, formatPhone, KIT_TYPES, type Size } from '@/lib/constants'
 import type { PackTier } from '@/lib/pricing'
 
 /**
@@ -40,6 +40,23 @@ export type ShopProductDetail = ShopProduct & {
   images: Array<{ id: number; url: string }>
 }
 
+/**
+ * La bannière d'accueil, telle que la boutique la rend.
+ *
+ * `null` dès qu'il manque quelque chose — case décochée, titre vide, lien
+ * vide. Le composant n'a donc aucun cas partiel à gérer : il y a une bannière
+ * ou il n'y en a pas. Une bannière à moitié remplie en haut de la page
+ * d'accueil est pire que pas de bannière du tout.
+ */
+export type ShopHero = {
+  title: string
+  subtitle: string | null
+  /** Chemin interne, garanti par la validation côté action. */
+  href: string
+  /** `null` : la bannière prend la photo du maillot le plus récent du lien. */
+  imageUrl: string | null
+}
+
 export type ShopSettings = {
   packEnabled: boolean
   /** Le barème, trié par taille croissante. Vide quand il n'y a aucun palier. */
@@ -49,6 +66,7 @@ export type ShopSettings = {
   lowStockThreshold: number
   shopPhone: string | null
   shopWhatsapp: string | null
+  hero: ShopHero | null
 }
 
 export type Category = 'tous' | 'clubs' | 'selections' | 'retro'
@@ -75,6 +93,74 @@ export function inCategory(product: ShopProduct, category: Category): boolean {
   if (category === 'retro') return product.isRetro
   if (category === 'selections') return product.teamType === 'national'
   return product.teamType !== 'national'
+}
+
+/** « Domicile », « Extérieur », « Third » — ou null quand le type est absent. */
+export function kitTypeLabel(kitType: ShopProduct['kitType']): string | null {
+  return KIT_TYPES.find((option) => option.value === kitType)?.label ?? null
+}
+
+/** Ce qu'il faut savoir d'un maillot pour le nommer. */
+export type NameableProduct = Pick<ShopProduct, 'title' | 'teamName' | 'kitType' | 'season'>
+
+/**
+ * Le nom d'un maillot, dans un seul format : « FC Barcelone · Domicile 2026/27 ».
+ *
+ * **Composé à l'affichage, jamais lu depuis `products.title`.** Le titre
+ * enregistré a été saisi à la main ou proposé par l'IA sur des mois, et il
+ * porte les traces de chaque passage : « Barcelona » sur une carte dont
+ * l'équipe liée s'appelle « FC Barcelone », « Chelsea » répété deux fois parce
+ * que le titre et le nom d'équipe disaient la même chose, « Aston villa third »
+ * en minuscules et en anglais. Reconstruire le nom à partir de l'équipe liée,
+ * du type de maillot et de la saison rend ces trois cas impossibles à
+ * l'écran — et le jour où un titre est corrigé en base, l'affichage ne change
+ * pas, parce qu'il n'en dépendait pas.
+ *
+ * Le titre enregistré reste le filet : un maillot sans équipe liée n'a pas de
+ * nom à reconstruire. C'est aussi pour ça qu'il ne faut pas le supprimer de la
+ * base — et que les lignes de commande continuent de le figer, puisqu'une
+ * facture doit dire ce qui a été vendu ce jour-là, pas ce que le catalogue
+ * raconte aujourd'hui.
+ *
+ * Le séparateur est un point médian et non un tiret : « Sénégal - Extérieur »
+ * se lit comme un score.
+ */
+export function productName(product: NameableProduct): string {
+  return composeName(product.teamName, product.kitType, product.season) ?? product.title
+}
+
+/**
+ * Le format lui-même, à partir de trois valeurs brutes — donc utilisable là où
+ * il n'y a pas encore de produit : `composeTitle` dans `lib/ai/suggest` s'en
+ * sert pour que le titre proposé par l'IA naisse déjà au bon format, et le
+ * script de reprise pour réécrire les titres déjà en base. Un seul endroit
+ * décide de la forme, sinon l'IA et l'affichage divergent au premier
+ * changement.
+ */
+export function composeName(
+  team: string | null,
+  kitType: ShopProduct['kitType'],
+  season: string | null,
+): string | null {
+  if (!team) return null
+
+  const qualifier = [kitTypeLabel(kitType), season].filter(Boolean).join(' ')
+  return qualifier ? `${team} · ${qualifier}` : team
+}
+
+/**
+ * Le sous-titre d'une carte : la ligue, et rien d'autre.
+ *
+ * Il portait le nom de l'équipe, que `productName` annonce déjà — d'où les
+ * cartes « Chelsea / Chelsea ». La ligue est la seule information qui ajoute
+ * quelque chose à ce moment-là, et elle est absente sur une sélection
+ * nationale : une carte sans sous-titre est donc normale, pas un oubli.
+ */
+export function productSubtitle(
+  product: Pick<ShopProduct, 'leagueName' | 'teamName'>,
+): string | null {
+  if (!product.leagueName) return null
+  return product.leagueName === product.teamName ? null : product.leagueName
 }
 
 /** A jersey with sizes but none ticked is sold out; with no sizes at all it is not. */

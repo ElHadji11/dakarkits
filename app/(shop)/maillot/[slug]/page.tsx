@@ -3,11 +3,12 @@ import { notFound } from 'next/navigation'
 import { Suspense } from 'react'
 
 import { ProductGallery } from '@/components/shop/product-gallery'
-import { ProductGrid } from '@/components/shop/product-grid'
 import { ProductPurchase } from '@/components/shop/product-purchase'
+import { RelatedRow } from '@/components/shop/related-row'
 import { ViewContentEvent } from '@/components/shop/view-content-event'
 import { formatCfa } from '@/lib/constants'
 import { getCatalog, getProduct, getShopSettings } from '@/lib/shop'
+import { productName, type ShopProduct, type ShopProductDetail } from '@/lib/shop-types'
 
 export async function generateStaticParams() {
   const catalog = await getCatalog()
@@ -25,6 +26,8 @@ export async function generateMetadata(
   const product = await getProduct(slug)
   if (!product) return { title: 'Maillot introuvable' }
 
+  const name = productName(product)
+
   const description = [
     product.teamName,
     product.season,
@@ -40,14 +43,16 @@ export async function generateMetadata(
     : undefined
 
   return {
-    title: `${product.title} — ${formatCfa(product.price)}`,
+    // Le même nom que la page affiche : un onglet, un aperçu WhatsApp et un
+    // titre de page qui ne disent pas la même chose font douter du lien.
+    title: `${name} — ${formatCfa(product.price)}`,
     description,
     alternates: { canonical: `/maillot/${product.slug}` },
     openGraph: {
       type: 'website',
-      title: product.title,
+      title: name,
       description,
-      images: image ? [{ url: image, width: 1200, height: 630, alt: product.title }] : undefined,
+      images: image ? [{ url: image, width: 1200, height: 630, alt: name }] : undefined,
     },
   }
 }
@@ -74,21 +79,21 @@ async function ProductBody({ params }: { params: PageProps<'/maillot/[slug]'>['p
   ])
   if (!product) notFound()
 
-  // Same team first, then same league; never the jersey being viewed.
-  const related = catalog
-    .filter((other) => other.id !== product.id)
-    .filter(
-      (other) =>
-        (product.teamId !== null && other.teamId === product.teamId) ||
-        (product.leagueId !== null && other.leagueId === product.leagueId),
-    )
-    .slice(0, 4)
+  const related = relatedTo(product, catalog)
 
   return (
-    <div className="space-y-10 pb-24 sm:pb-6">
+    /* Plus de `pb-24`. La barre d'achat collée est `fixed`, donc elle ne
+       recouvre que le bas de l'écran — et c'est le pied de page qui porte
+       désormais sa garde au sol (`pb-20`, voir `site-footer`). Les 96 px
+       d'avant s'ajoutaient à celle-là : d'où le grand vide à la fin de la
+       fiche, qui n'avait aucune raison d'être là.
+
+       `space-y-6` sur téléphone : entre la ligne du pack et « Description »,
+       40 px se lisaient comme une rupture de page. */
+    <div className="space-y-6 sm:space-y-8">
       <ViewContentEvent productId={product.id} value={product.price} />
-      <div className="grid gap-6 lg:grid-cols-2 lg:gap-10">
-        <ProductGallery images={product.images} title={product.title} />
+      <div className="grid gap-6 lg:grid-cols-2 lg:gap-8">
+        <ProductGallery images={product.images} title={productName(product)} />
         <ProductPurchase product={product} settings={settings} />
       </div>
 
@@ -99,10 +104,11 @@ async function ProductBody({ params }: { params: PageProps<'/maillot/[slug]'>['p
         </section>
       ) : null}
 
-      {related.length > 0 ? (
-        <section className="space-y-3">
+      {/* Quatre ou rien : voir `relatedTo`. */}
+      {related.length === RELATED_COUNT ? (
+        <section className="space-y-4">
           <h2 className="text-lg font-semibold tracking-tight">Dans le même esprit</h2>
-          <ProductGrid products={related} />
+          <RelatedRow products={related} />
         </section>
       ) : null}
 
@@ -113,7 +119,7 @@ async function ProductBody({ params }: { params: PageProps<'/maillot/[slug]'>['p
           __html: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'Product',
-            name: product.title,
+            name: productName(product),
             image: product.imageUrl ? [product.imageUrl] : undefined,
             description: product.description ?? undefined,
             brand: product.teamName ? { '@type': 'Brand', name: product.teamName } : undefined,
@@ -135,7 +141,7 @@ async function ProductBody({ params }: { params: PageProps<'/maillot/[slug]'>['p
 
 function ProductSkeleton() {
   return (
-    <div className="grid gap-6 pb-24 lg:grid-cols-2 lg:gap-10" aria-hidden>
+    <div className="grid gap-6 lg:grid-cols-2 lg:gap-8" aria-hidden>
       <div className="aspect-square rounded-lg bg-muted" />
       <div className="space-y-4">
         <div className="h-8 w-3/4 rounded bg-muted" />
@@ -145,4 +151,47 @@ function ProductSkeleton() {
       </div>
     </div>
   )
+}
+
+/**
+ * Le nombre de maillots de la rangée « Dans le même esprit ». Quatre, et
+ * jamais trois : voir `relatedTo`.
+ */
+const RELATED_COUNT = 4
+
+/**
+ * Quatre maillots proches, ou aucun.
+ *
+ * L'ancienne version prenait ce qui partageait l'équipe ou la ligue, et
+ * s'arrêtait là. Sur une équipe dont la boutique n'a qu'un autre maillot, la
+ * section s'affichait avec **une carte unique** dans une grille de quatre
+ * colonnes : trois quarts de vide, et l'air d'un bug. Elle se remplit donc par
+ * cercles de plus en plus larges, et si les quatre places ne sont pas prises,
+ * la fiche n'affiche pas la section du tout — une suggestion incomplète ne
+ * vend rien, un trou dans la page fait douter du reste.
+ *
+ * Les trois cercles, dans l'ordre : même équipe, même ligue, puis même famille
+ * — un club avec les clubs, une sélection avec les sélections, un rétro avec
+ * les rétros. Le troisième cercle est le dernier : au-delà, « le même esprit »
+ * ne voudrait plus rien dire, et autant ne rien proposer.
+ */
+function relatedTo(product: ShopProductDetail, catalog: ShopProduct[]): ShopProduct[] {
+  const others = catalog.filter((other) => other.id !== product.id)
+
+  const circles = [
+    (other: ShopProduct) => product.teamId !== null && other.teamId === product.teamId,
+    (other: ShopProduct) => product.leagueId !== null && other.leagueId === product.leagueId,
+    (other: ShopProduct) =>
+      other.teamType === product.teamType && other.isRetro === product.isRetro,
+  ]
+
+  const picked: ShopProduct[] = []
+  for (const belongs of circles) {
+    for (const other of others) {
+      if (picked.length === RELATED_COUNT) return picked
+      if (belongs(other) && !picked.includes(other)) picked.push(other)
+    }
+  }
+
+  return picked
 }

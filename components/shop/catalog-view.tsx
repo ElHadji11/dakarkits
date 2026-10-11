@@ -197,7 +197,7 @@ export function CatalogView({ category }: { category: Category }) {
       ) : null}
 
       {visible.length === 0 ? (
-        <div className="space-y-3 rounded-lg border border-dashed border-border p-8 text-center">
+        <div className="space-y-4 rounded-lg border border-dashed border-border p-8 text-center">
           <p className="text-sm text-muted-foreground">
             {active > 0 || query
               ? 'Aucun maillot ne correspond. Essaie d’élargir ta recherche.'

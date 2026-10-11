@@ -18,7 +18,7 @@ import {
  * Écrites à partir de ce que l'application fait, pas d'un modèle. Chaque
  * engagement ci-dessous correspond à un comportement réel du code :
  *
- *   - trois champs, aucun compte client    app/(shop)/commande/_actions/order.ts
+ *   - trois champs, aucun compte client    app/(checkout)/commande/_actions/order.ts
  *   - montants recalculés côté serveur     lib/pricing.ts
  *   - pack et livraison pris aux réglages  lib/settings.ts
  *   - trois statuts, motif d'annulation    lib/db/schema.ts (orderStatusEnum)

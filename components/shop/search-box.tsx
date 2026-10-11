@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { formatCfa } from '@/lib/constants'
 import { searchItems } from '@/lib/search'
+import { productName, productSubtitle } from '@/lib/shop-types'
 
 const MAX_RESULTS = 6
 
@@ -92,7 +93,7 @@ export function SearchBox() {
                   <Link
                     href={`/maillot/${product.slug}`}
                     onClick={close}
-                    className="flex items-center gap-3 p-2 hover:bg-accent/40"
+                    className="flex items-center gap-4 p-2 hover:bg-accent/40"
                   >
                     <span className="relative size-12 shrink-0 overflow-hidden rounded bg-card">
                       {product.imageUrl ? (
@@ -109,11 +110,16 @@ export function SearchBox() {
                         </span>
                       )}
                     </span>
+                    {/* Même nom que sur la carte et sur la fiche : un
+                        résultat de recherche qui ne s'écrit pas comme la carte
+                        qu'il ouvre fait douter d'avoir trouvé le bon maillot. */}
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate text-sm font-medium">{product.title}</span>
-                      {product.teamName ? (
+                      <span className="block truncate text-sm font-medium">
+                        {productName(product)}
+                      </span>
+                      {productSubtitle(product) ? (
                         <span className="block truncate text-xs text-muted-foreground">
-                          {product.teamName}
+                          {productSubtitle(product)}
                         </span>
                       ) : null}
                     </span>

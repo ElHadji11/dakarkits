@@ -1,23 +1,37 @@
 'use client'
 
-import { ShoppingBag } from 'lucide-react'
+import { ShoppingBag, Truck, Wallet } from 'lucide-react'
 import Link from 'next/link'
 import { useActionState, useEffect, useRef } from 'react'
 
-import { placeOrder } from '@/app/(shop)/commande/_actions/order'
+import { placeOrder } from '@/app/(checkout)/commande/_actions/order'
 import { CartLines } from '@/components/shop/cart-lines'
 import { CartSummary } from '@/components/shop/cart-summary'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { DELIVERY_ETA } from '@/lib/constants'
+import { useCatalog } from '@/components/shop/catalog-provider'
+import { paymentPromise } from '@/lib/shop-types'
 import { useCartLines } from '@/hooks/use-cart-lines'
 import { idle } from '@/lib/action-state'
 import { trackInitiateCheckout } from '@/lib/pixel'
 import { useAttribution } from '@/stores/attribution'
 
+/**
+ * Un placeholder doit se lire comme un exemple, pas comme une valeur déjà
+ * saisie. « Awa Diop » et « 77 123 45 67 » tels quels avaient l'air d'un
+ * formulaire prérempli, et `placeholder:text-muted-foreground` n'y suffit pas
+ * en thème sombre : à oklch 0,72 contre 0,92 pour le texte réel, l'écart est
+ * trop faible. D'où le préfixe « Ex : » *et* l'opacité réduite — un seul des
+ * deux laissait le doute.
+ */
+const placeholderClass = 'placeholder:text-muted-foreground/60'
+
 export function OrderForm() {
   const { hydrated, lines, pricing, nudge } = useCartLines()
+  const { settings } = useCatalog()
   const attribution = useAttribution()
   const [state, formAction, pending] = useActionState(placeOrder, idle)
 
@@ -65,7 +79,7 @@ export function OrderForm() {
   )
 
   return (
-    <form action={formAction} className="space-y-8 pb-28 sm:pb-8">
+    <form action={formAction} className="space-y-6 pb-24 sm:pb-8">
       <input type="hidden" name="lines" value={payload} />
       <input type="hidden" name="utmSource" value={attribution.utmSource ?? ''} />
       <input type="hidden" name="utmCampaign" value={attribution.utmCampaign ?? ''} />
@@ -97,8 +111,8 @@ export function OrderForm() {
             required
             autoComplete="name"
             defaultValue={kept('customerName')}
-            placeholder="Awa Diop"
-            className="h-12"
+            placeholder="Ex : Awa Diop"
+            className={`h-12 ${placeholderClass}`}
             aria-invalid={Boolean(error('customerName'))}
           />
           <FieldError message={error('customerName')} />
@@ -114,8 +128,8 @@ export function OrderForm() {
             inputMode="tel"
             autoComplete="tel"
             defaultValue={kept('phone')}
-            placeholder="77 123 45 67"
-            className="h-12"
+            placeholder="Ex : 77 123 45 67"
+            className={`h-12 ${placeholderClass}`}
             aria-invalid={Boolean(error('phone'))}
           />
           <p className="text-xs text-muted-foreground">
@@ -133,12 +147,28 @@ export function OrderForm() {
             rows={3}
             autoComplete="street-address"
             defaultValue={kept('address')}
-            placeholder="Quartier, rue, point de repère — Dakar"
+            placeholder="Ex : Sacré-Cœur 3, villa 123, près de la pharmacie"
+            className={placeholderClass}
             aria-invalid={Boolean(error('address'))}
           />
           <FieldError message={error('address')} />
         </div>
       </section>
+
+      {/* Ce qu'il y avait sous le champ adresse : rien. Le bouton collé doit
+          garder 96 px de garde au sol, et ces 96 px se lisaient comme une page
+          qui s'arrête trop tôt — au moment précis où on hésite à valider. Les
+          deux phrases qui lèvent cette hésitation les occupent maintenant. */}
+      <ul className="space-y-2 rounded-lg border border-border p-4 text-sm text-muted-foreground">
+        <li className="flex items-center gap-2">
+          <Wallet className="size-4 shrink-0 text-primary" aria-hidden />
+          Rien à payer maintenant : {paymentPromise(settings)} à la livraison.
+        </li>
+        <li className="flex items-center gap-2">
+          <Truck className="size-4 shrink-0 text-primary" aria-hidden />
+          {DELIVERY_ETA}. On t&apos;appelle pour confirmer.
+        </li>
+      </ul>
 
       {state.error ? (
         <p role="alert" className="text-sm text-destructive">
@@ -152,7 +182,7 @@ export function OrderForm() {
         </Button>
       </div>
 
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/95 p-3 backdrop-blur sm:hidden">
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/95 p-4 backdrop-blur sm:hidden">
         <Button type="submit" variant="cta" disabled={pending} className="h-12 w-full">
           {pending ? 'Enregistrement…' : 'Confirmer ma commande'}
         </Button>

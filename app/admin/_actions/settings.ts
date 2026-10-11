@@ -9,6 +9,7 @@ import { hashPassword, verifyPassword } from '@/lib/auth/password'
 import { createSession, requireAdmin } from '@/lib/auth/session'
 import { PACK_TIER_SIZES, packPriceField } from '@/lib/constants'
 import { db } from '@/lib/db'
+import { isOwnUrl } from '@/lib/imagekit'
 import { ladderIssues } from '@/lib/pricing'
 import { adminUsers, packTiers, settings } from '@/lib/db/schema'
 import { emailField } from '@/lib/validation/auth'
@@ -46,6 +47,51 @@ function flatten(error: z.ZodError, values: Record<string, string>): ActionState
 
 /* -------------------------------------------------------------- réglages --- */
 
+/** Texte libre facultatif, coupé aux blancs et borné. */
+function optionalText(max: number, message: string) {
+  return z.preprocess(blankToNull, z.union([z.string().trim().max(max, message), z.null()]))
+}
+
+/**
+ * Le lien de la bannière : un chemin interne, et rien d'autre.
+ *
+ * `//evil.example` est une URL protocol-relative : le navigateur la suit vers
+ * l'extérieur. Une bannière plein écran en haut de l'accueil est exactement
+ * l'endroit où ça ne doit pas pouvoir arriver, même par faute de frappe —
+ * d'où le refus de tout ce qui ne commence pas par une seule barre oblique.
+ */
+const internalPath = z.preprocess(
+  blankToNull,
+  z.union([
+    z
+      .string()
+      .trim()
+      .max(200)
+      .regex(/^\/(?!\/)/, 'Le lien doit être un chemin du site, par exemple /selections.'),
+    z.null(),
+  ]),
+)
+
+/**
+ * La photo de la bannière : une image de notre ImageKit, ou rien.
+ *
+ * C'est la règle sur les photos appliquée là où elle compte le plus. La
+ * bannière est le premier visuel qu'un robot publicitaire voit du site : une
+ * photo officielle collée ici met en jeu le compte entier, pas une fiche.
+ * Laisser le champ vide est le cas normal — la bannière prend alors la photo
+ * du maillot le plus récent de la collection visée.
+ */
+const ownImageUrl = z.preprocess(
+  blankToNull,
+  z.union([
+    z
+      .string()
+      .trim()
+      .refine((value) => isOwnUrl(value), 'Colle une URL d’image de la boutique (ImageKit).'),
+    z.null(),
+  ]),
+)
+
 /** Un prix de palier : vide = pas de pack de cette taille. */
 const tierPrice = z.preprocess(
   blankToNull,
@@ -64,10 +110,25 @@ const shopSchema = z
     shippingMode: z.enum(['fee', 'included']),
     shippingFee: amount,
     lowStockThreshold: z.coerce.number().int().min(0).max(100),
+    heroEnabled: checkbox,
+    heroTitle: optionalText(80, 'Titre trop long (80 caractères maximum).'),
+    heroSubtitle: optionalText(160, 'Sous-titre trop long (160 caractères maximum).'),
+    heroHref: internalPath,
+    heroImageUrl: ownImageUrl,
     ...Object.fromEntries(PACK_TIER_SIZES.map((size) => [packPriceField(size), tierPrice])),
   })
   .superRefine((values, ctx) => {
     const active = activeTiers(values)
+
+    // Une bannière cochée mais sans titre ni lien s'afficherait vide en haut de
+    // l'accueil. `heroOf` (lib/shop) la rendrait `null` et personne ne saurait
+    // pourquoi : autant refuser l'enregistrement et le dire.
+    if (values.heroEnabled && !values.heroTitle) {
+      ctx.addIssue({ code: 'custom', path: ['heroTitle'], message: 'Donne un titre à la bannière, ou décoche « Bannière active ».' })
+    }
+    if (values.heroEnabled && !values.heroHref) {
+      ctx.addIssue({ code: 'custom', path: ['heroHref'], message: 'Indique où la bannière mène, par exemple /selections.' })
+    }
 
     if (values.packEnabled && active.length === 0) {
       ctx.addIssue({
@@ -97,6 +158,10 @@ const SHOP_FIELDS = [
   ...PACK_TIER_SIZES.map((size) => packPriceField(size)),
   'shippingFee',
   'lowStockThreshold',
+  'heroTitle',
+  'heroSubtitle',
+  'heroHref',
+  'heroImageUrl',
 ]
 
 export async function saveShopSettings(
@@ -110,13 +175,28 @@ export async function saveShopSettings(
     shippingMode: formData.get('shippingMode'),
     shippingFee: formData.get('shippingFee'),
     lowStockThreshold: formData.get('lowStockThreshold'),
+    heroEnabled: formData.get('heroEnabled'),
+    heroTitle: formData.get('heroTitle'),
+    heroSubtitle: formData.get('heroSubtitle'),
+    heroHref: formData.get('heroHref'),
+    heroImageUrl: formData.get('heroImageUrl'),
     ...Object.fromEntries(
       PACK_TIER_SIZES.map((size) => [packPriceField(size), formData.get(packPriceField(size))]),
     ),
   })
   if (!parsed.success) return flatten(parsed.error, submittedValues(formData, SHOP_FIELDS))
 
-  const { packEnabled, shippingMode, shippingFee, lowStockThreshold } = parsed.data
+  const {
+    packEnabled,
+    shippingMode,
+    shippingFee,
+    lowStockThreshold,
+    heroEnabled,
+    heroTitle,
+    heroSubtitle,
+    heroHref,
+    heroImageUrl,
+  } = parsed.data
   const kept = activeTiers(parsed.data)
 
   // Une transaction, parce que le barème passe par deux ordres : un palier
@@ -125,7 +205,18 @@ export async function saveShopSettings(
   await db.transaction(async (tx) => {
     await tx
       .update(settings)
-      .set({ packEnabled, shippingMode, shippingFee, lowStockThreshold, updatedAt: new Date() })
+      .set({
+        packEnabled,
+        shippingMode,
+        shippingFee,
+        lowStockThreshold,
+        heroEnabled,
+        heroTitle,
+        heroSubtitle,
+        heroHref,
+        heroImageUrl,
+        updatedAt: new Date(),
+      })
       .where(eq(settings.id, 1))
 
     // Un prix vidé supprime son palier : il n'y a rien à conserver dans une

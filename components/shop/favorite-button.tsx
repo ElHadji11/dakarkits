@@ -30,11 +30,19 @@ export function FavoriteButton({
       aria-pressed={active}
       aria-label={active ? 'Retirer des favoris' : 'Ajouter aux favoris'}
       className={cn(
-        'flex size-11 items-center justify-center rounded-full text-muted-foreground transition-colors hover:text-foreground',
+        // `transition` (et non `transition-colors`) couvre aussi la
+        // transformation : le `active:scale-90` est le seul retour au doigt sur
+        // un téléphone, où il n'y a pas de survol. 150 ms — au-delà, un appui
+        // donne l'impression que l'interface réfléchit.
+        'flex size-11 items-center justify-center rounded-full text-muted-foreground',
+        'transition duration-150 hover:text-foreground active:scale-90',
         className,
       )}
     >
-      <Heart className={cn('size-5', active && 'fill-primary text-primary')} aria-hidden />
+      <Heart
+        className={cn('size-5 transition-colors', active && 'fill-primary text-primary')}
+        aria-hidden
+      />
     </button>
   )
 }

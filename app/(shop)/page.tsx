@@ -2,7 +2,9 @@ import type { Metadata } from 'next'
 import { Suspense } from 'react'
 
 import { CatalogView } from '@/components/shop/catalog-view'
+import { ShopHeroBanner } from '@/components/shop/shop-hero'
 import { StaticGrid } from '@/components/shop/static-grid'
+import { getShopSettings } from '@/lib/shop'
 import type { Category } from '@/lib/shop-types'
 
 export const metadata: Metadata = {
@@ -11,8 +13,27 @@ export const metadata: Metadata = {
     'Tous les maillots disponibles — clubs, sélections et rétro — livrés à Dakar et payés à la livraison. Filtre par équipe, ligue, taille et prix.',
 }
 
-export default function AllKitsPage() {
-  return <CatalogPage category="tous" />
+/**
+ * L'accueil, et le seul endroit où la bannière s'affiche.
+ *
+ * Elle est rendue ici et non dans le layout : les pages Clubs, Sélections et
+ * Rétro sont des listes, on y arrive en sachant ce qu'on cherche. Une bannière
+ * répétée en haut de chacune n'est plus un moment de marque, c'est 200 px à
+ * faire défiler.
+ *
+ * `getShopSettings` est en `'use cache'` et la page ne lit aucune donnée de
+ * requête : la bannière reste donc dans la coquille statique servie par le
+ * CDN, image comprise.
+ */
+export default async function AllKitsPage() {
+  const settings = await getShopSettings()
+
+  return (
+    <div className="space-y-6">
+      {settings.hero ? <ShopHeroBanner hero={settings.hero} /> : null}
+      <CatalogPage category="tous" />
+    </div>
+  )
 }
 
 /**
