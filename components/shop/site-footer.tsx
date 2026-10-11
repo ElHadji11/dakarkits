@@ -1,6 +1,7 @@
 import Link from 'next/link'
 
 import { Logo } from '@/components/shop/logo'
+import { formatPhone } from '@/lib/constants'
 import type { ShopSettings } from '@/lib/shop-types'
 
 /**
@@ -22,12 +23,6 @@ const YEAR = new Date().getFullYear()
  */
 const CONTACT_EMAIL = 'contact@louyomb.com'
 const INSTAGRAM_URL = 'https://instagram.com/babacar__thior'
-
-/** +221774354688 -> +221 77 435 46 88 */
-function formatPhone(value: string): string {
-  const groups = value.replace(/\D/g, '').match(/^221(\d{2})(\d{3})(\d{2})(\d{2})$/)
-  return groups ? `+221 ${groups[1]} ${groups[2]} ${groups[3]} ${groups[4]}` : value
-}
 
 const LINKS = [
   { href: '/', label: 'Tous' },

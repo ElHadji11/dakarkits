@@ -30,6 +30,19 @@ export function packPriceField(size: number): string {
   return `packPrice${size}`
 }
 
+/**
+ * `+221774354688` -> `+221 77 435 46 88`.
+ *
+ * Partagé plutôt que recopié : le pied de page, la fiche produit et la page de
+ * confirmation affichent le même numéro, et un numéro affiché de trois façons
+ * différentes sur un même site n'inspire pas confiance quand c'est celui sur
+ * lequel on demande d'envoyer de l'argent.
+ */
+export function formatPhone(value: string): string {
+  const groups = value.replace(/\D/g, '').match(/^221(\d{2})(\d{3})(\d{2})(\d{2})$/)
+  return groups ? `+221 ${groups[1]} ${groups[2]} ${groups[3]} ${groups[4]}` : value
+}
+
 export const PRODUCT_STATUSES = [
   { value: 'draft', label: 'Brouillon' },
   { value: 'published', label: 'Publié' },

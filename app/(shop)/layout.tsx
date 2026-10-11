@@ -3,6 +3,7 @@ import { Suspense } from 'react'
 import { AttributionCapture } from '@/components/shop/attribution-capture'
 import { CatalogProvider } from '@/components/shop/catalog-provider'
 import { MetaPixel } from '@/components/shop/meta-pixel'
+import { PromoBanner } from '@/components/shop/promo-banner'
 import { SiteFooter } from '@/components/shop/site-footer'
 import { SiteHeader } from '@/components/shop/site-header'
 import { getCatalog, getShopSettings } from '@/lib/shop'
@@ -25,6 +26,10 @@ export default async function ShopLayout({ children }: { children: React.ReactNo
       </Suspense>
       <MetaPixel />
       <div className="flex min-h-dvh flex-col">
+        {/* Au-dessus de l'en-tête collé, pas dedans : la barre collée garde sa
+            hauteur sur téléphone, et la promo défile hors de l'écran une fois
+            lue. */}
+        <PromoBanner />
         <SiteHeader settings={settings} />
         <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-4">{children}</main>
         <SiteFooter settings={settings} />

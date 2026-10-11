@@ -29,7 +29,7 @@ import {
  * tenir : c'est tout l'intérêt d'avoir audité le code avant de rédiger.
  */
 
-const UPDATED = '7 octobre 2026'
+const UPDATED = '11 octobre 2026'
 
 export const metadata: Metadata = {
   title: 'Conditions générales de vente',
@@ -146,8 +146,9 @@ export default function TermsPage() {
 
       <Section title="7. Paiement à la livraison">
         <P>
-          Le paiement se fait <Strong>par mobile money, Wave, Orange Money, au livreur, au moment de la remise</Strong>. Ce
-          site n&apos; ne collecte aucune donnée bancaire.
+          Le paiement se fait <Strong>au livreur, au moment de la remise</Strong> : par Wave sur
+          le <Strong>+221 77 435 46 88</Strong>, par Orange Money, ou en espèces. Ce site ne
+          collecte aucune donnée bancaire et ne prélève rien à l&apos;avance.
         </P>
         <P>
           Prévois le montant exact affiché sur ta confirmation. Le transfert de propriété

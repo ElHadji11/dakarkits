@@ -9,6 +9,8 @@ import { PurchaseEvent } from '@/components/shop/purchase-event'
 import { Button } from '@/components/ui/button'
 import { formatCfa } from '@/lib/constants'
 import { getOrderByToken } from '@/lib/orders'
+import { getShopSettings } from '@/lib/shop'
+import { paymentPromise } from '@/lib/shop-types'
 
 export const metadata: Metadata = {
   title: 'Commande confirmée',
@@ -31,7 +33,9 @@ async function Confirmation({
   params: PageProps<'/commande/confirmee/[token]'>['params']
 }) {
   const { token } = await params
-  const order = await getOrderByToken(token)
+  // Le numéro de paiement vient du réglage, comme au pied de page : il doit
+  // suivre la boutique si elle change de ligne, sans redéploiement.
+  const [order, settings] = await Promise.all([getOrderByToken(token), getShopSettings()])
   if (!order) notFound()
 
   return (
@@ -85,7 +89,7 @@ async function Confirmation({
       </section>
 
       <p className="text-center text-sm text-muted-foreground">
-        Tu paies en espèces, au livreur, à la réception.
+        Tu paies à la réception : {paymentPromise(settings, { withNumber: true })}.
       </p>
 
       <Button asChild variant="outline" className="h-12 w-full">

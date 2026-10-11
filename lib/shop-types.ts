@@ -1,4 +1,4 @@
-import { formatCfa, type Size } from '@/lib/constants'
+import { formatCfa, formatPhone, type Size } from '@/lib/constants'
 import type { PackTier } from '@/lib/pricing'
 
 /**
@@ -119,6 +119,27 @@ export function deliveryPromise(
   return free
     ? 'Livraison gratuite partout à Dakar'
     : `Livraison à Dakar : ${formatCfa(settings.shippingFee)}`
+}
+
+/**
+ * La promesse de paiement, en une seule phrase et en un seul endroit.
+ *
+ * Même raison que `deliveryPromise` : la fiche produit, la page de
+ * confirmation et les pages juridiques doivent dire la même chose. Wave est
+ * cité en premier parce que c'est le moyen mis en avant ; Orange Money et les
+ * espèces restent acceptés, et les taire ferait perdre les clients qui n'ont
+ * pas Wave.
+ *
+ * Le numéro vient du réglage, jamais d'une constante : le jour où la boutique
+ * change de ligne, elle le fait dans l'admin, pas dans un déploiement.
+ */
+export function paymentPromise(
+  settings: Pick<ShopSettings, 'shopPhone'>,
+  options: { withNumber?: boolean } = {},
+): string {
+  const number = settings.shopPhone ? formatPhone(settings.shopPhone) : null
+  const wave = options.withNumber && number ? `Wave au ${number}` : 'Wave'
+  return `${wave}, Orange Money ou espèces`
 }
 
 /**

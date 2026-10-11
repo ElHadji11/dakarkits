@@ -14,6 +14,7 @@ import {
   isOnSale,
   isSoldOut,
   packLadder,
+  paymentPromise,
   type ShopProduct,
   type ShopSettings,
 } from '@/lib/shop-types'
@@ -91,7 +92,7 @@ export function ProductPurchase({
       <ul className="space-y-1.5 text-sm text-muted-foreground">
         <li className="flex items-center gap-2">
           <Wallet className="size-4 shrink-0" aria-hidden />
-          Tu paies à la livraison, en espèces.
+          Tu paies à la livraison : {paymentPromise(settings)}.
         </li>
         <li className="flex items-center gap-2">
           <Truck className="size-4 shrink-0" aria-hidden />

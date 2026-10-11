@@ -25,7 +25,7 @@ import {
  *   - aucune purge de `rate_limits` hors connexion admin réussie
  */
 
-const UPDATED = '7 octobre 2026'
+const UPDATED = '11 octobre 2026'
 
 export const metadata: Metadata = {
   title: 'Confidentialité',
@@ -49,7 +49,8 @@ export default function PrivacyPage() {
         <P>
           <Strong>Pour te livrer :</Strong> ton nom, ton numéro de téléphone et ton adresse de
           livraison. Ce sont les trois seuls champs du formulaire de commande. Nous ne créons pas de
-          compte et ne demandons jamais de données bancaires — tu paies en espèces, au livreur.
+          compte et ne demandons jamais de données bancaires — tu paies au livreur, par Wave sur le
+          +221 77 435 46 88, par Orange Money ou en espèces.
         </P>
         <P>
           <Strong>Pour savoir quelle publicité fonctionne :</Strong> si tu arrives par une annonce,
