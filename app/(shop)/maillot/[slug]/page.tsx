@@ -31,7 +31,7 @@ export async function generateMetadata(
   const description = [
     product.teamName,
     product.season,
-    `${formatCfa(product.price)} · payé à la livraison à Dakar`,
+    `${formatCfa(product.price)} · payé à la livraison sur l’axe du BRT`,
   ]
     .filter(Boolean)
     .join(' · ')

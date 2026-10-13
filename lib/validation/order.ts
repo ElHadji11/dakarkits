@@ -52,8 +52,16 @@ export const orderSchema = z.object({
   address: z
     .string()
     .trim()
-    .min(8, 'Indique une adresse de livraison à Dakar.')
+    .min(8, 'Indique une adresse livrable, avec un repère ou la station du BRT la plus proche.')
     .max(400, 'Adresse trop longue.'),
+  /**
+   * La zone déclarée au formulaire. Elle décide des frais, donc elle est
+   * validée ici comme le reste : le serveur ne lit jamais un montant venu du
+   * navigateur, seulement cette étiquette, et il recalcule à partir d'elle.
+   */
+  deliveryZone: z.enum(['brt', 'outside'], {
+    error: 'Dis-nous si ton adresse est sur l’axe du BRT ou ailleurs dans Dakar.',
+  }),
   lines: z.array(cartLineSchema).min(1, 'Ton panier est vide.').max(20),
   attribution: attributionSchema,
 })

@@ -5,10 +5,12 @@ import { notFound } from 'next/navigation'
 import { Suspense } from 'react'
 
 import { ClearCartOnce } from '@/components/shop/clear-cart-once'
+import { DeliveryZoneNotice } from '@/components/shop/delivery-zone'
 import { PurchaseEvent } from '@/components/shop/purchase-event'
 import { Button } from '@/components/ui/button'
-import { formatCfa } from '@/lib/constants'
+import { formatCfa, formatCfaRange } from '@/lib/constants'
 import { getOrderByToken } from '@/lib/orders'
+import { storedShippingMax } from '@/lib/pricing'
 import { getShopSettings } from '@/lib/shop'
 import { paymentPromise } from '@/lib/shop-types'
 
@@ -37,6 +39,12 @@ async function Confirmation({
   // suivre la boutique si elle change de ligne, sans redéploiement.
   const [order, settings] = await Promise.all([getOrderByToken(token), getShopSettings()])
   if (!order) notFound()
+
+  /* La commande fige un entier ; hors zone, le haut de l'intervalle se relit
+     de la zone enregistrée. Le client doit retrouver sur cette page le même
+     montant que celui qu'il avait sous les yeux en validant. */
+  const shippingMax = storedShippingMax(order.shippingFee, order.deliveryZone)
+  const totalMax = order.total + (shippingMax - order.shippingFee)
 
   return (
     <div className="mx-auto max-w-lg space-y-6 py-6">
@@ -79,11 +87,13 @@ async function Confirmation({
           ) : null}
           <Row
             label="Livraison"
-            value={order.shippingFee > 0 ? formatCfa(order.shippingFee) : 'Incluse'}
+            value={shippingMax > 0 ? formatCfaRange(order.shippingFee, shippingMax) : 'Incluse'}
           />
-          <div className="flex items-baseline justify-between border-t border-border pt-2">
+          <div className="flex items-baseline justify-between gap-3 border-t border-border pt-2">
             <dt className="font-medium">À payer à la livraison</dt>
-            <dd className="text-lg font-semibold tabular-nums">{formatCfa(order.total)}</dd>
+            <dd className="text-right text-lg font-semibold tabular-nums">
+              {formatCfaRange(order.total, totalMax)}
+            </dd>
           </div>
         </dl>
       </section>
@@ -91,6 +101,11 @@ async function Confirmation({
       <p className="text-center text-sm text-muted-foreground">
         Tu paies à la réception : {paymentPromise(settings, { withNumber: true })}.
       </p>
+
+      {/* La zone une dernière fois : l'adresse vient d'être saisie, et s'il
+          faut la discuter, autant que ce soit pendant l'appel de confirmation
+          plutôt que devant la porte. */}
+      <DeliveryZoneNotice className="text-xs" />
 
       <Button asChild variant="outline" className="h-12 w-full">
         <Link href="/">Continuer mes achats</Link>

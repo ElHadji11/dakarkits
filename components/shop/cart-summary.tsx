@@ -2,7 +2,7 @@
 
 import { Sparkles } from 'lucide-react'
 
-import { formatCfa } from '@/lib/constants'
+import { formatCfa, formatCfaRange } from '@/lib/constants'
 import type { PackNudge as PackNudgeOffer, PricingResult } from '@/lib/pricing'
 
 /**
@@ -27,14 +27,26 @@ export function CartSummary({
         ) : null}
         {/* Ce que la livraison coûte vraiment sur ce panier, pas le nom du
             réglage : un mode « frais » à 0 F affichait « 0 F ». Même mot que le
-            bandeau de l’en-tête, sinon le client lit deux promesses. */}
+            bandeau de l’en-tête, sinon le client lit deux promesses.
+
+            Hors zone, c'est un intervalle, et il remonte jusque dans le total :
+            annoncer « 7 500 F » en gros au-dessus d'une livraison à 2 000 à
+            3 000 F, c'est préparer une discussion sur le pas de la porte.
+            `formatCfaRange` rend le montant seul quand les bornes se
+            rejoignent, donc la zone n'a pas besoin d'un rendu à part. */}
         <Row
           label="Livraison"
-          value={pricing.shippingFee === 0 ? 'Gratuite' : formatCfa(pricing.shippingFee)}
+          value={
+            pricing.shippingFeeMax === 0
+              ? 'Gratuite'
+              : formatCfaRange(pricing.shippingFee, pricing.shippingFeeMax)
+          }
         />
-        <div className="flex items-baseline justify-between border-t border-border pt-2">
+        <div className="flex items-baseline justify-between gap-3 border-t border-border pt-2">
           <dt className="font-medium">À payer à la livraison</dt>
-          <dd className="text-lg font-semibold tabular-nums">{formatCfa(pricing.total)}</dd>
+          <dd className="text-right text-lg font-semibold tabular-nums">
+            {formatCfaRange(pricing.total, pricing.totalMax)}
+          </dd>
         </div>
       </dl>
     </div>

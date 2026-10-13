@@ -2,7 +2,7 @@
  * Every amount the shop shows and the order stores comes from here.
  * Francs CFA, integers only — the browser never gets to send a total.
  */
-import { formatCfa } from '@/lib/constants'
+import { formatCfa, OUTSIDE_ZONE_FEE } from '@/lib/constants'
 
 export type PricingLine = {
   productId: number
@@ -25,15 +25,64 @@ export type PricingSettings = {
   shippingFee: number
 }
 
+/**
+ * Où le client se fait livrer : sur l'axe du BRT, ou en dehors.
+ *
+ * Ce n'est pas une adresse, c'est une déclaration — celle que le formulaire
+ * de commande demande en deux cartes à cocher. Elle change le total, donc elle
+ * passe par ici et jamais par un prix envoyé depuis le navigateur.
+ */
+export type DeliveryZone = 'brt' | 'outside'
+
 export type PricingResult = {
   /** Sum of the unit prices, before any pack discount. */
   subtotal: number
   /** Always positive or zero; subtotal − packDiscount is what the items cost. */
   packDiscount: number
+  /** Le plancher de la livraison, et le seul montant que la commande fige. */
   shippingFee: number
+  /** Son plafond. Égal à `shippingFee` partout sauf hors zone. */
+  shippingFeeMax: number
   total: number
+  /** Le total au plafond. Égal à `total` quand la livraison n'est pas un intervalle. */
+  totalMax: number
   /** How many complete packs the basket earned, for the wording. */
   packsFormed: number
+  zone: DeliveryZone
+}
+
+/**
+ * Ce que coûte la livraison, des deux bornes.
+ *
+ * Dans la zone, les deux bornes sont le réglage de la boutique — souvent 0 F,
+ * c'est la promesse en vitrine. En dehors, c'est le forfait, pris au plus haut
+ * des deux : si la boutique repassait un jour à une livraison payante plus
+ * chère que le forfait, sortir de la zone reviendrait moins cher que d'y
+ * rester, ce qui n'a aucun sens à annoncer — même raison que le barème des
+ * packs, où le prix au maillot ne remonte jamais.
+ */
+export function shippingRange(
+  settings: Pick<PricingSettings, 'shippingMode' | 'shippingFee'>,
+  zone: DeliveryZone,
+): { min: number; max: number } {
+  const base = settings.shippingMode === 'fee' ? settings.shippingFee : 0
+  if (zone !== 'outside') return { min: base, max: base }
+  return {
+    min: Math.max(base, OUTSIDE_ZONE_FEE.min),
+    max: Math.max(base, OUTSIDE_ZONE_FEE.max),
+  }
+}
+
+/**
+ * Le plafond d'une commande déjà enregistrée, reconstitué de ce qu'elle stocke.
+ *
+ * Une commande fige un entier, pas un intervalle : `shipping_fee` porte le
+ * plancher et `delivery_zone` dit s'il y en avait un. La page de confirmation
+ * et l'admin relisent donc le haut ici, au lieu d'ajouter une colonne pour un
+ * montant qui sera de toute façon arrêté au téléphone.
+ */
+export function storedShippingMax(shippingFee: number, zone: string | null): number {
+  return zone === 'outside' ? Math.max(shippingFee, OUTSIDE_ZONE_FEE.max) : shippingFee
 }
 
 /**
@@ -186,6 +235,7 @@ function cheapest(prices: number[], tiers: PackTier[]): { cost: number; packsFor
 export function calculatePricing(
   lines: PricingLine[],
   settings: PricingSettings,
+  zone: DeliveryZone = 'brt',
 ): PricingResult {
   const eligible = eligiblePrices(lines)
   const rest = expand(lines, false)
@@ -197,14 +247,18 @@ export function calculatePricing(
   const { cost, packsFormed } = cheapest(eligible, usableTiers(settings))
   const discount = eligibleFull - cost
 
-  const shippingFee = settings.shippingMode === 'fee' ? settings.shippingFee : 0
+  const shipping = shippingRange(settings, zone)
+  const goods = subtotal - discount
 
   return {
     subtotal,
     packDiscount: discount,
-    shippingFee,
-    total: subtotal - discount + shippingFee,
+    shippingFee: shipping.min,
+    shippingFeeMax: shipping.max,
+    total: goods + shipping.min,
+    totalMax: goods + shipping.max,
     packsFormed,
+    zone,
   }
 }
 

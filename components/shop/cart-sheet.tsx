@@ -5,6 +5,7 @@ import Link from 'next/link'
 
 import { CartLines } from '@/components/shop/cart-lines'
 import { CartSummary } from '@/components/shop/cart-summary'
+import { DeliveryZoneNotice } from '@/components/shop/delivery-zone'
 import { Button } from '@/components/ui/button'
 import {
   Sheet,
@@ -32,7 +33,7 @@ export function CartSheet({
       <SheetContent side="right" className="flex w-full flex-col gap-0 sm:max-w-md">
         <SheetHeader>
           <SheetTitle>Ton panier</SheetTitle>
-          <SheetDescription>Paiement à la livraison, à Dakar.</SheetDescription>
+          <SheetDescription>Paiement à la livraison, sur l’axe du BRT.</SheetDescription>
         </SheetHeader>
 
         {lines.length === 0 ? (
@@ -50,6 +51,12 @@ export function CartSheet({
             </div>
             <SheetFooter className="gap-4 border-t border-border">
               <CartSummary pricing={pricing} nudge={nudge} />
+              {/* Sous la ligne « Livraison : Gratuite », et pas ailleurs : le
+                  panier est le dernier écran avant le formulaire, et le
+                  récapitulatif de ‹ /commande › reprend déjà la notice sous le
+                  champ adresse — la répéter là-bas la ferait lire deux fois sur
+                  la même page. */}
+              <DeliveryZoneNotice className="text-xs" />
               <Button asChild variant="cta" className="h-12 w-full" onClick={() => setOpen(false)}>
                 <Link href="/commande">Commander</Link>
               </Button>

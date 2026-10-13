@@ -1,5 +1,6 @@
 import Link from 'next/link'
 
+import { DeliveryZoneNotice } from '@/components/shop/delivery-zone'
 import { Logo } from '@/components/shop/logo'
 import { formatPhone } from '@/lib/constants'
 import type { ShopSettings } from '@/lib/shop-types'
@@ -91,7 +92,19 @@ export function SiteFooter({ settings }: { settings: ShopSettings }) {
             {/* La ligne « Paiement à la livraison · Livraison à Dakar » est
                 partie d'ici : le bandeau de l'en-tête dit déjà exactement ça,
                 sur toutes les pages, et la répéter coûtait 28 px au pied de
-                page sans rien apprendre à personne. */}
+                page sans rien apprendre à personne.
+
+                La notice de zone, elle, dit ce que le bandeau ne dit pas : où
+                s'arrête le gratuit. Sans elle, un visiteur qui ne touche
+                jamais une fiche produit ne lit nulle part les 23 stations ni
+                les 500 m. C'est le seul endroit rendu sur toutes les pages du
+                catalogue — et un pied de page est l'endroit où on va chercher
+                une zone de livraison.
+
+                Elle est alignée à gauche mais centrée dans la colonne : la
+                pastille en début de flex, posée devant quatre lignes
+                centrées, flottait toute seule dans la marge. */}
+            <DeliveryZoneNotice className="mx-auto max-w-xs text-left text-xs text-foreground/80 lg:mx-0" />
           </div>
 
           {/* `flex-nowrap` : les cinq libellés tiennent dans 343 px avec

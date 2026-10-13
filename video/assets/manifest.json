@@ -1,6 +1,6 @@
 {
   "base": "https://louyomb.com",
-  "capturedAt": "2026-10-11T11:19:23.631Z",
+  "capturedAt": "2026-10-12T23:54:21.539Z",
   "viewport": {
     "width": 1920,
     "height": 1080
@@ -51,7 +51,7 @@
         "x": 0,
         "y": 36,
         "w": 1920,
-        "h": 29
+        "h": 25
       }
     },
     {
@@ -61,7 +61,7 @@
       "note": "piece logo",
       "box": {
         "x": 400,
-        "y": 81,
+        "y": 77,
         "w": 134.1,
         "h": 24
       }
@@ -73,7 +73,7 @@
       "note": "piece search",
       "box": {
         "x": 550.1,
-        "y": 71,
+        "y": 67,
         "w": 869.9,
         "h": 44
       }
@@ -85,7 +85,7 @@
       "note": "piece icons",
       "box": {
         "x": 1428,
-        "y": 71,
+        "y": 67,
         "w": 92,
         "h": 44
       }
@@ -97,7 +97,7 @@
       "note": "piece nav",
       "box": {
         "x": 400,
-        "y": 138,
+        "y": 360,
         "w": 1120,
         "h": 48
       }
@@ -109,7 +109,7 @@
       "note": "piece tools",
       "box": {
         "x": 400,
-        "y": 202,
+        "y": 424,
         "w": 1120,
         "h": 44
       }
@@ -121,7 +121,7 @@
       "note": "piece count",
       "box": {
         "x": 1447.5,
-        "y": 214,
+        "y": 436,
         "w": 72.5,
         "h": 20
       }
@@ -130,112 +130,112 @@
       "name": "p-card-1",
       "url": "https://louyomb.com/",
       "dpr": 2,
-      "note": "carte Olympique de Marseille 2023/24",
+      "note": "carte Angleterre extérieur 2026/27",
       "box": {
         "x": 400,
-        "y": 262,
-        "w": 271,
-        "h": 339,
-        "title": "Olympique de Marseille 2023/24",
-        "href": "/maillot/olympique-de-marseille-2023-24"
+        "y": 484,
+        "w": 268,
+        "h": 368,
+        "title": "Angleterre extérieur 2026/27",
+        "href": "/maillot/angleterre-exterieur-2026-27"
       }
     },
     {
       "name": "p-card-2",
       "url": "https://louyomb.com/",
       "dpr": 2,
-      "note": "carte RB Leipzig third 2024/25",
+      "note": "carte Angleterre · Domicile 2026/27",
       "box": {
-        "x": 683,
-        "y": 262,
-        "w": 271,
-        "h": 339,
-        "title": "RB Leipzig third 2024/25",
-        "href": "/maillot/rb-leipzig-third-2024-25"
+        "x": 684,
+        "y": 484,
+        "w": 268,
+        "h": 368,
+        "title": "Angleterre · Domicile 2026/27",
+        "href": "/maillot/angleterre-domicile-2026-27"
       }
     },
     {
       "name": "p-card-3",
       "url": "https://louyomb.com/",
       "dpr": 2,
-      "note": "carte Stade Rennais domicile 2020/21",
+      "note": "carte Paris Saint-Germain · Domicile 2026/27",
       "box": {
-        "x": 966,
-        "y": 262,
-        "w": 271,
-        "h": 339,
-        "title": "Stade Rennais domicile 2020/21",
-        "href": "/maillot/stade-rennais-domicile-2020-21"
+        "x": 968,
+        "y": 484,
+        "w": 268,
+        "h": 368,
+        "title": "Paris Saint-Germain · Domicile 2026/27",
+        "href": "/maillot/paris-saint-germain-domicile-2026-27"
       }
     },
     {
       "name": "p-card-4",
       "url": "https://louyomb.com/",
       "dpr": 2,
-      "note": "carte Liverpool extérieur 2026/27",
+      "note": "carte Bayern Munich extérieur 2026/27",
       "box": {
-        "x": 1249,
-        "y": 262,
-        "w": 271,
-        "h": 339,
-        "title": "Liverpool extérieur 2026/27",
-        "href": "/maillot/liverpool-exterieur-2026-27"
+        "x": 1252,
+        "y": 484,
+        "w": 268,
+        "h": 368,
+        "title": "Bayern Munich extérieur 2026/27",
+        "href": "/maillot/bayern-munich-exterieur-2026-27"
       }
     },
     {
       "name": "p-card-5",
       "url": "https://louyomb.com/",
       "dpr": 2,
-      "note": "carte Real Madrid third 2025/26",
+      "note": "carte Real Madrid · Extérieur 2026/27",
       "box": {
         "x": 400,
-        "y": 625,
-        "w": 271,
-        "h": 339,
-        "title": "Real Madrid third 2025/26",
-        "href": "/maillot/real-madrid-third-2025-26"
+        "y": 868,
+        "w": 268,
+        "h": 368,
+        "title": "Real Madrid · Extérieur 2026/27",
+        "href": "/maillot/real-madrid-exterieur-2026-27"
       }
     },
     {
       "name": "p-card-6",
       "url": "https://louyomb.com/",
       "dpr": 2,
-      "note": "carte Inter Milan",
+      "note": "carte Aston Villa · Domicile 2026/27",
       "box": {
-        "x": 683,
-        "y": 625,
-        "w": 271,
-        "h": 339,
-        "title": "Inter Milan",
-        "href": "/maillot/inter-milan"
+        "x": 684,
+        "y": 868,
+        "w": 268,
+        "h": 368,
+        "title": "Aston Villa · Domicile 2026/27",
+        "href": "/maillot/aston-villa-domicile-2026-27"
       }
     },
     {
       "name": "p-card-7",
       "url": "https://louyomb.com/",
       "dpr": 2,
-      "note": "carte Atlético de Madrid third 2024/25",
+      "note": "carte Manchester United · Domicile 2026/27",
       "box": {
-        "x": 966,
-        "y": 625,
-        "w": 271,
-        "h": 339,
-        "title": "Atlético de Madrid third 2024/25",
-        "href": "/maillot/atletico-de-madrid-third-2024-25"
+        "x": 968,
+        "y": 868,
+        "w": 268,
+        "h": 368,
+        "title": "Manchester United · Domicile 2026/27",
+        "href": "/maillot/manchester-united-domicile-2026-27"
       }
     },
     {
       "name": "p-card-8",
       "url": "https://louyomb.com/",
       "dpr": 2,
-      "note": "carte Benfica extérieur 2026/27",
+      "note": "carte Olympique de Marseille · Extérieur 2023/24",
       "box": {
-        "x": 1249,
-        "y": 625,
-        "w": 271,
-        "h": 339,
-        "title": "Benfica extérieur 2026/27",
-        "href": "/maillot/benfica-exterieur-2026-27"
+        "x": 1252,
+        "y": 868,
+        "w": 268,
+        "h": 368,
+        "title": "Olympique de Marseille · Extérieur 2023/24",
+        "href": "/maillot/olympique-de-marseille-2023-24"
       }
     },
     {
@@ -267,6 +267,30 @@
       "url": "https://louyomb.com/maillot/barcelona",
       "dpr": 2,
       "note": ""
+    },
+    {
+      "name": "d-sizes",
+      "url": "https://louyomb.com/maillot/barcelona",
+      "dpr": 2,
+      "note": "selecteur de taille"
+    },
+    {
+      "name": "d-sizes-picked",
+      "url": "https://louyomb.com/maillot/barcelona",
+      "dpr": 2,
+      "note": "taille choisie, etat actif reel"
+    },
+    {
+      "name": "d-product-sized",
+      "url": "https://louyomb.com/maillot/barcelona",
+      "dpr": 2,
+      "note": "fiche avec la taille choisie"
+    },
+    {
+      "name": "d-pack",
+      "url": "https://louyomb.com/maillot/barcelona",
+      "dpr": 2,
+      "note": "la phrase du bareme de pack"
     },
     {
       "name": "d-add-button",
@@ -383,16 +407,124 @@
       "note": "telephone /selections"
     },
     {
+      "name": "m-home-full",
+      "url": "https://louyomb.com/selections",
+      "dpr": 3,
+      "note": "telephone, accueil entier"
+    },
+    {
+      "name": "m-search-open",
+      "url": "https://louyomb.com/",
+      "dpr": 3,
+      "note": "telephone, champ de recherche actif"
+    },
+    {
+      "name": "m-search-barca",
+      "url": "https://louyomb.com/",
+      "dpr": 3,
+      "note": "telephone, resultats pour barca"
+    },
+    {
+      "name": "m-search-listbox",
+      "url": "https://louyomb.com/",
+      "dpr": 3,
+      "note": "telephone, la liste seule"
+    },
+    {
+      "name": "m-product",
+      "url": "https://louyomb.com/maillot/barcelona",
+      "dpr": 3,
+      "note": "telephone, fiche produit"
+    },
+    {
+      "name": "m-product-full",
+      "url": "https://louyomb.com/maillot/barcelona",
+      "dpr": 3,
+      "note": "telephone, fiche entiere"
+    },
+    {
+      "name": "m-product-pick",
+      "url": "https://louyomb.com/maillot/barcelona",
+      "dpr": 3,
+      "note": "telephone, le bloc taille + bouton en un cadre"
+    },
+    {
+      "name": "m-sizes",
+      "url": "https://louyomb.com/maillot/barcelona",
+      "dpr": 3,
+      "note": "telephone, selecteur de taille"
+    },
+    {
+      "name": "m-sizes-picked",
+      "url": "https://louyomb.com/maillot/barcelona",
+      "dpr": 3,
+      "note": "telephone, taille choisie"
+    },
+    {
+      "name": "m-product-picked",
+      "url": "https://louyomb.com/maillot/barcelona",
+      "dpr": 3,
+      "note": "telephone, fiche avec la taille choisie"
+    },
+    {
+      "name": "m-add-button",
+      "url": "https://louyomb.com/maillot/barcelona",
+      "dpr": 3,
+      "note": "telephone, bouton Ajouter"
+    },
+    {
+      "name": "m-added",
+      "url": "https://louyomb.com/maillot/barcelona",
+      "dpr": 3,
+      "note": "telephone, apres l ajout"
+    },
+    {
+      "name": "m-header-1",
+      "url": "https://louyomb.com/maillot/barcelona",
+      "dpr": 3,
+      "note": "telephone, en-tete avec la pastille a 1"
+    },
+    {
       "name": "m-cart",
       "url": "https://louyomb.com/panier",
       "dpr": 3,
-      "note": "telephone /panier"
+      "note": "telephone, panier"
+    },
+    {
+      "name": "m-cart-full",
+      "url": "https://louyomb.com/panier",
+      "dpr": 3,
+      "note": "telephone, panier entier"
     },
     {
       "name": "m-form",
       "url": "https://louyomb.com/commande",
       "dpr": 3,
-      "note": "telephone /commande"
+      "note": "telephone, formulaire vide et non envoye"
+    },
+    {
+      "name": "m-form-full",
+      "url": "https://louyomb.com/commande",
+      "dpr": 3,
+      "note": "telephone, tunnel entier"
+    },
+    {
+      "name": "m-form-fields",
+      "url": "https://louyomb.com/commande",
+      "dpr": 3,
+      "note": "telephone, les trois champs et le bouton"
+    },
+    {
+      "name": "m-form-bottom",
+      "url": "https://louyomb.com/commande",
+      "dpr": 3,
+      "note": "telephone, formulaire defile en bas"
+    },
+    {
+      "name": "m-confirm-button",
+      "url": "https://louyomb.com/commande",
+      "dpr": 3,
+      "note": "telephone, bouton Confirmer"
     }
   ]
 }

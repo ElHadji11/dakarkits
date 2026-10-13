@@ -38,7 +38,19 @@ export const Cursor: React.FC<{
   /** Avant cette frame, le curseur n'est pas encore entre. */
   from?: number
   opacity?: number
-}> = ({ frame, path, clicks = [], from = 0, opacity = 1 }) => {
+  /**
+   * Le doigt plutot que la fleche.
+   *
+   * Les plans de commande se jouent sur une capture de telephone. Une fleche
+   * de souris posee sur un ecran tactile est le genre de detail qui ne se
+   * remarque pas consciemment et decredibilise quand meme le plan : le
+   * spectateur regarde son propre telephone pendant qu'il regarde le film.
+   *
+   * Le doigt est une pastille pleine et translucide, de la taille d'une vraie
+   * pulpe — un disque opaque masquerait le champ qu'il vient toucher.
+   */
+  touch?: boolean
+}> = ({ frame, path, clicks = [], from = 0, opacity = 1, touch = false }) => {
   const scale = useFrameScale()
   if (path.length === 0) return null
 
@@ -111,27 +123,48 @@ export const Cursor: React.FC<{
           />
         )
       })}
-      <svg
-        width={size}
-        height={size * 1.35}
-        viewBox="0 0 24 32"
-        style={{
-          position: 'absolute',
-          left: -size * 0.1,
-          top: -size * 0.1,
-          transform: `scale(${1 - press * 0.18})`,
-          transformOrigin: '10% 10%',
-          filter: `drop-shadow(0 ${4 / scale}px ${10 / scale}px rgba(0,0,0,.6))`,
-        }}
-      >
-        <path
-          d="M3 2 L3 24.5 L8.8 19.2 L12.4 28.4 L16.6 26.6 L13 17.6 L21 17.2 Z"
-          fill={C.fg}
-          stroke={C.bgDeep}
-          strokeWidth={1.6}
-          strokeLinejoin="round"
+      {touch ? (
+        // La pulpe d'un doigt fait une quarantaine de pixels CSS sur un
+        // telephone : c'est la taille du contact, et c'est pour ca que les
+        // boutons tactiles font 48 px. La pastille est centree sur le point
+        // vise, la ou la fleche, elle, pointe depuis son coin.
+        <div
+          style={{
+            position: 'absolute',
+            left: -size * 0.62,
+            top: -size * 0.62,
+            width: size * 1.24,
+            height: size * 1.24,
+            borderRadius: '50%',
+            background: `${C.fg}38`,
+            border: `${2.5 / scale}px solid ${C.fg}D0`,
+            transform: `scale(${1 - press * 0.16})`,
+            boxShadow: `0 ${4 / scale}px ${14 / scale}px rgba(0,0,0,.5)`,
+          }}
         />
-      </svg>
+      ) : (
+        <svg
+          width={size}
+          height={size * 1.35}
+          viewBox="0 0 24 32"
+          style={{
+            position: 'absolute',
+            left: -size * 0.1,
+            top: -size * 0.1,
+            transform: `scale(${1 - press * 0.18})`,
+            transformOrigin: '10% 10%',
+            filter: `drop-shadow(0 ${4 / scale}px ${10 / scale}px rgba(0,0,0,.6))`,
+          }}
+        >
+          <path
+            d="M3 2 L3 24.5 L8.8 19.2 L12.4 28.4 L16.6 26.6 L13 17.6 L21 17.2 Z"
+            fill={C.fg}
+            stroke={C.bgDeep}
+            strokeWidth={1.6}
+            strokeLinejoin="round"
+          />
+        </svg>
+      )}
     </div>
   )
 }

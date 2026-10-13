@@ -77,7 +77,18 @@ export type Jersey = {
   was?: number
 }
 
-/** Les maillots photographiés par la boutique, relevés le 2026-10-10. */
+/**
+ * Les maillots photographiés par la boutique, relevés le 2026-10-10.
+ *
+ * **Ces prix sont une copie, et une copie ne suit pas la boutique.** Le
+ * catalogue est passé de 25 à 32 maillots depuis, et le Sénégal extérieur a
+ * changé de prix : il était écrit 7 500 F ici, il coûte 8 000 F sur le site —
+ * et le reel l'affichait en Bebas de 176 px pendant une seconde et demie.
+ *
+ * Les trois que la parade met en avant (`j9`, `j1`, `j11`) ont été revérifiés
+ * sur louyomb.com le 2026-10-11. **Les dix autres ne l'ont pas été** : avant
+ * d'en mettre un à l'image, relire son prix sur le site.
+ */
 export const JERSEYS: Jersey[] = [
   { src: 'j1.png', name: 'Maroc domicile', team: 'Maroc', price: 8000, was: 12000 },
   { src: 'j2.png', name: 'Man. United third', team: 'Manchester United', price: 8000, was: 12000 },
@@ -87,7 +98,7 @@ export const JERSEYS: Jersey[] = [
   { src: 'j6.png', name: 'Brésil domicile 2026', team: 'Brésil', price: 8000 },
   { src: 'j7.png', name: 'Chelsea', team: 'Chelsea', price: 7500 },
   { src: 'j8.png', name: 'Manchester City', team: 'Man. City', price: 8000, was: 10000 },
-  { src: 'j9.png', name: 'Sénégal extérieur 2026', team: 'Sénégal', price: 7500, was: 10000 },
+  { src: 'j9.png', name: 'Sénégal extérieur 2026', team: 'Sénégal', price: 8000, was: 10000 },
   { src: 'j10.png', name: 'Aston Villa third', team: 'Aston Villa', price: 8000, was: 12000 },
   { src: 'j11.png', name: 'Barcelona', team: 'FC Barcelone', price: 7500, was: 10000 },
   { src: 'j12.png', name: 'Fulham', team: 'Fulham', price: 7500, was: 10000 },

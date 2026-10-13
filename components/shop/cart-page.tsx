@@ -5,6 +5,7 @@ import Link from 'next/link'
 
 import { CartLines } from '@/components/shop/cart-lines'
 import { CartSummary } from '@/components/shop/cart-summary'
+import { DeliveryZoneNotice } from '@/components/shop/delivery-zone'
 import { Button } from '@/components/ui/button'
 import { useCartLines } from '@/hooks/use-cart-lines'
 
@@ -41,6 +42,9 @@ export function CartPage() {
 
         <div className="space-y-4 lg:sticky lg:top-20 lg:self-start">
           <CartSummary pricing={pricing} nudge={nudge} />
+          {/* Même place que dans le panneau du panier : juste sous la ligne
+              « Livraison », avant le bouton. */}
+          <DeliveryZoneNotice className="text-xs" />
           <Button asChild variant="cta" className="hidden h-12 w-full sm:flex">
             <Link href="/commande">Commander</Link>
           </Button>

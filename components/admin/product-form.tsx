@@ -17,7 +17,13 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { idle } from '@/lib/action-state'
-import { formatCfa, KIT_TYPES, PRODUCT_STATUSES } from '@/lib/constants'
+import {
+  formatCfa,
+  formatCfaRange,
+  KIT_TYPES,
+  OUTSIDE_ZONE_FEE,
+  PRODUCT_STATUSES,
+} from '@/lib/constants'
 
 export type ProductFormValues = {
   id: number | null
@@ -233,9 +239,10 @@ function ShippingNote({ shipping }: { shipping: ShippingHint }) {
       <Truck className="mt-px size-4 shrink-0" aria-hidden />
       <span>
         {paid
-          ? `Livraison payante : ${formatCfa(shipping.fee)} s’ajoutent au prix ci-dessus, encaissés à la livraison.`
-          : 'Livraison gratuite : le client ne paie que le prix ci-dessus.'}{' '}
-        Vaut pour tous les maillots.{' '}
+          ? `Sur l’axe du BRT, livraison payante : ${formatCfa(shipping.fee)} s’ajoutent au prix ci-dessus.`
+          : 'Sur l’axe du BRT, livraison gratuite : le client ne paie que le prix ci-dessus.'}{' '}
+        Ailleurs dans Dakar, {formatCfaRange(OUTSIDE_ZONE_FEE.min, OUTSIDE_ZONE_FEE.max)} de plus,
+        selon ce que le client déclare à la commande. Vaut pour tous les maillots.{' '}
         <Link href="/admin/reglages" className="underline">
           Changer dans Réglages
         </Link>

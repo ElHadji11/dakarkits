@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     template: '%s · DakarKits',
   },
   description:
-    'Maillots de clubs, de sélections et rétro livrés à Dakar. Vous payez à la livraison.',
+    'Maillots de clubs, de sélections et rétro livrés sur l’axe du BRT, à Dakar. Vous payez à la livraison.',
 }
 
 export const viewport: Viewport = {

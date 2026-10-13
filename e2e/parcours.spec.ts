@@ -48,6 +48,17 @@ test('de la publicité à la commande, puis dans l’admin', async ({ page }) =>
   await page.getByLabel('Nom complet').fill('Client E2E')
   await page.getByLabel('Téléphone').fill(phone)
   await page.getByLabel('Adresse de livraison').fill('Point E, rue 10, Dakar')
+
+  // 5 bis. La zone décide du total, et le récapitulatif doit suivre le doigt.
+  // On passe hors zone pour le vérifier, puis on revient : la commande écrite
+  // reste une commande de la zone, celle que le reste du parcours raconte.
+  // Les montants s'écrivent avec une espace fine insécable, d'où les `\s`.
+  const summary = page.locator('dl').filter({ hasText: 'Sous-total' }).first()
+  await page.getByText('Ailleurs dans Dakar').click()
+  await expect(summary).toContainText(/2\s?000\s?à\s?3\s?000\s?F/)
+  await page.getByText('Sur l’axe du BRT').click()
+  await expect(summary).toContainText('Gratuite')
+
   await page.getByRole('button', { name: 'Confirmer ma commande' }).last().click()
 
   // 6. Confirmation, with a readable order number.

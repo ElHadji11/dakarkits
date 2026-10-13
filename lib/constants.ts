@@ -57,9 +57,28 @@ export function siteUrl(): string {
   return (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://louyomb.com').replace(/\/+$/, '')
 }
 
+/** Le nombre seul, séparateurs compris : « 8 000 ». */
+function amount(value: number): string {
+  return new Intl.NumberFormat('fr-FR').format(value).replace(/ | /g, ' ')
+}
+
 /** Francs CFA, always integers: "8 000 F". */
-export function formatCfa(amount: number): string {
-  return `${new Intl.NumberFormat('fr-FR').format(amount).replace(/ | /g, ' ')} F`
+export function formatCfa(value: number): string {
+  return `${amount(value)} F`
+}
+
+/**
+ * « 2 000 à 3 000 F », et « 3 000 F » tout court quand les deux bornes se
+ * rejoignent.
+ *
+ * Un seul « F », à la fin : « 2 000 F à 3 000 F » se lit comme deux montants
+ * sans rapport. Les appelants n'ont donc pas à savoir s'ils tiennent un
+ * intervalle ou un montant — la livraison hors zone en est un, celle de la
+ * zone n'en est pas un, et c'est la même ligne de récapitulatif qui affiche
+ * les deux.
+ */
+export function formatCfaRange(min: number, max: number): string {
+  return min === max ? formatCfa(min) : `${amount(min)} à ${formatCfa(max)}`
 }
 
 /**
@@ -67,11 +86,100 @@ export function formatCfa(amount: number): string {
  *
  * Il vit ici et pas dans les réglages parce que ce n'est pas un prix : c'est
  * la promesse opérationnelle de la boutique, et elle ne change pas d'un
- * maillot à l'autre. `deliveryPromise` dit *combien* coûte la livraison,
- * celle-ci dit *quand* elle arrive — les deux se lisent côte à côte sur la
- * fiche produit, au moment où la taille est choisie.
+ * maillot à l'autre. Trois phrases se lisent côte à côte sur la fiche
+ * produit, au moment où la taille est choisie : `deliveryPromise` dit
+ * *combien* coûte la livraison, celle-ci dit *quand* elle arrive, et
+ * `DELIVERY_ZONE` dit *jusqu'où*. Elle ne nomme plus la ville : la zone n'est
+ * plus Dakar en entier, et deux phrases qui tracent deux zones différentes,
+ * c'est une promesse de trop.
  */
-export const DELIVERY_ETA = 'Livré en 24/48h à Dakar'
+export const DELIVERY_ETA = 'Livré en 24/48h'
+
+/**
+ * La zone de livraison : l'axe du BRT, pas Dakar en entier.
+ *
+ * La boutique livrait « gratuitement partout à Dakar ». Un seul livreur ne
+ * tient pas cette promesse à l'échelle de l'agglomération, et une adresse
+ * hors de portée se paie à la livraison — au moment où le client a le colis
+ * en main et où un refus coûte le trajet. Le **gratuit** s'arrête donc à la
+ * ligne du BRT, que tout le monde ici sait situer sans carte : on se repère à
+ * sa station. Plus loin, c'est livré aussi, contre `OUTSIDE_ZONE_FEE`.
+ *
+ * Trois phrases, trois longueurs, et aucune réécrite ailleurs :
+ *
+ * - `DELIVERY_ZONE` tient dans le bandeau de l'en-tête, où il reste la moitié
+ *   d'une ligne de 12 px ;
+ * - `DELIVERY_ZONE_NOTICE` est la notice complète — les deux terminus, les 23
+ *   stations, le rayon — pour la fiche produit, le panier et la commande ;
+ * - `DELIVERY_ZONE_OUTSIDE` dit le prix d'en dehors. Les deux se lisent
+ *   ensemble partout, sauf là où le choix de zone affiche déjà le forfait.
+ *
+ * Le rayon est annoncé « environ » exprès, comme les mesures du guide des
+ * tailles : personne ne mesure 500 m au GPS devant un portail, et un chiffre
+ * présenté comme exact fabriquerait un motif de dispute à la livraison.
+ */
+export const DELIVERY_ZONE = 'tout l’axe du BRT'
+
+/**
+ * Les 23 stations de la ligne, du terminus central à celui de la banlieue.
+ *
+ * Écrites une fois, dans l'ordre du trajet. Les CGV les énumèrent et le
+ * formulaire de commande les déplie : deux listes recopiées à la main auraient
+ * fini par ne plus dire la même chose, et c'est sur celle des CGV qu'on
+ * s'appuierait le jour d'un désaccord. Le compte annoncé partout se déduit du
+ * tableau, jamais écrit à côté : ajouter une station met à jour la phrase.
+ */
+export const BRT_STATIONS = [
+  'Petersen – Papa Gueye Fall',
+  'Place de la Nation',
+  'Grande Mosquée',
+  'Dial Diop',
+  'Grand Dakar',
+  'Liberté 1',
+  'Sacré-Cœur',
+  'Liberté 5',
+  'Liberté 6',
+  'Khar Yalla',
+  'Scat Urbam',
+  'Cardinal Hyacinthe Thiandoum',
+  'Grand Médine',
+  'Police des Parcelles',
+  'Croisement 22',
+  'Parcelles Assainies',
+  'Ndingala',
+  'Golf Sud',
+  'Dalal Jam',
+  'Golf Nord',
+  'Gueule Tapée',
+  'Fith Mith',
+  'Préfecture de Guédiawaye',
+] as const
+
+/** Le nombre de stations, déduit de la liste et jamais écrit à la main. */
+export const BRT_STATION_COUNT = BRT_STATIONS.length
+
+/**
+ * Le forfait hors zone, en intervalle parce que la distance varie.
+ *
+ * Annoncé des deux bornes, et jamais d'une seule : « à partir de 2 000 F »
+ * n'engage à rien et laisse croire au pire, « 3 000 F » fait fuir celui qui
+ * habite à deux rues de la ligne. Le montant exact est arrêté pendant l'appel
+ * de confirmation, et **jamais au-dessus du maximum annoncé** — c'est ce
+ * qu'écrivent les CGV, c'est donc ce que le livreur encaisse.
+ *
+ * La commande enregistre le plancher (`orders.shipping_fee`) et la zone
+ * (`orders.delivery_zone`) : le haut de l'intervalle se recalcule de là, et
+ * l'admin sait qu'il reste un montant à arrêter au téléphone.
+ */
+export const OUTSIDE_ZONE_FEE = { min: 2000, max: 3000 } as const
+
+/** La notice complète : les deux terminus, les 23 stations, le rayon. */
+export const DELIVERY_ZONE_NOTICE =
+  `Nous livrons gratuitement le long du BRT, de Papa Gueye Fall (Petersen) à la Préfecture de Guédiawaye : les ${BRT_STATION_COUNT} stations de la ligne, et environ 500 m autour de chacune.`
+
+/** Et pour qui habite plus loin : c'est livrable aussi, et voilà le prix. */
+export const DELIVERY_ZONE_OUTSIDE =
+  `En dehors, nous livrons quand même dans Dakar : ${formatCfaRange(OUTSIDE_ZONE_FEE.min, OUTSIDE_ZONE_FEE.max)} selon la distance, à régler avec le reste à la livraison.`
 
 /**
  * Le guide des tailles, mesures à plat en centimètres.

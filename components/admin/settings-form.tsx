@@ -97,8 +97,10 @@ export function SettingsForm({ values }: { values: ShopSettingsValues }) {
             className="h-12"
           />
           <p className="text-xs text-muted-foreground">
-            Ignoré quand la livraison est incluse : le site affiche alors « Livraison incluse
-            partout à Dakar ».
+            Ignoré quand la livraison est incluse : le site affiche alors « Livraison gratuite sur
+            tout l’axe du BRT ». Ni la zone — les 23 stations de la ligne et environ 500 m
+            autour de chacune — ni le forfait d’en dehors ne se règlent ici : le client déclare
+            sa zone au moment de la commande, et le total suit.
           </p>
         </div>
       </section>
@@ -155,7 +157,7 @@ export function SettingsForm({ values }: { values: ShopSettingsValues }) {
             id="heroSubtitle"
             name="heroSubtitle"
             maxLength={160}
-            placeholder="Ex : Domicile, extérieur et rétro, livrés à Dakar"
+            placeholder="Ex : Domicile, extérieur et rétro, livrés sur l’axe du BRT"
             defaultValue={kept('heroSubtitle', values.heroSubtitle)}
             className="h-12"
           />

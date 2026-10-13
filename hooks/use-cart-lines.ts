@@ -4,7 +4,12 @@ import { useMemo } from 'react'
 
 import { useCatalog } from '@/components/shop/catalog-provider'
 import { useHydrated } from '@/hooks/use-hydrated'
-import { calculatePricing, nextPackStep, type PricingLine } from '@/lib/pricing'
+import {
+  calculatePricing,
+  nextPackStep,
+  type DeliveryZone,
+  type PricingLine,
+} from '@/lib/pricing'
 import type { ShopProduct } from '@/lib/shop-types'
 import { useCart, type CartLine } from '@/stores/cart'
 
@@ -15,8 +20,12 @@ export type ResolvedLine = CartLine & { product: ShopProduct }
  * same function the server uses at checkout. Lines whose jersey has since been
  * unpublished simply disappear, so nothing can be ordered that is no longer
  * for sale.
+ *
+ * `zone` n'est passé que par le formulaire de commande, le seul écran où la
+ * question est posée. Partout ailleurs — panneau du panier, page panier — le
+ * panier se chiffre dans la zone, c'est-à-dire au prix que la vitrine annonce.
  */
-export function useCartLines() {
+export function useCartLines(zone: DeliveryZone = 'brt') {
   const hydrated = useHydrated()
   const { byId, products, settings } = useCatalog()
   const stored = useCart((state) => state.lines)
@@ -41,8 +50,8 @@ export function useCartLines() {
   )
 
   const pricing = useMemo(
-    () => calculatePricing(pricingLines, settings),
-    [pricingLines, settings],
+    () => calculatePricing(pricingLines, settings, zone),
+    [pricingLines, settings, zone],
   )
 
   const count = lines.reduce((sum, line) => sum + line.quantity, 0)

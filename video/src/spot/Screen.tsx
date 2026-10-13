@@ -110,19 +110,36 @@ export type ShotProps = Omit<FrameProps, 'children' | 'page'> & {
   /** Assombrit la capture — pour laisser passer un titre. */
   dim?: number
   blur?: number
+  /**
+   * La largeur CSS de l'espace de page de la capture. 1920 pour le bureau,
+   * `SHOT_M.w` (430) pour le telephone.
+   *
+   * Sans ce reglage, une capture de telephone serait placee dans un espace de
+   * 1920 px : les boites de `GM`, mesurees dans une fenetre de 430, viseraient
+   * le quart gauche de l'image. Les deux jeux de coordonnees ne se melangent
+   * pas, et c'est ce parametre qui dit lequel on habite.
+   */
+  base?: number
 }
 
 /**
  * Une capture entiere, cadree sur une region.
  *
- * La capture est en 2x : elle est dessinee a sa taille CSS (1920x1080) et le
- * fichier a deux fois plus de pixels, donc un gros plan reste net.
+ * La capture est en 2x ou 3x : elle est dessinee a sa taille CSS et le
+ * fichier a deux ou trois fois plus de pixels, donc un gros plan reste net.
  */
-export const Shot: React.FC<ShotProps> = ({ src, children, dim = 0, blur = 0, ...frame }) => {
+export const Shot: React.FC<ShotProps> = ({
+  src,
+  children,
+  dim = 0,
+  blur = 0,
+  base = SHOT.w,
+  ...frame
+}) => {
   const asset = ASSETS[src]
   // Les captures pleine page sont plus hautes que le cadrage : leur espace de
   // page suit leur propre ratio, sinon l'image serait ecrasee.
-  const page = { w: SHOT.w, h: (asset.h / asset.w) * SHOT.w }
+  const page = { w: base, h: (asset.h / asset.w) * base }
   return (
     <Frame {...frame} page={page}>
       <Img
@@ -188,31 +205,36 @@ export const Crop: React.FC<{
   src: AssetName
   box: Box
   style?: React.CSSProperties
-}> = ({ src, box, style }) => (
-  <div
-    style={{
-      position: 'absolute',
-      left: box.x,
-      top: box.y,
-      width: box.w,
-      height: box.h,
-      overflow: 'hidden',
-      ...style,
-    }}
-  >
-    <Img
-      src={shotFile(src)}
+  /** Largeur CSS de l'espace de page — voir `base` sur `Shot`. */
+  base?: number
+}> = ({ src, box, style, base = SHOT.w }) => {
+  const asset = ASSETS[src]
+  return (
+    <div
       style={{
         position: 'absolute',
-        left: -box.x,
-        top: -box.y,
-        width: SHOT.w,
-        height: SHOT.h,
-        maxWidth: 'none',
+        left: box.x,
+        top: box.y,
+        width: box.w,
+        height: box.h,
+        overflow: 'hidden',
+        ...style,
       }}
-    />
-  </div>
-)
+    >
+      <Img
+        src={shotFile(src)}
+        style={{
+          position: 'absolute',
+          left: -box.x,
+          top: -box.y,
+          width: base,
+          height: (asset.h / asset.w) * base,
+          maxWidth: 'none',
+        }}
+      />
+    </div>
+  )
+}
 
 /**
  * Un rectangle pose en coordonnees de page : surlignage d'un bouton, masque

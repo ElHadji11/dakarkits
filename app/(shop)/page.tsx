@@ -10,7 +10,7 @@ import type { Category } from '@/lib/shop-types'
 export const metadata: Metadata = {
   title: 'Tous les maillots',
   description:
-    'Tous les maillots disponibles — clubs, sélections et rétro — livrés à Dakar et payés à la livraison. Filtre par équipe, ligue, taille et prix.',
+    'Tous les maillots disponibles — clubs, sélections et rétro — livrés sur l’axe du BRT à Dakar et payés à la livraison. Filtre par équipe, ligue, taille et prix.',
 }
 
 /**

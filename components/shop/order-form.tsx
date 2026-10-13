@@ -2,16 +2,18 @@
 
 import { ShoppingBag, Truck, Wallet } from 'lucide-react'
 import Link from 'next/link'
-import { useActionState, useEffect, useRef } from 'react'
+import { useActionState, useEffect, useRef, useState } from 'react'
 
 import { placeOrder } from '@/app/(checkout)/commande/_actions/order'
 import { CartLines } from '@/components/shop/cart-lines'
 import { CartSummary } from '@/components/shop/cart-summary'
+import { DeliveryZoneChoice } from '@/components/shop/delivery-zone-choice'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { DELIVERY_ETA } from '@/lib/constants'
+import type { DeliveryZone } from '@/lib/pricing'
 import { useCatalog } from '@/components/shop/catalog-provider'
 import { paymentPromise } from '@/lib/shop-types'
 import { useCartLines } from '@/hooks/use-cart-lines'
@@ -30,7 +32,12 @@ import { useAttribution } from '@/stores/attribution'
 const placeholderClass = 'placeholder:text-muted-foreground/60'
 
 export function OrderForm() {
-  const { hydrated, lines, pricing, nudge } = useCartLines()
+  /* La zone déclarée vit ici, pas dans le panier : elle ne concerne que cette
+     page, et un panier qui retiendrait « hors zone » d'une commande à l'autre
+     facturerait la livraison à qui a déménagé entre-temps. Le défaut est la
+     zone, comme la vitrine l'annonce partout. */
+  const [zone, setZone] = useState<DeliveryZone>('brt')
+  const { hydrated, lines, pricing, nudge } = useCartLines(zone)
   const { settings } = useCatalog()
   const attribution = useAttribution()
   const [state, formAction, pending] = useActionState(placeOrder, idle)
@@ -147,12 +154,21 @@ export function OrderForm() {
             rows={3}
             autoComplete="street-address"
             defaultValue={kept('address')}
-            placeholder="Ex : Sacré-Cœur 3, villa 123, près de la pharmacie"
+            placeholder="Ex : Sacré-Cœur 3, villa 123, près de la station Sacré-Cœur"
             className={placeholderClass}
             aria-invalid={Boolean(error('address'))}
           />
           <FieldError message={error('address')} />
         </div>
+      </section>
+
+      {/* Juste après l'adresse, et avant le bouton : c'est le dernier écran où
+          une adresse hors zone peut encore être déclarée. Plus tard, elle se
+          rattrape au téléphone — ou à la porte, devant le livreur. */}
+      <section className="space-y-4">
+        <h2 className="text-sm font-medium text-muted-foreground">Zone de livraison</h2>
+        <DeliveryZoneChoice value={zone} onChange={setZone} />
+        <FieldError message={error('deliveryZone')} />
       </section>
 
       {/* Ce qu'il y avait sous le champ adresse : rien. Le bouton collé doit

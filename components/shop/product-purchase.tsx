@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { Fragment, useState } from 'react'
 import { toast } from 'sonner'
 
+import { DeliveryZoneNotice } from '@/components/shop/delivery-zone'
 import { FavoriteButton } from '@/components/shop/favorite-button'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -133,6 +134,12 @@ export function ProductPurchase({
         <li className="flex items-center gap-2">
           <Truck className="size-4 shrink-0" aria-hidden />
           {deliveryPromise(settings)}.
+        </li>
+        {/* La zone juste sous le prix de la livraison : c'est la ligne qui
+            vient d'annoncer le gratuit, donc l'endroit où la question
+            « gratuit jusqu'où ? » se pose. */}
+        <li>
+          <DeliveryZoneNotice />
         </li>
       </ul>
 

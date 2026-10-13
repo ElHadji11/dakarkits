@@ -6,9 +6,10 @@ import { AdminGuard } from '@/components/admin/admin-guard'
 import { OrderActions } from '@/components/admin/order-actions'
 import { OrderStatusBadge } from '@/components/admin/order-status-badge'
 import { Button } from '@/components/ui/button'
-import { formatCfa } from '@/lib/constants'
+import { formatCfa, formatCfaRange } from '@/lib/constants'
 import { formatDateTime } from '@/lib/format'
 import { getOrderByNumber } from '@/lib/orders'
+import { storedShippingMax } from '@/lib/pricing'
 
 export const metadata: Metadata = { title: 'Commande' }
 
@@ -30,6 +31,11 @@ async function OrderScreen({
   if (!order) notFound()
 
   const whatsapp = order.phone.replace('+', '')
+  /* Hors zone, la commande n'a figé que le plancher : le reste se fixe pendant
+     l'appel, et c'est exactement ce que cet écran doit rappeler avant qu'on
+     compose le numéro. */
+  const outside = order.deliveryZone === 'outside'
+  const shippingMax = storedShippingMax(order.shippingFee, order.deliveryZone)
   const attribution = [order.utmSource, order.utmCampaign, order.utmContent].filter(Boolean)
 
   return (
@@ -53,6 +59,11 @@ async function OrderScreen({
         <h2 className="text-sm font-medium text-muted-foreground">Client</h2>
         <p className="text-lg font-medium">{order.customerName}</p>
         <p className="whitespace-pre-line text-sm">{order.address}</p>
+        <p className="text-sm text-muted-foreground">
+          {outside
+            ? 'Hors zone BRT — fixe les frais de livraison pendant l’appel.'
+            : 'Sur l’axe du BRT — livraison gratuite.'}
+        </p>
 
         <div className="flex gap-2 pt-1">
           <Button asChild className="h-12 flex-1 gap-2">
@@ -94,11 +105,13 @@ async function OrderScreen({
           ) : null}
           <Row
             label="Livraison"
-            value={order.shippingFee > 0 ? formatCfa(order.shippingFee) : 'Incluse'}
+            value={shippingMax > 0 ? formatCfaRange(order.shippingFee, shippingMax) : 'Incluse'}
           />
-          <div className="flex items-baseline justify-between border-t border-border pt-2">
+          <div className="flex items-baseline justify-between gap-3 border-t border-border pt-2">
             <dt className="font-medium">À encaisser</dt>
-            <dd className="text-lg font-semibold tabular-nums">{formatCfa(order.total)}</dd>
+            <dd className="text-right text-lg font-semibold tabular-nums">
+              {formatCfaRange(order.total, order.total + (shippingMax - order.shippingFee))}
+            </dd>
           </div>
         </dl>
       </section>

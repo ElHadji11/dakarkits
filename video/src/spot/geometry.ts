@@ -2,7 +2,7 @@
  * Genere par `npm run capture` — ne pas editer a la main.
  *
  * La geometrie reelle de louyomb.com dans un cadrage 1920x1080,
- * relevee le 2026-10-11. Le curseur du spot vise ces boites : il
+ * relevee le 2026-10-12. Le curseur du spot vise ces boites : il
  * clique la ou le bouton se trouve vraiment, et les pieces de l’interface
  * volent a leur vraie place.
  */
@@ -22,111 +22,111 @@ export const G = {
       "x": 0,
       "y": 36,
       "w": 1920,
-      "h": 29
+      "h": 25
     },
     "logo": {
       "x": 400,
-      "y": 81,
+      "y": 77,
       "w": 134.1,
       "h": 24
     },
     "search": {
       "x": 550.1,
-      "y": 71,
+      "y": 67,
       "w": 869.9,
       "h": 44
     },
     "icons": {
       "x": 1428,
-      "y": 71,
+      "y": 67,
       "w": 92,
       "h": 44
     },
     "nav": {
       "x": 400,
-      "y": 138,
+      "y": 360,
       "w": 1120,
       "h": 48
     },
     "tools": {
       "x": 400,
-      "y": 202,
+      "y": 424,
       "w": 1120,
       "h": 44
     },
     "count": {
       "x": 1447.5,
-      "y": 214,
+      "y": 436,
       "w": 72.5,
       "h": 20
     },
     "cards": [
       {
         "x": 400,
-        "y": 262,
-        "w": 271,
-        "h": 339,
-        "title": "Olympique de Marseille 2023/24",
-        "href": "/maillot/olympique-de-marseille-2023-24"
+        "y": 484,
+        "w": 268,
+        "h": 368,
+        "title": "Angleterre extérieur 2026/27",
+        "href": "/maillot/angleterre-exterieur-2026-27"
       },
       {
-        "x": 683,
-        "y": 262,
-        "w": 271,
-        "h": 339,
-        "title": "RB Leipzig third 2024/25",
-        "href": "/maillot/rb-leipzig-third-2024-25"
+        "x": 684,
+        "y": 484,
+        "w": 268,
+        "h": 368,
+        "title": "Angleterre · Domicile 2026/27",
+        "href": "/maillot/angleterre-domicile-2026-27"
       },
       {
-        "x": 966,
-        "y": 262,
-        "w": 271,
-        "h": 339,
-        "title": "Stade Rennais domicile 2020/21",
-        "href": "/maillot/stade-rennais-domicile-2020-21"
+        "x": 968,
+        "y": 484,
+        "w": 268,
+        "h": 368,
+        "title": "Paris Saint-Germain · Domicile 2026/27",
+        "href": "/maillot/paris-saint-germain-domicile-2026-27"
       },
       {
-        "x": 1249,
-        "y": 262,
-        "w": 271,
-        "h": 339,
-        "title": "Liverpool extérieur 2026/27",
-        "href": "/maillot/liverpool-exterieur-2026-27"
+        "x": 1252,
+        "y": 484,
+        "w": 268,
+        "h": 368,
+        "title": "Bayern Munich extérieur 2026/27",
+        "href": "/maillot/bayern-munich-exterieur-2026-27"
       },
       {
         "x": 400,
-        "y": 625,
-        "w": 271,
-        "h": 339,
-        "title": "Real Madrid third 2025/26",
-        "href": "/maillot/real-madrid-third-2025-26"
+        "y": 868,
+        "w": 268,
+        "h": 368,
+        "title": "Real Madrid · Extérieur 2026/27",
+        "href": "/maillot/real-madrid-exterieur-2026-27"
       },
       {
-        "x": 683,
-        "y": 625,
-        "w": 271,
-        "h": 339,
-        "title": "Inter Milan",
-        "href": "/maillot/inter-milan"
+        "x": 684,
+        "y": 868,
+        "w": 268,
+        "h": 368,
+        "title": "Aston Villa · Domicile 2026/27",
+        "href": "/maillot/aston-villa-domicile-2026-27"
       },
       {
-        "x": 966,
-        "y": 625,
-        "w": 271,
-        "h": 339,
-        "title": "Atlético de Madrid third 2024/25",
-        "href": "/maillot/atletico-de-madrid-third-2024-25"
+        "x": 968,
+        "y": 868,
+        "w": 268,
+        "h": 368,
+        "title": "Manchester United · Domicile 2026/27",
+        "href": "/maillot/manchester-united-domicile-2026-27"
       },
       {
-        "x": 1249,
-        "y": 625,
-        "w": 271,
-        "h": 339,
-        "title": "Benfica extérieur 2026/27",
-        "href": "/maillot/benfica-exterieur-2026-27"
+        "x": 1252,
+        "y": 868,
+        "w": 268,
+        "h": 368,
+        "title": "Olympique de Marseille · Extérieur 2023/24",
+        "href": "/maillot/olympique-de-marseille-2023-24"
       }
     ],
-    "countText": "25 maillots",
+    "countText": "32 maillots",
     "viewport": {
       "w": 1920,
       "h": 1080
@@ -136,164 +136,356 @@ export const G = {
   "search": {
     "field": {
       "x": 550.1,
-      "y": 71,
+      "y": 67,
       "w": 869.9,
       "h": 44
     },
     "listbox": {
       "x": 550.1,
-      "y": 123,
+      "y": 119,
       "w": 869.9,
       "h": 66
     },
     "firstResult": {
       "x": 551.1,
-      "y": 124,
+      "y": 120,
       "w": 867.9,
       "h": 64
     }
   },
   "product": {
     "title": {
-      "x": 980,
-      "y": 138,
-      "w": 268.3,
+      "x": 976,
+      "y": 134,
+      "w": 366.2,
       "h": 32
     },
     "price": {
-      "x": 980,
+      "x": 976,
       "y": 214,
       "w": 111.4,
       "h": 36
     },
     "photo": {
       "x": 400,
-      "y": 138,
-      "w": 540,
-      "h": 540
+      "y": 134,
+      "w": 544,
+      "h": 544
     },
     "sizeGroup": {
-      "x": 980,
-      "y": 337,
-      "w": 540,
-      "h": 76
+      "x": 976,
+      "y": 347,
+      "w": 544,
+      "h": 128
     },
     "sizeS": {
-      "x": 980,
-      "y": 365,
+      "x": 976,
+      "y": 375,
       "w": 56,
       "h": 48
     },
     "sizeM": {
-      "x": 1044,
-      "y": 365,
+      "x": 1040,
+      "y": 375,
       "w": 56,
       "h": 48
     },
     "sizeL": {
-      "x": 1108,
-      "y": 365,
+      "x": 1104,
+      "y": 375,
       "w": 56,
       "h": 48
     },
     "sizeXL": {
-      "x": 1172,
-      "y": 365,
+      "x": 1168,
+      "y": 375,
       "w": 56,
       "h": 48
     },
     "orderNow": {
-      "x": 980,
-      "y": 433,
+      "x": 976,
+      "y": 499,
       "w": 264,
       "h": 48
     },
     "addToCart": {
       "x": 1256,
-      "y": 433,
+      "y": 499,
       "w": 264,
       "h": 48
     },
     "pack": {
-      "x": 1004,
-      "y": 502,
-      "w": 212.7,
+      "x": 1000,
+      "y": 572,
+      "w": 222.2,
       "h": 17
     },
     "cartIcon": {
       "x": 1428,
-      "y": 71,
+      "y": 67,
       "w": 92,
       "h": 44
     }
   },
   "cart": {
     "relance": {
-      "x": 1237,
+      "x": 1241,
       "y": 207,
-      "w": 270,
+      "w": 262,
       "h": 40
     },
     "totalBlock": {
       "x": 1200,
-      "y": 350,
+      "y": 364,
       "w": 320,
       "h": 37
     },
     "totalLine": {
       "x": 1200,
-      "y": 364,
+      "y": 378,
       "w": 138.6,
       "h": 20
     },
     "order": {
       "x": 1200,
-      "y": 403,
+      "y": 417,
       "w": 320,
       "h": 48
     },
     "line1": {
       "x": 400,
-      "y": 194,
+      "y": 190,
       "w": 768,
-      "h": 141
+      "h": 149
     }
   },
   "form": {
     "legend": {
       "x": 400,
-      "y": 476,
+      "y": 644,
       "w": 1120,
       "h": 20
     },
     "name": {
       "x": 400,
-      "y": 534,
+      "y": 702,
       "w": 1120,
       "h": 48
     },
     "phone": {
       "x": 400,
-      "y": 620,
+      "y": 788,
       "w": 1120,
       "h": 48
     },
     "address": {
       "x": 400,
-      "y": 730,
+      "y": 898,
       "w": 1120,
       "h": 64
     },
     "confirm": {
       "x": 400,
-      "y": 826,
+      "y": 1092,
       "w": 1120,
       "h": 48
     },
-    "scrollY": 298
+    "scrollY": 91
   },
   "colors": {
-    "input": "#2e2e53",
+    "input": "#000000",
+    "textarea": "#2e2e53",
+    "page": "#0f0f1a"
+  }
+} as const
+
+/**
+ * Le meme site, releve sur un telephone de 430x932.
+ *
+ * C’est ce jeu-la que le reel vise : un formulaire de commande recadre
+ * depuis un cadrage paysage ne se lit plus dans un 9:16, et c’etait le
+ * defaut du premier montage.
+ */
+export const SHOT_M = { w: 430, h: 932 } as const
+
+export const GM = {
+  "home": {
+    "header": {
+      "x": 0,
+      "y": 32,
+      "w": 430,
+      "h": 126
+    },
+    "viewport": {
+      "w": 430,
+      "h": 932
+    }
+  },
+  "search": {
+    "field": {
+      "x": 16,
+      "y": 105,
+      "w": 398,
+      "h": 44
+    },
+    "listbox": {
+      "x": 16,
+      "y": 157,
+      "w": 398,
+      "h": 66
+    },
+    "firstResult": {
+      "x": 17,
+      "y": 158,
+      "w": 396,
+      "h": 64
+    }
+  },
+  "product": {
+    "title": {
+      "x": 16,
+      "y": 149,
+      "w": 346,
+      "h": 64
+    },
+    "price": {
+      "x": 16,
+      "y": 261,
+      "w": 111.4,
+      "h": 36
+    },
+    "photo": {
+      "x": 16,
+      "y": -273,
+      "w": 398,
+      "h": 398
+    },
+    "sizeGroup": {
+      "x": 16,
+      "y": 414,
+      "w": 398,
+      "h": 128
+    },
+    "sizeM": {
+      "x": 80,
+      "y": 442,
+      "w": 56,
+      "h": 48
+    },
+    "addToCart": {
+      "x": 366,
+      "y": 868,
+      "w": 48,
+      "h": 48
+    },
+    "pack": {
+      "x": 40,
+      "y": 567,
+      "w": 222.2,
+      "h": 17
+    },
+    "header": {
+      "x": 0,
+      "y": -126,
+      "w": 430,
+      "h": 126
+    },
+    "scrollY": 447
+  },
+  "cart": {
+    "relance": {
+      "x": 57,
+      "y": 427,
+      "w": 340,
+      "h": 40
+    },
+    "totalLine": {
+      "x": 16,
+      "y": 570,
+      "w": 138.6,
+      "h": 20
+    },
+    "order": {
+      "x": 16,
+      "y": 868,
+      "w": 398,
+      "h": 48
+    }
+  },
+  "form": {
+    "legend": {
+      "x": 16,
+      "y": 578,
+      "w": 398,
+      "h": 20
+    },
+    "name": {
+      "x": 16,
+      "y": 636,
+      "w": 398,
+      "h": 48
+    },
+    "phone": {
+      "x": 16,
+      "y": 722,
+      "w": 398,
+      "h": 48
+    },
+    "address": {
+      "x": 16,
+      "y": 832,
+      "w": 398,
+      "h": 66
+    },
+    "confirm": {
+      "x": 16,
+      "y": 868,
+      "w": 398,
+      "h": 48
+    },
+    "scrollY": 0
+  },
+  "formBottom": {
+    "legend": {
+      "x": 16,
+      "y": 322,
+      "w": 398,
+      "h": 20
+    },
+    "name": {
+      "x": 16,
+      "y": 380,
+      "w": 398,
+      "h": 48
+    },
+    "phone": {
+      "x": 16,
+      "y": 466,
+      "w": 398,
+      "h": 48
+    },
+    "address": {
+      "x": 16,
+      "y": 576,
+      "w": 398,
+      "h": 66
+    },
+    "confirm": {
+      "x": 16,
+      "y": 868,
+      "w": 398,
+      "h": 48
+    },
+    "total": {
+      "x": 33,
+      "y": 258,
+      "w": 138.6,
+      "h": 20
+    },
+    "scrollY": 256
+  },
+  "colors": {
+    "input": "#000000",
     "textarea": "#2e2e53",
     "page": "#0f0f1a"
   }

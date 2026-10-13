@@ -78,6 +78,7 @@ export async function placeOrder(
     customerName: formData.get('customerName'),
     phone: formData.get('phone'),
     address: formData.get('address'),
+    deliveryZone: formData.get('deliveryZone'),
     lines: z.array(cartLineSchema).catch([]).parse(rawLines),
     attribution: {
       utmSource: formData.get('utmSource') || null,
@@ -182,7 +183,7 @@ export async function placeOrder(
         packEligible: product.packEligible,
       }
     })
-    const pricing = calculatePricing(pricingLines, settings)
+    const pricing = calculatePricing(pricingLines, settings, input.deliveryZone)
 
     // Same phone, same basket, same total, moments apart: one order, not two.
     const since = new Date(Date.now() - DUPLICATE_WINDOW_MINUTES * 60_000)
@@ -234,6 +235,10 @@ export async function placeOrder(
           customerName: input.customerName,
           phone: input.phone,
           address: input.address,
+          /* La zone déclarée, et le plancher des frais dans `shippingFee` :
+             hors zone, le montant exact s'arrête au téléphone, et c'est cette
+             colonne qui dit à l'admin qu'il reste quelque chose à arrêter. */
+          deliveryZone: input.deliveryZone,
           status: 'new',
           subtotal: pricing.subtotal,
           packDiscount: pricing.packDiscount,
@@ -281,7 +286,10 @@ export async function placeOrder(
       subtotal: pricing.subtotal,
       packDiscount: pricing.packDiscount,
       shippingFee: pricing.shippingFee,
+      shippingFeeMax: pricing.shippingFeeMax,
       total: pricing.total,
+      totalMax: pricing.totalMax,
+      zone: pricing.zone,
       // `siteUrl()` et non un repli vide : sans origine, le lien de l'email et
       // du message Telegram serait relatif, donc mort hors du site.
       adminUrl: `${siteUrl()}/admin/commandes/${created.number}`,

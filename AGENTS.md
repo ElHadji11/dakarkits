@@ -57,6 +57,69 @@ ce qu'ils coûteraient en payant les ajoutés au prix affiché — donc elle sai
 encore proposer le troisième à qui en a déjà deux, ce que l'ancien pack ne
 savait pas faire.
 
+### Le gratuit s'arrête à l'axe du BRT ; ailleurs, c'est un forfait
+
+La boutique promettait « Livraison gratuite partout à Dakar ». La livraison est
+désormais **gratuite le long du BRT, de Papa Gueye Fall (Petersen) à la
+Préfecture de Guédiawaye : les 23 stations de la ligne, et environ 500 m autour
+de chacune**. Ailleurs dans Dakar, elle coûte **2 000 à 3 000 F selon la
+distance**, ajoutés au total. Décision du 2026-10-13 : un seul livreur ne tient
+pas une promesse à l'échelle de l'agglomération, et une adresse hors de portée
+se découvre sinon au pire moment — colis en main, devant la porte, au moment
+d'encaisser.
+
+Tout part de `lib/constants.ts`, et **rien ne se réécrit ailleurs** :
+
+- `BRT_STATIONS` est la liste des 23 stations, dans l'ordre du trajet.
+  `BRT_STATION_COUNT` s'en déduit : le « 23 » des phrases n'est écrit nulle
+  part à la main. Les CGV l'énumèrent, le formulaire de commande la déplie —
+  deux listes recopiées auraient fini par diverger, et c'est sur celle des CGV
+  qu'on s'appuierait le jour d'un désaccord.
+- `OUTSIDE_ZONE_FEE` porte l'intervalle. Les deux bornes sont toujours
+  annoncées : « à partir de 2 000 F » n'engage à rien, « 3 000 F » fait fuir
+  celui qui habite à deux rues de la ligne.
+- `DELIVERY_ZONE` (trois mots, pour le bandeau), `DELIVERY_ZONE_NOTICE` (la
+  notice) et `DELIVERY_ZONE_OUTSIDE` (le prix d'en dehors) sont les trois
+  phrases ; `deliveryPromise()` (`lib/shop-types.ts`) dit *combien* et
+  `DELIVERY_ETA` *quand* — celle-ci ne nomme plus la ville.
+
+`<DeliveryZoneNotice>` (`components/shop/delivery-zone.tsx`) rend les deux
+phrases au pied de page (donc sur tout le catalogue), sur la fiche produit,
+dans le panier et sur sa page, et sur la confirmation. **Pas de carte, et les
+23 noms seulement là où on en a besoin** : `<BrtStationList>` est un `<details>`
+natif — zéro octet de JavaScript — déplié sous le choix de zone.
+
+**Le client déclare sa zone, le serveur la facture.** `<DeliveryZoneChoice>`
+pose la question en deux cartes à cocher, juste sous le champ adresse ; le
+récapitulatif se met à jour au doigt. Une case cochée par défaut aurait été une
+réponse que personne n'a donnée, mais deux cartes vides auraient coûté un tap à
+tout le monde : le défaut est la zone, et ce qui le rattrape est la liste des
+stations dépliable et l'appel de confirmation.
+
+La zone remonte dans `orderSchema` (`lib/validation/order.ts`), puis dans
+`calculatePricing(lines, settings, zone)` : **le navigateur n'envoie jamais un
+montant**, seulement cette étiquette. `shippingRange()` garantit au passage que
+sortir de la zone ne coûte jamais moins que d'y rester — même règle que le
+barème des packs, où le prix au maillot ne remonte jamais.
+
+**Une commande fige un entier, pas un intervalle.** `orders.shipping_fee` porte
+le plancher, `orders.delivery_zone` (colonne qui existait déjà, inutilisée) dit
+s'il y avait un intervalle, et `storedShippingMax()` relit le plafond. Pas de
+colonne de plus pour un montant qui sera de toute façon arrêté au téléphone :
+l'admin et la notification affichent « hors zone BRT, à fixer à l'appel ».
+
+Le rayon de 500 m et l'intervalle sont annoncés « environ » et « selon la
+distance », comme les mesures du guide des tailles : personne ne mesure 500 m
+au GPS devant un portail. Mais les CGV s'engagent sur le **plafond** — jamais
+plus de 3 000 F, et annulation sans frais si la distance devait coûter plus.
+Si `OUTSIDE_ZONE_FEE` bouge, l'article 8 bouge avec.
+
+**Reste à l'ancienne promesse** : le reel (`video/src/reel/`, `video/src/scenes/Delivery.tsx`)
+et les légendes Instagram (`instagram-posts/legendes.md`, dont `post-06.png` qui
+porte « Livraison gratuite à Dakar » en dur dans l'image). Une publicité qui
+promet plus que le site est le genre de contradiction qui se paie en refus à la
+livraison — à reprendre avant publication.
+
 ### Autres invariants
 
 - Montants en francs CFA, entiers. Jamais de flottant.
@@ -181,7 +244,11 @@ deux pages bougent dans le même commit.** Elles affirment notamment :
   la main — vrai tant qu'il n'y a aucun `delete(orders)` dans l'admin ;
 - que le téléphone part haché en SHA-256 vers Meta mais l'IP en clair
   (`lib/meta.ts`) ;
-- que le serveur recalcule seul les montants (`lib/pricing.ts`).
+- que le serveur recalcule seul les montants (`lib/pricing.ts`) ;
+- que la livraison est gratuite sur l'axe du BRT, ses 23 stations et environ
+  500 m autour de chacune, et facturée 2 000 à 3 000 F ailleurs dans Dakar —
+  l'article 8 des CGV, `BRT_STATIONS` et `OUTSIDE_ZONE_FEE` doivent dire la
+  même chose, plafond compris.
 
 `LegalIdentity` dans `components/shop/legal-text.tsx` est la **source unique**
 de l'identification du vendeur, rendue par les deux pages. C'est une

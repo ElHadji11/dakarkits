@@ -1,4 +1,4 @@
-import { formatCfa, formatPhone, KIT_TYPES, type Size } from '@/lib/constants'
+import { DELIVERY_ZONE, formatCfa, formatPhone, KIT_TYPES, type Size } from '@/lib/constants'
 import type { PackTier } from '@/lib/pricing'
 
 /**
@@ -197,14 +197,18 @@ export function discountPercent(product: ShopProduct): number | null {
  * payante en laisserait un qui promet le gratuit alors que `calculatePricing`
  * facture. Un mode « frais » à 0 F est gratuit lui aussi — c’est ce que le
  * client paie qui compte, pas le nom du réglage.
+ *
+ * La zone vient de `DELIVERY_ZONE` et non d’un « partout à Dakar » écrit ici :
+ * elle se détaille dans `DELIVERY_ZONE_NOTICE`, et les deux doivent nommer la
+ * même ligne. Cette phrase-ci dit *combien*, la notice dit *jusqu’où*.
  */
 export function deliveryPromise(
   settings: Pick<ShopSettings, 'shippingMode' | 'shippingFee'>,
 ): string {
   const free = settings.shippingMode === 'included' || settings.shippingFee === 0
   return free
-    ? 'Livraison gratuite partout à Dakar'
-    : `Livraison à Dakar : ${formatCfa(settings.shippingFee)}`
+    ? `Livraison gratuite sur ${DELIVERY_ZONE}`
+    : `Livraison sur ${DELIVERY_ZONE} : ${formatCfa(settings.shippingFee)}`
 }
 
 /**

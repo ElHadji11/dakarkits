@@ -6,6 +6,7 @@ import { Backdrop, Flash } from '../Backdrop'
 import { Cursor, Focus } from '../Cursor'
 import { Crop, Frame, shotFile } from '../Screen'
 import { Caption, Typed } from '../Type'
+import { ASSETS } from '../assets'
 import { G, SHOT, type Box } from '../geometry'
 import { COPY } from '../timeline'
 import { clampBox, spanBox, useStage, windowRect, type Stage } from '../stage'
@@ -25,16 +26,42 @@ import { clampBox, spanBox, useStage, windowRect, type Stage } from '../stage'
 const UNIT = 60
 
 /** Le cadrage d'un plan : plein cadre en 16:9, fenetre sinon. */
-const useFrameFor = (stage: Stage, cx: number, cy: number, span: number) => {
+const useFrameFor = (
+  stage: Stage,
+  cx: number,
+  cy: number,
+  span: number,
+  page: { w: number; h: number } = SHOT,
+) => {
   const rect = windowRect(stage, stage.tall ? 0.46 : 0.58)
   const target = rect ?? { x: 0, y: 0, w: stage.width, h: stage.height }
   return {
     rect,
     radius: rect ? 18 : 0,
     chrome: Boolean(rect),
-    focus: clampBox(spanBox(cx, cy, span, { width: target.w, height: target.h })),
+    page,
+    focus: clampBox(spanBox(cx, cy, span, { width: target.w, height: target.h }), page),
   }
 }
+
+/**
+ * L'espace de page de la capture pleine hauteur du tunnel de commande, et le
+ * pont vers les boites mesurees.
+ *
+ * Le plan utilisait `d-form-fields`, la capture de la fenetre : tant que la
+ * page defilait de 298 px, les trois champs **et** le bouton y tenaient. La
+ * mise en page du tunnel a change — la capture se fait desormais a 63 px de
+ * defilement et « Confirmer ma commande » tombe a 1 092, soit sous les
+ * 1 080 px de la fenetre. Le bouton, son halo et le clic se dessinaient donc
+ * hors de l'image.
+ *
+ * La capture pleine hauteur ne peut pas avoir ce probleme, quel que soit le
+ * defilement : elle contient la page entiere. En echange, ses coordonnees
+ * partent du haut du **document**, pas de la fenetre — d'ou `scrollY`.
+ */
+const FORM_ASSET = ASSETS['d-form-full']
+const FORM_PAGE = { w: SHOT.w, h: (FORM_ASSET.h / FORM_ASSET.w) * SHOT.w }
+const fb = (box: Box): Box => ({ ...box, y: box.y + G.form.scrollY })
 
 /** Le texte du plan, sous la fenetre en vertical, en bas a gauche sinon. */
 const CaptionSlot: React.FC<{
@@ -280,16 +307,16 @@ export const Size: React.FC = () => {
 export const Order: React.FC = () => {
   const frame = useCurrentFrame()
   const stage = useStage()
-  const name = G.form.name as Box
-  const phone = G.form.phone as Box
-  const address = G.form.address as Box
-  const confirm = G.form.confirm as Box
+  const name = fb(G.form.name as Box)
+  const phone = fb(G.form.phone as Box)
+  const address = fb(G.form.address as Box)
+  const confirm = fb(G.form.confirm as Box)
 
   const t = lerp(frame, [0, 22], [0, 1], EASE.out)
   const cx = 960
-  const cy = lerp(t, [0, 1], [520, 690])
-  const span = lerp(t, [0, 1], [1800, 1340]) * lerp(frame, [22, UNIT], [1, 0.97], EASE.inOut)
-  const view = useFrameFor(stage, cx, cy, span)
+  const cy = lerp(t, [0, 1], [700, 960])
+  const span = lerp(t, [0, 1], [1800, 1380]) * lerp(frame, [22, UNIT], [1, 0.97], EASE.inOut)
+  const view = useFrameFor(stage, cx, cy, span, FORM_PAGE)
 
   const CLICK_NAME = 8
   const CLICK_PHONE = 22
@@ -300,7 +327,7 @@ export const Order: React.FC = () => {
     <AbsoluteFill>
       <Backdrop frame={frame} energy={0.7} />
       <Frame {...view}>
-        <Img src={shotFile('d-form-fields')} style={{ width: SHOT.w, height: SHOT.h }} />
+        <Img src={shotFile('d-form-full')} style={{ width: FORM_PAGE.w, height: FORM_PAGE.h }} />
 
         {/* Des valeurs inventees pour le film : le formulaire a ete capture
             vide, et rien n'a jamais ete envoye depuis la production. */}
@@ -336,7 +363,7 @@ export const Order: React.FC = () => {
           frame={frame}
           from={0}
           path={[
-            { at: 0, to: { x: 1380, y: 980 } },
+            { at: 0, to: { x: 1380, y: name.y - 110 } },
             { at: CLICK_NAME, to: { x: name.x + 190, y: name.y + 24 }, arc: 40 },
             { at: CLICK_PHONE, to: { x: phone.x + 150, y: phone.y + 24 }, arc: 16 },
             { at: CLICK_ADDR, to: { x: address.x + 210, y: address.y + 22 }, arc: 16 },

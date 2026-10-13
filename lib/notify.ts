@@ -1,6 +1,7 @@
 import 'server-only'
 
-import { formatCfa } from '@/lib/constants'
+import { formatCfa, formatCfaRange } from '@/lib/constants'
+import type { DeliveryZone } from '@/lib/pricing'
 
 export type OrderNotification = {
   number: string
@@ -12,8 +13,31 @@ export type OrderNotification = {
   subtotal: number
   packDiscount: number
   shippingFee: number
+  /** Égal à `shippingFee` dans la zone ; le haut de l'intervalle en dehors. */
+  shippingFeeMax: number
   total: number
+  totalMax: number
+  zone: DeliveryZone
   adminUrl: string
+}
+
+/**
+ * Ce qu'on encaisse, et la seule ligne que celui qui appelle doit lire avant
+ * de composer le numéro.
+ *
+ * Hors zone, c'est un intervalle : le montant exact se fixe pendant cet appel,
+ * et l'annoncer comme un chiffre ferme dans la notification, c'est l'oublier.
+ */
+function amountDue(order: OrderNotification): string {
+  return formatCfaRange(order.total, order.totalMax)
+}
+
+/** « 2 000 à 3 000 F · hors zone BRT, à fixer à l'appel », ou « incluse ». */
+function shippingLine(order: OrderNotification): string {
+  if (order.zone === 'outside') {
+    return `${formatCfaRange(order.shippingFee, order.shippingFeeMax)} · hors zone BRT, à fixer à l'appel`
+  }
+  return order.shippingFee > 0 ? formatCfa(order.shippingFee) : 'incluse · zone BRT'
 }
 
 /** Recipients live in the settings row, not in environment variables. */
@@ -47,7 +71,7 @@ function emailHtml(order: OrderNotification): string {
   // Plain inline HTML: one short email, readable on a phone, no build step.
   return `<!doctype html><html lang="fr"><body style="font-family:system-ui,sans-serif;line-height:1.5;color:#111">
 <h2 style="margin:0 0 4px">Nouvelle commande ${escapeHtml(order.number)}</h2>
-<p style="margin:0 0 16px;font-size:20px"><strong>${formatCfa(order.total)}</strong> à encaisser à la livraison</p>
+<p style="margin:0 0 16px;font-size:20px"><strong>${amountDue(order)}</strong> à encaisser à la livraison</p>
 <p style="margin:0 0 4px"><strong>${escapeHtml(order.customerName)}</strong></p>
 <p style="margin:0 0 4px"><a href="tel:${escapeHtml(order.phone)}">${escapeHtml(order.phone)}</a>
  · <a href="https://wa.me/${escapeHtml(order.phone.replace('+', ''))}">WhatsApp</a></p>
@@ -55,7 +79,7 @@ function emailHtml(order: OrderNotification): string {
 <ul style="margin:0 0 16px;padding-left:18px">${rows}</ul>
 <p style="margin:0 0 4px">Sous-total ${formatCfa(order.subtotal)}</p>
 ${order.packDiscount > 0 ? `<p style="margin:0 0 4px">Remise pack − ${formatCfa(order.packDiscount)}</p>` : ''}
-<p style="margin:0 0 16px">Livraison ${order.shippingFee > 0 ? formatCfa(order.shippingFee) : 'incluse'}</p>
+<p style="margin:0 0 16px">Livraison ${escapeHtml(shippingLine(order))}</p>
 <p style="margin:0"><a href="${escapeHtml(order.adminUrl)}">Ouvrir dans l'admin</a></p>
 </body></html>`
 }
@@ -67,7 +91,8 @@ function telegramHtml(order: OrderNotification): string {
 
   return [
     `<b>Nouvelle commande ${escapeHtml(order.number)}</b>`,
-    `<b>${formatCfa(order.total)}</b> à encaisser à la livraison`,
+    `<b>${amountDue(order)}</b> à encaisser à la livraison`,
+    `Livraison : ${escapeHtml(shippingLine(order))}`,
     '',
     escapeHtml(order.customerName),
     `<a href="tel:${escapeHtml(order.phone)}">${escapeHtml(order.phone)}</a> · <a href="https://wa.me/${escapeHtml(order.phone.replace('+', ''))}">WhatsApp</a>`,
@@ -90,7 +115,7 @@ async function sendEmail(order: OrderNotification, to: string): Promise<void> {
     body: JSON.stringify({
       from,
       to: [to],
-      subject: `Commande ${order.number} — ${formatCfa(order.total)}`,
+      subject: `Commande ${order.number} — ${amountDue(order)}`,
       html: emailHtml(order),
     }),
   })

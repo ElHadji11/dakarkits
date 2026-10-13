@@ -11,6 +11,7 @@ import {
   Section,
   Strong,
 } from '@/components/shop/legal-text'
+import { BRT_STATIONS, formatCfa, formatCfaRange, OUTSIDE_ZONE_FEE } from '@/lib/constants'
 
 /**
  * Conditions générales de vente.
@@ -29,12 +30,12 @@ import {
  * tenir : c'est tout l'intérêt d'avoir audité le code avant de rédiger.
  */
 
-const UPDATED = '11 octobre 2026'
+const UPDATED = '13 octobre 2026'
 
 export const metadata: Metadata = {
   title: 'Conditions générales de vente',
   description:
-    'Les règles de vente de DakarKits : produits, prix, commande, paiement à la livraison, vérification à la réception, annulation.',
+    'Les règles de vente de DakarKits : produits, prix, commande, paiement à la livraison, zone de livraison sur l’axe du BRT, vérification à la réception, annulation.',
   alternates: { canonical: '/cgv' },
 }
 
@@ -48,7 +49,7 @@ export default function TermsPage() {
         </P>
         <P>
           Elles s&apos;adressent à des personnes majeures, capables de contracter, qui commandent
-          pour leur usage personnel et se font livrer à Dakar.
+          pour leur usage personnel et se font livrer dans la zone décrite à l&apos;article 8.
         </P>
       </Section>
 
@@ -102,7 +103,8 @@ export default function TermsPage() {
         <P>
           Les frais de livraison sont soit ajoutés au total, soit inclus dans les prix affichés. Le
           récapitulatif de commande indique toujours le sous-total, la remise éventuelle, la
-          livraison et le total à payer.
+          livraison et le total à payer. Hors de la zone décrite à l&apos;article 8, la livraison
+          est annoncée sous forme d&apos;intervalle, et le total l&apos;est aussi.
         </P>
       </Section>
 
@@ -156,11 +158,39 @@ export default function TermsPage() {
         </P>
       </Section>
 
-      <Section title="8. Livraison">
+      <Section title="8. Zone de livraison et frais">
         <P>
-          Nous livrons <Strong>uniquement à Dakar</Strong>, sous 24 à 48 heures après confirmation
-          téléphonique, hors week-ends, jours fériés et cas de force majeure. Ce délai est indicatif
-          et un retard n&apos;ouvre pas droit à indemnité.
+          La livraison est <Strong>gratuite le long de l&apos;axe du BRT</Strong>, de Papa Gueye
+          Fall (Petersen) à la Préfecture de Guédiawaye : les{' '}
+          <Strong>{BRT_STATIONS.length} stations</Strong> de la ligne, et une bande d&apos;
+          <Strong>environ 500 mètres autour de chacune</Strong>.
+        </P>
+        <P>
+          {/* Énumérées depuis `BRT_STATIONS`, la même liste que le formulaire de
+              commande déplie. Deux listes recopiées finiraient par diverger, et
+              c'est sur celle-ci qu'on s'appuierait le jour d'un désaccord. */}
+          Les stations desservies sont, dans l&apos;ordre du trajet : {BRT_STATIONS.join(', ')}.
+        </P>
+        <P>
+          Ces 500 mètres sont une distance de marche depuis la station, pas un cercle tracé au
+          mètre près. Si ton adresse se trouve à la limite, dis-le-nous au moment de
+          l&apos;appel de confirmation.
+        </P>
+        <P>
+          <Strong>En dehors de cette zone, nous livrons aussi</Strong>, partout ailleurs dans
+          Dakar, contre des frais de{' '}
+          <Strong>{formatCfaRange(OUTSIDE_ZONE_FEE.min, OUTSIDE_ZONE_FEE.max)}</Strong>{' '}
+          selon la distance, ajoutés au total et encaissés avec lui à la livraison. Tu déclares
+          ta zone au moment de la commande, et le récapitulatif affiche alors cet intervalle. Le
+          montant exact est arrêté pendant l&apos;appel de confirmation et ne dépasse jamais{' '}
+          {formatCfa(OUTSIDE_ZONE_FEE.max)} ; si la distance devait coûter davantage, nous te le
+          disons pendant cet appel et tu restes libre d&apos;annuler sans frais.
+        </P>
+        <P>Nous ne livrons nulle part hors de Dakar.</P>
+        <P>
+          La livraison intervient sous 24 à 48 heures après confirmation téléphonique, hors
+          week-ends, jours fériés et cas de force majeure. Ce délai est indicatif et un retard
+          n&apos;ouvre pas droit à indemnité.
         </P>
         <P>
           Tu dois être joignable au numéro indiqué et présent à l&apos;adresse convenue. Si la

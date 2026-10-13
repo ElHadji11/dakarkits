@@ -11,8 +11,36 @@
  * vraie commande en production.
  */
 import { chromium } from '@playwright/test'
+import { closeSync, existsSync, ftruncateSync, openSync, writeSync } from 'node:fs'
 import { mkdir, writeFile } from 'node:fs/promises'
 import { dirname, resolve } from 'node:path'
+
+/**
+ * Ecrit un fichier **genere** (manifeste, geometrie) par-dessus l'ancien.
+ *
+ * `writeFile` ouvre en `w`, c'est-a-dire `CREATE_ALWAYS` : le fichier est
+ * recree. Certaines machines Windows refusent ca sur un fichier deja suivi
+ * par git — antivirus, filtre de synchronisation, bac a sable — et renvoient
+ * un `UNKNOWN (-4094)` que rien dans le message n'explique. Ouvrir en `r+`
+ * puis tronquer passe : on ne recree pas le fichier, on reecrit dedans.
+ *
+ * La difference compte parce que ces trois ecritures sont les **dernieres**
+ * du script : quand elles echouent, les captures sont deja sur le disque mais
+ * la geometrie, elle, n'existe qu'en memoire. Trois minutes de parcours
+ * perdues pour un drapeau d'ouverture.
+ */
+function writeGenerated(path, text) {
+  const data = Buffer.from(text, 'utf8')
+  if (!existsSync(path)) return writeFile(path, data)
+  const fd = openSync(path, 'r+')
+  try {
+    ftruncateSync(fd, 0)
+    writeSync(fd, data, 0, data.length, 0)
+  } finally {
+    closeSync(fd)
+  }
+  return Promise.resolve()
+}
 
 const BASE = (process.argv[2] ?? 'https://louyomb.com').replace(/\/+$/, '')
 const OUT = resolve(import.meta.dirname, '../assets/shots')
@@ -22,10 +50,33 @@ const PHONE = { width: 430, height: 932 }
 const manifest = []
 /** Geometrie reelle, par page, en pixels CSS du cadrage 1920x1080. */
 const geometry = {}
+/**
+ * La meme chose, relevee sur le telephone — en pixels CSS de 430x932.
+ *
+ * Deux jeux separes et jamais melanges : une boite mesuree en 1920 de large
+ * n'a aucun sens dans une capture qui en fait 430. Le reel vise `GM`, le spot
+ * paysage vise `G`.
+ */
+const mGeometry = {}
 
-async function settle(page) {
+/**
+ * `ready` : une condition **propre a la page**, evaluee dans le navigateur.
+ *
+ * Les deux attentes generiques ci-dessous ne suffisent pas, et le prouver a
+ * coute un film : `ProductSkeleton` (`app/(shop)/maillot/[slug]/page.tsx`) est
+ * fait de `div.bg-muted` nus — **pas** d'`animate-pulse`, et `aria-hidden`.
+ * Aucune des deux sondes ne le voit, `networkidle` se declenche pendant qu'il
+ * est a l'ecran, et `d-product` est sorti sur une page vide : pas de maillot,
+ * pas de titre, pas de prix. Le defaut etait invisible dans `geometry.ts`,
+ * mesuree plus tard, une fois la fiche vraiment rendue.
+ *
+ * Une sonde par classe ne tient donc pas : seule une attente sur le **contenu
+ * attendu** distingue une page rendue d'un squelette.
+ */
+async function settle(page, ready) {
   await page.waitForLoadState('networkidle').catch(() => {})
   await page.evaluate(() => document.fonts.ready)
+  if (ready) await page.waitForFunction(ready, null, { timeout: 30000 })
   // Les images produit viennent d'ImageKit : attendre qu'elles soient décodées,
   // sinon la capture montre des cartes vides.
   await page
@@ -33,16 +84,27 @@ async function settle(page) {
       timeout: 15000,
     })
     .catch(() => {})
-  // Et surtout : plus aucun squelette a l'ecran. Sur une navigation client,
-  // `networkidle` se declenche alors que le Suspense montre encore ses barres
-  // grises — la fiche produit est sortie comme ca une fois, et le plan « 02 ·
-  // Choisis » montrait une page en train de charger.
+  // Et les squelettes qui, eux, s'annoncent.
   await page
     .waitForFunction(() => document.querySelectorAll('[class*="animate-pulse"]').length === 0, null, {
       timeout: 15000,
     })
     .catch(() => {})
   await page.waitForTimeout(600)
+}
+
+/**
+ * La fiche produit est rendue quand ces trois choses sont vraies ensemble.
+ * Un squelette n'en satisfait aucune.
+ */
+const PRODUCT_READY = () => {
+  const h1 = document.querySelector('h1')
+  if (!h1 || h1.textContent.trim().length === 0) return false
+  const img = document.querySelector('main img')
+  if (!img || !img.currentSrc || !img.complete || img.naturalWidth === 0) return false
+  return [...document.querySelectorAll('button')].some((b) =>
+    /Ajouter au panier/i.test(b.textContent),
+  )
 }
 
 /**
@@ -241,7 +303,7 @@ const browser = await chromium.launch()
     if (href) {
       await first.click()
       await page.waitForLoadState('domcontentloaded')
-      await settle(page)
+      await settle(page, PRODUCT_READY)
     }
   }
 
@@ -249,7 +311,7 @@ const browser = await chromium.launch()
   if (!page.url().includes('/maillot/')) {
     const any = await page.locator('a[href^="/maillot/"]').first().getAttribute('href')
     await page.goto(BASE + any, { waitUntil: 'domcontentloaded' })
-    await settle(page)
+    await settle(page, PRODUCT_READY)
   }
   const productUrl = page.url()
   console.log('  -> fiche:', productUrl)
@@ -312,14 +374,39 @@ const browser = await chromium.launch()
   await shot(page, 'd-cart-1', { note: 'panier, un maillot' })
   await shot(page, 'd-cart-1-full', { shot: { fullPage: true } })
 
-  // Un deuxieme maillot : le bareme s'active.
+  /*
+   * Un deuxieme maillot — et **pas n'importe lequel**.
+   *
+   * Tous les maillots ne sont pas au bareme : `products.pack_eligible` est une
+   * case a cocher de l'admin, et un maillot decoche n'entre dans aucun pack.
+   * Ce plan-ci prenait la quatrieme carte de l'accueil, quelle qu'elle soit.
+   * Tant que le hasard donnait un maillot eligible, la capture montrait bien
+   * une remise ; le jour ou il a donne un Bayern a 10 000 F hors bareme, le
+   * panier a sorti 17 500 F sans remise — et le plan du spot a continue
+   * d'animer un compteur jusqu'a 13 000 F a cote de cette capture-la.
+   *
+   * L'eligibilite se lit sur la fiche : seul un maillot au bareme affiche la
+   * phrase « N maillots au choix pour ... ». On essaie donc les cartes dans
+   * l'ordre et on garde la premiere qui la porte.
+   */
   await page.goto(BASE + '/', { waitUntil: 'domcontentloaded' })
   await settle(page)
-  const second = page.locator('main a[href^="/maillot/"]').nth(3)
-  const secondHref = await second.getAttribute('href').catch(() => null)
-  if (secondHref && !productUrl.endsWith(secondHref)) {
-    await page.goto(BASE + secondHref, { waitUntil: 'domcontentloaded' })
-    await settle(page)
+  const candidates = (
+    await page.locator('main a[href^="/maillot/"]').evaluateAll((els) =>
+      els.map((e) => e.getAttribute('href')),
+    )
+  ).filter((href, i, all) => href && all.indexOf(href) === i && !productUrl.endsWith(href))
+
+  let secondHref = null
+  for (const href of candidates.slice(0, 8)) {
+    await page.goto(BASE + href, { waitUntil: 'domcontentloaded' })
+    await settle(page, PRODUCT_READY)
+    if ((await page.getByText(/maillots au choix pour/i).count()) === 0) {
+      console.log('  -- hors bareme, suivant:', href)
+      continue
+    }
+    secondHref = href
+    console.log('  -> deuxieme (au bareme):', href)
     const g = page.getByRole('group', { name: /Taille/i }).first()
     if (await g.count()) {
       const b = g.locator('button:not([disabled])').filter({ hasNotText: /^$/ }).first()
@@ -330,7 +417,9 @@ const browser = await chromium.launch()
       await add2.click()
       await page.waitForTimeout(1400)
     }
+    break
   }
+  if (!secondHref) console.log('  !! aucun deuxieme maillot au bareme trouve')
   await page.goto(BASE + '/panier', { waitUntil: 'domcontentloaded' })
   await settle(page)
   await shot(page, 'd-cart-2', { note: 'panier a deux, le prix du pack s applique' })
@@ -437,39 +526,273 @@ const browser = await chromium.launch()
   })
   const page = await ctx.newPage()
   console.log('\n[telephone 430x932 @3x]')
-  const routes = [
+
+  /** Les pages simples, pour le decor et les plans larges. */
+  for (const [name, path] of [
     ['m-home', '/'],
     ['m-selections', '/selections'],
-    ['m-cart', '/panier'],
-    ['m-form', '/commande'],
-  ]
-  for (const [name, path] of routes) {
+  ]) {
     await page.goto(BASE + path, { waitUntil: 'domcontentloaded' })
     await settle(page)
     await shot(page, name, { note: 'telephone ' + path })
   }
-  const card = page.locator('main a[href^="/maillot/"]').first()
-  const href = await card.getAttribute('href').catch(() => null)
-  if (href) {
-    await page.goto(BASE + href, { waitUntil: 'domcontentloaded' })
-    await settle(page)
-    await shot(page, 'm-product', { note: 'telephone, fiche produit' })
+  await shot(page, 'm-home-full', { shot: { fullPage: true }, note: 'telephone, accueil entier' })
+
+  mGeometry.home = await page.evaluate(() => {
+    const rect = (el) => {
+      if (!el) return null
+      const r = el.getBoundingClientRect()
+      return {
+        x: +r.x.toFixed(1),
+        y: +r.y.toFixed(1),
+        w: +r.width.toFixed(1),
+        h: +r.height.toFixed(1),
+      }
+    }
+    /*
+     * Pas de `countText` ici — exprès.
+     *
+     * Le compteur du catalogue est releve **une seule fois**, sur le cadrage
+     * de bureau (`geometry.home.countText`), et c'est lui que le carton de
+     * fin affiche. Une deuxieme mesure du meme nombre sur une autre largeur
+     * est une divergence programmee : le premier essai de ce bloc a ramasse
+     * « 8 maillots » — un compteur de section — pendant que la page en
+     * annoncait 32 un peu plus bas. Deux sources, deux nombres, et rien dans
+     * le film pour dire lequel est le bon.
+     */
+    return {
+      header: rect(document.querySelector('header')),
+      viewport: { w: innerWidth, h: innerHeight },
+    }
+  })
+
+  /*
+   * 1. La recherche.
+   *
+   * Sur telephone la barre n'est pas toujours posee dans l'en-tete : elle
+   * peut vivre derriere un bouton loupe. On essaie le champ, puis le bouton,
+   * et on note ce qui a marche — un plan qui vise un champ absent cliquerait
+   * dans le vide.
+   */
+  await page.goto(BASE + '/', { waitUntil: 'domcontentloaded' })
+  await settle(page)
+  let search = page.getByRole('combobox', { name: /Chercher un maillot/i }).first()
+  if ((await search.count()) === 0) {
+    const opener = page.getByRole('button', { name: /chercher|recherche|search/i }).first()
+    if (await opener.count()) {
+      console.log('  -> la recherche est derriere un bouton')
+      await opener.click()
+      await page.waitForTimeout(600)
+      search = page.getByRole('combobox', { name: /Chercher un maillot/i }).first()
+    }
   }
+  if ((await search.count()) === 0) search = page.locator('input[type="search"]').first()
+
+  if (await search.count()) {
+    await search.click()
+    await page.waitForTimeout(400)
+    await shot(page, 'm-search-open', { note: 'telephone, champ de recherche actif' })
+    await search.pressSequentially('barca', { delay: 90 })
+    await page.waitForTimeout(900)
+    await shot(page, 'm-search-barca', { note: 'telephone, resultats pour barca' })
+    const box = page.getByRole('listbox').first()
+    if (await box.count())
+      await shot(page, 'm-search-listbox', { locator: box, note: 'telephone, la liste seule' })
+    mGeometry.search = await measure({
+      field: search,
+      listbox: box,
+      firstResult: page.getByRole('listbox').getByRole('link').first(),
+    })
+    const first = page.getByRole('listbox').getByRole('link').first()
+    const href = await first.getAttribute('href').catch(() => null)
+    console.log('  -> resultat:', href)
+    if (href) {
+      await first.click()
+      await page.waitForLoadState('domcontentloaded')
+      await settle(page, PRODUCT_READY)
+    }
+  } else {
+    console.log('  !! aucun champ de recherche sur telephone')
+  }
+
+  // 2. La fiche : la taille, puis « Ajouter au panier ».
+  if (!page.url().includes('/maillot/')) {
+    const any = await page.locator('a[href^="/maillot/"]').first().getAttribute('href')
+    await page.goto(BASE + any, { waitUntil: 'domcontentloaded' })
+    await settle(page, PRODUCT_READY)
+  }
+  console.log('  -> fiche:', page.url())
+  await shot(page, 'm-product', { note: 'telephone, fiche produit' })
+  await shot(page, 'm-product-full', { shot: { fullPage: true }, note: 'telephone, fiche entiere' })
+
+  const mSizeGroup = page.getByRole('group', { name: /Taille/i }).first()
+  if (await mSizeGroup.count()) {
+    /*
+     * La fiche telephone defile : le selecteur de taille et le bouton sont
+     * sous la ligne de flottaison. On amene le bloc dans la fenetre **avant**
+     * de mesurer, et on retient ce defilement — les boites sont relevees dans
+     * la fenetre, la capture pleine hauteur part du haut du document, et sans
+     * ce pont le curseur cliquerait des centaines de pixels trop haut.
+     */
+    await mSizeGroup.scrollIntoViewIfNeeded()
+    await page.evaluate(() => scrollBy(0, -120))
+    await page.waitForTimeout(500)
+    await shot(page, 'm-product-pick', { note: 'telephone, le bloc taille + bouton en un cadre' })
+    await shot(page, 'm-sizes', { locator: mSizeGroup, note: 'telephone, selecteur de taille' })
+
+    const sizes = mSizeGroup.locator('button:not([disabled])').filter({ hasNotText: /^$/ })
+    const n = await sizes.count()
+    if (n > 0) {
+      const pick = sizes.nth(Math.min(1, n - 1))
+      console.log('  -> taille:', (await pick.innerText()).trim())
+      await pick.click()
+      await page.waitForTimeout(400)
+      await shot(page, 'm-sizes-picked', { locator: mSizeGroup, note: 'telephone, taille choisie' })
+      await shot(page, 'm-product-picked', { note: 'telephone, fiche avec la taille choisie' })
+    }
+  }
+
+  const mAdd = page.getByRole('button', { name: /Ajouter au panier/i }).last()
+  mGeometry.product = await measure({
+    title: page.getByRole('heading', { level: 1 }).first(),
+    price: page.getByText(/^\d[\d  ]*F$/).first(),
+    photo: page.locator('main img').first(),
+    sizeGroup: mSizeGroup,
+    sizeM: mSizeGroup.locator('button', { hasText: /^M$/ }).first(),
+    addToCart: mAdd,
+    pack: page.getByText(/maillots au choix pour/i).first(),
+    header: page.locator('header').first(),
+  })
+  mGeometry.product.scrollY = await page.evaluate(() => Math.round(scrollY))
+
+  if (await mAdd.count()) {
+    await shot(page, 'm-add-button', { locator: mAdd, note: 'telephone, bouton Ajouter' })
+    await mAdd.click()
+    await page.waitForTimeout(1400)
+    await shot(page, 'm-added', { note: 'telephone, apres l ajout' })
+    await page.evaluate(() => scrollTo(0, 0))
+    await page.waitForTimeout(300)
+    await shot(page, 'm-header-1', {
+      locator: page.locator('header').first(),
+      note: 'telephone, en-tete avec la pastille a 1',
+    })
+  }
+
+  // 3. Le panier.
+  await page.goto(BASE + '/panier', { waitUntil: 'domcontentloaded' })
+  await settle(page)
+  await shot(page, 'm-cart', { note: 'telephone, panier' })
+  await shot(page, 'm-cart-full', { shot: { fullPage: true }, note: 'telephone, panier entier' })
+  mGeometry.cart = await measure({
+    relance: page.getByText(/Ajoute un maillot/i).first(),
+    totalLine: page.getByText(/payer a la livraison|payer à la livraison/i).first(),
+    order: page.getByRole('link', { name: /^Commander$/i }).first(),
+  })
+
+  /*
+   * 4. Le formulaire, capture vide.
+   *
+   * C'est le plan qui motive tout ce bloc. Sur telephone les trois champs
+   * sont empiles sur toute la largeur : « Nom complet », « Telephone »,
+   * « Adresse de livraison » et le bouton tiennent dans une seule hauteur
+   * d'ecran, a leur taille reelle. Aucun recadrage n'est necessaire, et c'est
+   * exactement ce que le client voit quand il commande.
+   */
+  await page.goto(BASE + '/commande', { waitUntil: 'domcontentloaded' })
+  await settle(page)
+  await shot(page, 'm-form', { note: 'telephone, formulaire vide et non envoye' })
+  await shot(page, 'm-form-full', { shot: { fullPage: true }, note: 'telephone, tunnel entier' })
+
+  const mName = page.getByLabel('Nom complet')
+  const mPhone = page.getByLabel('Téléphone')
+  const mAddr = page.getByLabel('Adresse de livraison')
+  const mConfirm = page.getByRole('button', { name: /Confirmer ma commande/i }).last()
+
+  await mName.scrollIntoViewIfNeeded()
+  await page.evaluate(() => scrollBy(0, -150))
+  await page.waitForTimeout(500)
+  await shot(page, 'm-form-fields', { note: 'telephone, les trois champs et le bouton' })
+  mGeometry.form = await measure({
+    legend: page.getByText(/Où te livrer/i).first(),
+    name: mName,
+    phone: mPhone,
+    address: mAddr,
+    confirm: mConfirm,
+  })
+  mGeometry.form.scrollY = await page.evaluate(() => Math.round(scrollY))
+
+  /*
+   * Le meme formulaire, defile jusqu'en bas — et c'est **celui que le film
+   * montre**.
+   *
+   * Le bouton « Confirmer ma commande » est colle en bas de l'ecran. En haut
+   * de page il recouvre donc le champ « Adresse de livraison », dont il ne
+   * laisse voir qu'une trentaine de pixels : la frappe du film y serait
+   * coupee en deux. Un plan qui annonce « trois champs » ne peut pas en
+   * montrer deux et demi.
+   *
+   * Descendu en bas, le document ne bouge plus mais le bouton, lui, reste a
+   * sa place : les trois champs passent au-dessus de lui et se degagent
+   * entierement, le recapitulatif reste visible par le haut, et le total y
+   * est encore. Un seul cadrage porte alors tout le plan — le montant, les
+   * trois champs et le bouton — sans un seul recadrage.
+   */
+  await page.evaluate(() => scrollTo(0, document.body.scrollHeight))
+  await page.waitForTimeout(600)
+  await shot(page, 'm-form-bottom', { note: 'telephone, formulaire defile en bas' })
+  mGeometry.formBottom = await measure({
+    legend: page.getByText(/Où te livrer/i).first(),
+    name: mName,
+    phone: mPhone,
+    address: mAddr,
+    confirm: mConfirm,
+    total: page.getByText(/payer a la livraison|payer à la livraison/i).first(),
+  })
+  mGeometry.formBottom.scrollY = await page.evaluate(() => Math.round(scrollY))
+
+  if (await mConfirm.count())
+    await shot(page, 'm-confirm-button', { locator: mConfirm, note: 'telephone, bouton Confirmer' })
+
+  /** Les fonds de champ, en sRGB exact — meme raison qu'en desktop. */
+  mGeometry.colors = await page.evaluate(() => {
+    const hex = (color) => {
+      const cv = document.createElement('canvas')
+      cv.width = cv.height = 1
+      const ctx = cv.getContext('2d')
+      ctx.fillStyle = color
+      ctx.fillRect(0, 0, 1, 1)
+      const d = ctx.getImageData(0, 0, 1, 1).data
+      return '#' + [d[0], d[1], d[2]].map((v) => v.toString(16).padStart(2, '0')).join('')
+    }
+    const bg = (sel) => {
+      const el = document.querySelector(sel)
+      return el ? hex(getComputedStyle(el).backgroundColor) : null
+    }
+    return {
+      input: bg('input[name="name"], input[type="text"], input:not([type="hidden"])'),
+      textarea: bg('textarea'),
+      page: hex(getComputedStyle(document.body).backgroundColor),
+    }
+  })
+
   await ctx.close()
 }
 
 await browser.close()
 
 const capturedAt = new Date().toISOString()
-await writeFile(
+await writeGenerated(
   resolve(OUT, '../manifest.json'),
   JSON.stringify({ base: BASE, capturedAt, viewport: DESKTOP, shots: manifest }, null, 2),
 )
-await writeFile(resolve(OUT, '../geometry.json'), JSON.stringify(geometry, null, 2))
+await writeGenerated(
+  resolve(OUT, '../geometry.json'),
+  JSON.stringify({ desktop: geometry, phone: mGeometry }, null, 2),
+)
 
 // Le film lit la geometrie a la compilation, pas au rendu : une capture qui
 // manque doit casser le build, pas sortir un plan vide a la 400e frame.
-await writeFile(
+await writeGenerated(
   resolve(import.meta.dirname, '../src/spot/geometry.ts'),
   [
     '/**',
@@ -485,6 +808,17 @@ await writeFile(
     'export const SHOT = { w: ' + DESKTOP.width + ', h: ' + DESKTOP.height + ' } as const',
     '',
     'export const G = ' + JSON.stringify(geometry, null, 2) + ' as const',
+    '',
+    '/**',
+    ' * Le meme site, releve sur un telephone de ' + PHONE.width + 'x' + PHONE.height + '.',
+    ' *',
+    ' * C’est ce jeu-la que le reel vise : un formulaire de commande recadre',
+    ' * depuis un cadrage paysage ne se lit plus dans un 9:16, et c’etait le',
+    ' * defaut du premier montage.',
+    ' */',
+    'export const SHOT_M = { w: ' + PHONE.width + ', h: ' + PHONE.height + ' } as const',
+    '',
+    'export const GM = ' + JSON.stringify(mGeometry, null, 2) + ' as const',
     '',
   ].join('\n'),
 )

@@ -4,10 +4,12 @@ import {
   calculatePricing,
   ladderIssues,
   nextPackStep,
+  storedShippingMax,
   usableTiers,
   type PricingLine,
   type PricingSettings,
 } from '@/lib/pricing'
+import { OUTSIDE_ZONE_FEE } from '@/lib/constants'
 
 /**
  * Le barème en service : 8 000 F le maillot, 13 000 F les deux, 19 500 F les
@@ -260,6 +262,46 @@ describe('livraison', () => {
     const result = calculatePricing(jerseys(2), { ...launch, shippingFee: 1000 })
     expect(result.shippingFee).toBe(0)
     expect(result.total).toBe(13000)
+  })
+
+  it('reste gratuite sur l’axe du BRT', () => {
+    const result = calculatePricing(jerseys(2), launch, 'brt')
+    expect(result.shippingFee).toBe(0)
+    expect(result.shippingFeeMax).toBe(0)
+    // Pas d'intervalle : les deux bornes du total se rejoignent.
+    expect(result.total).toBe(13000)
+    expect(result.totalMax).toBe(13000)
+  })
+
+  it('facture un intervalle hors zone, ajouté au total', () => {
+    const result = calculatePricing(jerseys(2), launch, 'outside')
+    expect(result.shippingFee).toBe(OUTSIDE_ZONE_FEE.min)
+    expect(result.shippingFeeMax).toBe(OUTSIDE_ZONE_FEE.max)
+    expect(result.total).toBe(13000 + OUTSIDE_ZONE_FEE.min)
+    expect(result.totalMax).toBe(13000 + OUTSIDE_ZONE_FEE.max)
+  })
+
+  it('ne rend jamais la sortie de zone moins chère que la zone', () => {
+    const settings: PricingSettings = {
+      ...launch,
+      shippingMode: 'fee',
+      shippingFee: OUTSIDE_ZONE_FEE.max + 500,
+    }
+    const inside = calculatePricing(jerseys(2), settings, 'brt')
+    const outside = calculatePricing(jerseys(2), settings, 'outside')
+    expect(outside.shippingFee).toBe(inside.shippingFee)
+    expect(outside.total).toBeGreaterThanOrEqual(inside.total)
+  })
+
+  it('relit le plafond d’une commande enregistrée depuis sa zone', () => {
+    expect(storedShippingMax(OUTSIDE_ZONE_FEE.min, 'outside')).toBe(OUTSIDE_ZONE_FEE.max)
+    expect(storedShippingMax(0, 'brt')).toBe(0)
+    // Les commandes d'avant le choix de zone n'ont rien dans la colonne.
+    expect(storedShippingMax(0, null)).toBe(0)
+  })
+
+  it('chiffre le panier dans la zone par défaut', () => {
+    expect(calculatePricing(jerseys(2), launch).zone).toBe('brt')
   })
 })
 
