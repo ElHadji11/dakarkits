@@ -2,14 +2,19 @@ import 'server-only'
 
 import { createHash } from 'node:crypto'
 
+import { eurFromCfa } from '@/lib/money'
+
 const API_VERSION = 'v21.0'
 
 export type PurchaseEvent = {
   /** Shared with the browser Pixel so Meta counts the sale once. */
   eventId: string
   eventSourceUrl: string
+  /** En francs CFA, comme partout ailleurs. Converti en euros juste avant l'envoi. */
   value: number
   contentIds: string[]
+  /** Un maillot par ligne, pour `contents` et `num_items`. */
+  contents: Array<{ id: string; quantity: number }>
   /** Stored form, +2217XXXXXXXX. Hashed before it ever leaves this process. */
   phone: string
   clientIpAddress: string | null
@@ -61,11 +66,20 @@ export async function sendPurchaseToCapi(event: PurchaseEvent): Promise<void> {
           ...(event.fbp ? { fbp: event.fbp } : {}),
           ...(event.fbc ? { fbc: event.fbc } : {}),
         },
+        /* Mêmes champs, même devise et même valeur que le Pixel du navigateur.
+           Les deux rapports portent le même `event_id` : s'ils annonçaient des
+           montants différents, Events Manager en garderait un au hasard.
+
+           EUR et non XOF : Meta ne sait pas lire le franc CFA, et un événement
+           dans une devise inconnue n'est pas valorisé du tout. Voir
+           `lib/money.ts`. */
         custom_data: {
-          currency: 'XOF',
-          value: event.value,
+          currency: 'EUR',
+          value: eurFromCfa(event.value),
           content_type: 'product',
           content_ids: event.contentIds,
+          contents: event.contents,
+          num_items: event.contents.reduce((total, item) => total + item.quantity, 0),
         },
       },
     ],

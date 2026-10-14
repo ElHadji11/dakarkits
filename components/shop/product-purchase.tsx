@@ -1,6 +1,6 @@
 'use client'
 
-import { Check, Ruler, ShoppingBag, Truck, Wallet } from 'lucide-react'
+import { Ruler, ShoppingBag, Tag, Truck, Wallet } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
 import { Fragment, useState } from 'react'
@@ -71,20 +71,21 @@ export function ProductPurchase({
     chosen.quantity > 0 &&
     chosen.quantity <= settings.lowStockThreshold
 
+  /* La taille retenue, une fois pour les deux boutons : elle part au panier et
+     dans `AddToCart`, où elle distingue deux ajouts du même maillot. */
+  const size = hasSizes ? selected : null
+
   const addToCart = () => {
-    add(product.id, hasSizes ? selected : null, 1)
-    trackAddToCart(product.id, product.price)
+    add(product.id, size, 1)
+    trackAddToCart(product.id, productName(product), size, product.price)
     toast.success('Ajouté au panier', {
-      description:
-        hasSizes && selected
-          ? `${productName(product)} · taille ${selected}`
-          : productName(product),
+      description: size ? `${productName(product)} · taille ${size}` : productName(product),
     })
   }
 
   const orderNow = () => {
-    add(product.id, hasSizes ? selected : null, 1)
-    trackAddToCart(product.id, product.price)
+    add(product.id, size, 1)
+    trackAddToCart(product.id, productName(product), size, product.price)
     router.push('/commande')
   }
 
@@ -223,7 +224,7 @@ export function ProductPurchase({
 
       {ladder.length > 0 ? (
         <p className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Check className="size-4 shrink-0 text-primary" aria-hidden />
+          <Tag className="size-4 shrink-0 text-primary" aria-hidden />
           {/* Toute la phrase dans un seul élément : le parent est un flex avec
               `gap-2`, et un montant sorti à nu y deviendrait un élément flex
               de plus — 8 px de gouttière avant le point. */}

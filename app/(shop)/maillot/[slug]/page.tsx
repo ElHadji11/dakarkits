@@ -91,7 +91,11 @@ async function ProductBody({ params }: { params: PageProps<'/maillot/[slug]'>['p
        `space-y-6` sur téléphone : entre la ligne du pack et « Description »,
        40 px se lisaient comme une rupture de page. */
     <div className="space-y-6 sm:space-y-8">
-      <ViewContentEvent productId={product.id} value={product.price} />
+      <ViewContentEvent
+        productId={product.id}
+        name={productName(product)}
+        value={product.price}
+      />
       <div className="grid gap-6 lg:grid-cols-2 lg:gap-8">
         <ProductGallery images={product.images} title={productName(product)} />
         <ProductPurchase product={product} settings={settings} />

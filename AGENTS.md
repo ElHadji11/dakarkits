@@ -86,8 +86,9 @@ Tout part de `lib/constants.ts`, et **rien ne se réécrit ailleurs** :
 `<DeliveryZoneNotice>` (`components/shop/delivery-zone.tsx`) rend les deux
 phrases au pied de page (donc sur tout le catalogue), sur la fiche produit,
 dans le panier et sur sa page, et sur la confirmation. **Pas de carte, et les
-23 noms seulement là où on en a besoin** : `<BrtStationList>` est un `<details>`
-natif — zéro octet de JavaScript — déplié sous le choix de zone.
+23 noms seulement là où on en a besoin** : `<BrtStationGrid>` ne se déplie que
+sur demande, sous le choix de zone, par un lien porté par la carte « Sur l'axe
+du BRT » — la seule des deux où la question « suis-je dedans ? » se pose.
 
 **Le client déclare sa zone, le serveur la facture.** `<DeliveryZoneChoice>`
 pose la question en deux cartes à cocher, juste sous le champ adresse ; le
@@ -119,6 +120,66 @@ et les légendes Instagram (`instagram-posts/legendes.md`, dont `post-06.png` qu
 porte « Livraison gratuite à Dakar » en dur dans l'image). Une publicité qui
 promet plus que le site est le genre de contradiction qui se paie en refus à la
 livraison — à reprendre avant publication.
+
+### Meta ne sait pas lire le franc CFA
+
+Un seul pixel sur le site, un seul identifiant, et il n'est **jamais codé en
+dur** : `NEXT_PUBLIC_META_PIXEL_ID` est lu par `components/shop/meta-pixel.tsx`
+pour le navigateur et par `lib/meta.ts` pour l'API de conversions. Changer de
+dataset est donc un changement de valeur, pas de code — mais le jeton
+`META_CAPI_ACCESS_TOKEN` est propre au dataset et doit être régénéré avec, sinon
+l'API échoue en silence (chercher `[meta]` dans les logs).
+
+`MetaPixel` est rendu par `(shop)/layout.tsx` et `(checkout)/layout.tsx`, deux
+groupes de routes frères : exactement un pixel par page. **Jamais dans
+`app/layout.tsx`** — le layout racine enveloppe aussi `/admin`, et l'admin
+n'envoie aucun événement.
+
+**Les événements partent en euros, et c'est la seule entorse à la règle des
+francs entiers.** Meta ne connaît pas le XOF : un événement dans cette devise
+n'est pas valorisé, donc ni valeur de conversion, ni optimisation, ni ROAS. Tout
+passe par `eurFromCfa()` (`lib/money.ts`), à la parité fixe de 655,957 — un
+taux fixé par traité, pas un cours à rafraîchir. La conversion n'existe qu'au
+bord du système, pour ce qui sort vers Meta : **aucun montant affiché,
+enregistré ou facturé ne la traverse.**
+
+Le navigateur et le serveur doivent annoncer **le même montant** pour un achat,
+parce qu'ils portent le même `event_id` (`purchase_<numéro>`) et que c'est
+là-dessus que Meta déduplique. D'où une seule fonction de conversion partagée,
+et `order.total` des deux côtés — le plancher figé, jamais `totalMax` : déclarer
+le plafond surévaluerait chaque vente hors zone.
+
+`lib/pixel.ts` est le seul appelant du pixel, et **tout appel y est inoffensif**
+(`try/catch` plus appel optionnel) : un bloqueur de publicité est le cas normal,
+et aucune mesure ne doit faire tomber une page qui vend.
+
+`Purchase` ne part qu'après l'enregistrement de la commande, et **une seule fois
+par commande** : une ref pour le remontage StrictMode, un marqueur
+`localStorage` portant le numéro de commande pour le rafraîchissement et la
+revisite du lien, et `event_id` comme dernier filet côté Meta. Le marqueur porte
+le numéro et non un booléen — une seconde commande du même navigateur doit bien
+compter.
+
+`PageView` vient de `PixelPageView`, pas du snippet : la boutique navigue côté
+client, donc une vue au chargement serait la seule de toute la visite. Le
+snippet ne fait plus que `init` — les deux ensemble compteraient deux vues au
+premier chargement. Ce composant lit `usePathname` et **jamais
+`useSearchParams`** : un filtre n'est pas une nouvelle page, et lire les
+paramètres de requête sortirait le layout de la coquille statique, soit
+exactement le défaut de LCP corrigé le 2026-10-07.
+
+Sur `Purchase`, le téléphone part en correspondance avancée (`ph`), en chiffres
+avec l'indicatif 221, **haché par le pixel** côté navigateur et en SHA-256 côté
+serveur. C'est le signal qui compte ici : on encaisse à la livraison, donc il n'y
+a ni email, ni paiement en ligne, ni compte client à rattacher à la personne qui
+a vu la publicité. **Ni le nom, ni l'adresse ne sortent** — et
+`/confidentialite` affirme exactement ça : si ce qui part vers Meta change,
+cette page bouge dans le même commit.
+
+La vérification de domaine de `louyomb.com` **n'est pas dans ce dépôt** : aucune
+balise `facebook-domain-verification` nulle part, donc elle est portée par un
+enregistrement DNS ou par l'hébergeur. Ne pas en ajouter une ici en croyant la
+rétablir.
 
 ### Autres invariants
 

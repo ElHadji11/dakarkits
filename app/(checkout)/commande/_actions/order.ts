@@ -304,6 +304,10 @@ export async function placeOrder(
       eventSourceUrl: `${siteUrl()}/commande`,
       value: pricing.total,
       contentIds: input.lines.map((line) => String(line.productId)),
+      contents: input.lines.map((line) => ({
+        id: String(line.productId),
+        quantity: line.quantity,
+      })),
       phone: input.phone,
       clientIpAddress: ip === 'unknown' ? null : ip,
       clientUserAgent: headerStore.get('user-agent'),

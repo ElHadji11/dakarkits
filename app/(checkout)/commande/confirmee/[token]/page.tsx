@@ -49,10 +49,21 @@ async function Confirmation({
   return (
     <div className="mx-auto max-w-lg space-y-6 py-6">
       <ClearCartOnce orderNumber={order.number} />
+      {/* `order.total` et non `totalMax` : la commande fige un entier, et c'est
+          celui-là qui sera encaissé si l'adresse est bien sur l'axe. Déclarer
+          le plafond surévaluerait chaque vente hors zone.
+
+          Le même `event_id` que l'API de conversions (`purchase_<numéro>`),
+          sinon la vente est comptée deux fois. */}
       <PurchaseEvent
+        orderNumber={order.number}
         eventId={`purchase_${order.number}`}
-        productIds={order.items.map((item) => String(item.productId))}
+        items={order.items.map((item) => ({
+          productId: item.productId,
+          quantity: item.quantity,
+        }))}
         value={order.total}
+        phone={order.phone}
       />
 
       <div className="space-y-2 text-center">

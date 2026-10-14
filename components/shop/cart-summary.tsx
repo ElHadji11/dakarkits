@@ -1,6 +1,6 @@
 'use client'
 
-import { Sparkles } from 'lucide-react'
+import { Tag } from 'lucide-react'
 
 import { formatCfa, formatCfaRange } from '@/lib/constants'
 import type { PackNudge as PackNudgeOffer, PricingResult } from '@/lib/pricing'
@@ -80,7 +80,7 @@ function PackNudge({
 
   return (
     <p className="flex items-start gap-2 rounded-lg border border-primary/40 bg-primary/10 p-4 text-sm">
-      <Sparkles className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
+      <Tag className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
       {/* Toute la phrase dans un seul enfant du flex : un montant sorti à nu y
           deviendrait un élément flex de plus, donc 8 px de gouttière avant le
           mot suivant. */}
