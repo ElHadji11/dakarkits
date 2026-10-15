@@ -31,7 +31,39 @@ const YEAR = new Date().getFullYear()
  * de commande et ne doit jamais s'afficher sur le site.
  */
 const CONTACT_EMAIL = 'contact@louyomb.com'
-const INSTAGRAM_URL = 'https://instagram.com/babacar__thior'
+
+/** Le compte de la boutique, celui qu'on suit. À ne pas confondre avec
+ *  `AUTHOR_INSTAGRAM_URL`, qui est le compte personnel derrière la signature
+ *  de la barre du bas. */
+const SHOP_INSTAGRAM_URL = 'https://instagram.com/dakarkits'
+const AUTHOR_INSTAGRAM_URL = 'https://instagram.com/babacar__thior'
+
+/**
+ * Le glyphe Instagram, tracé à la main : lucide a retiré ses icônes de marque
+ * en v1 (`lucide-react` n'exporte plus `Instagram`), et une image serait un
+ * fichier de plus à télécharger pour 20 px. La géométrie est celle de l'ancien
+ * icône lucide — même grille de 24, même trait de 2 — pour qu'il s'aligne avec
+ * `ShoppingBag` et les autres. `currentColor` partout : aucune couleur codée
+ * en dur, donc il suit le thème et le survol comme du texte.
+ */
+function InstagramIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden
+    >
+      <rect x="2" y="2" width="20" height="20" rx="5" />
+      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+      <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+    </svg>
+  )
+}
 
 const LINKS = [
   { href: '/', label: 'Tous' },
@@ -125,19 +157,50 @@ export function SiteFooter({ settings }: { settings: ShopSettings }) {
 
           {/* E-mail et téléphone côte à côte sous 1024 px : deux rangées de
               44 px l'une sous l'autre, c'était 44 px de pied de page pour
-              rien. */}
-          <div className="flex flex-row items-center justify-center gap-x-4 lg:flex-col lg:items-end lg:gap-x-0 lg:justify-self-end">
+              rien.
+
+              Mesuré à 375 px : e-mail 161, numéro 121, Instagram 44, pour
+              344 px disponibles — les trois ne tiennent qu'avec `gap-x-2`,
+              et pas du tout sur les écrans de 360. D'où `flex-wrap` plutôt
+              qu'une troisième colonne forcée : sans lui, flex écrase l'icône
+              à 37 px et coupe le numéro en deux lignes. Le numéro et
+              Instagram sont groupés, donc ce qui passe à la ligne est le
+              groupe entier — jamais l'icône seule, loin du numéro qu'elle
+              accompagne. */}
+          <div className="flex flex-row flex-wrap items-center justify-center gap-x-2 sm:gap-x-4 lg:flex-col lg:flex-nowrap lg:items-end lg:gap-x-0 lg:justify-self-end">
             <a href={`mailto:${CONTACT_EMAIL}`} className={linkClass}>
               {CONTACT_EMAIL}
             </a>
-            {phone ? (
-              /* `tel:` sur le numéro E.164 brut : avec les espaces que pose
-                 `formatPhone`, Android ouvre le clavier sur un numéro
-                 tronqué. L'affichage est formaté, le lien ne l'est pas. */
-              <a href={`tel:${phone}`} className={linkClass}>
-                {formatPhone(phone)}
+            {/* Le numéro et Instagram ne se séparent jamais : c'est le groupe
+                qui passe à la ligne, pas l'icône. Sur `lg` il reste une
+                rangée, alignée à droite sous l'e-mail. */}
+            <div className="flex shrink-0 items-center gap-x-2 sm:gap-x-4">
+              {phone ? (
+                /* `tel:` sur le numéro E.164 brut : avec les espaces que pose
+                   `formatPhone`, Android ouvre le clavier sur un numéro
+                   tronqué. L'affichage est formaté, le lien ne l'est pas. */
+                <a href={`tel:${phone}`} className={`${linkClass} whitespace-nowrap`}>
+                  {formatPhone(phone)}
+                </a>
+              ) : null}
+              {/* Instagram ferme la rangée des moyens de joindre la boutique :
+                  c'est le troisième, et sur un téléphone c'est souvent le
+                  premier qu'on essaie. Icône seule — un troisième libellé
+                  écrit ne tiendrait nulle part, et c'est une marque qu'on
+                  reconnaît sans la lire. `min-h-11` et `w-11` plutôt que
+                  `size-11` : la rangée fait déjà 44 px de haut, l'icône
+                  n'ajoute que sa largeur. `shrink-0` sinon flex la ramène à
+                  37 px et la zone tactile passe sous les 44 px. */}
+              <a
+                href={SHOP_INSTAGRAM_URL}
+                target="_blank"
+                rel="noreferrer"
+                aria-label="DakarKits sur Instagram"
+                className="inline-flex min-h-11 w-11 shrink-0 items-center justify-center text-foreground/80 transition-colors duration-200 hover:text-foreground focus-visible:text-foreground"
+              >
+                <InstagramIcon className="size-5" />
               </a>
-            ) : null}
+            </div>
           </div>
         </div>
 
@@ -162,7 +225,7 @@ export function SiteFooter({ settings }: { settings: ShopSettings }) {
                 le droit d'auteur existe sans elle — et elle faisait passer la
                 ligne sur deux rangées de 44 px sur un écran de 375. */}
             <span>© {YEAR} DakarKits</span>
-            <a href={INSTAGRAM_URL} target="_blank" rel="noreferrer" className={fineClass}>
+            <a href={AUTHOR_INSTAGRAM_URL} target="_blank" rel="noreferrer" className={fineClass}>
               Made by ElHadji
             </a>
           </p>
