@@ -10,8 +10,8 @@ import { Button } from '@/components/ui/button'
 import { useHideOnScroll } from '@/hooks/use-hide-on-scroll'
 import { useHydrated } from '@/hooks/use-hydrated'
 import { deliveryPromise, type ShopSettings } from '@/lib/shop-types'
-import { useFavorites } from '@/stores/favorites'
 import { HEADER_NAME, NAV_BACK, NAV_FORWARD } from '@/lib/view-transitions'
+import { useFavorites } from '@/stores/favorites'
 
 /**
  * L'en-tête collé, et le compromis qu'il règle.

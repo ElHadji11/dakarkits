@@ -297,9 +297,10 @@
 
 /* Pendant l'animation, la superposition du navigateur capte les appuis : un
    tap sur « Commander » à la fin d'un glissement serait perdu. On la rend
-   transparente au doigt, la page en dessous répond. Les éléments nommés
-   (l'en-tête ancré) restent, eux, hors d'atteinte le temps de l'animation —
-   d'où des durées courtes. */
+   transparente au doigt, et la page en dessous répond. `pointer-events` est
+   héritée : tout l'arbre des pseudo-éléments devient traversant, les
+   captures nommées comprises — c'est le vrai en-tête, à sa place puisqu'il
+   ne bouge pas, qui reçoit l'appui. */
 ::view-transition {
   pointer-events: none;
 }

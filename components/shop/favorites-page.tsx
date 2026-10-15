@@ -7,8 +7,8 @@ import { useCatalog } from '@/components/shop/catalog-provider'
 import { ProductGrid } from '@/components/shop/product-grid'
 import { Button } from '@/components/ui/button'
 import { useHydrated } from '@/hooks/use-hydrated'
-import { useFavorites } from '@/stores/favorites'
 import { NAV_BACK } from '@/lib/view-transitions'
+import { useFavorites } from '@/stores/favorites'
 
 export function FavoritesPage() {
   const hydrated = useHydrated()

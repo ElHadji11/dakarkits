@@ -10,8 +10,11 @@ import { kitPhotoName } from '@/lib/view-transitions'
  * `default="none"` sans `share` explicite, en particulier, fait cesser le
  * glissement sans la moindre erreur.
  *
- * Sans `'use client'` : la carte et la galerie l'appellent côté client, le
- * squelette côté serveur, et `<ViewTransition>` sait se rendre des deux côtés.
+ * Sans `'use client'` : ses trois appelants — la carte, la galerie et le
+ * squelette — sont déjà des composants client, et celui-ci n'a ni état ni
+ * gestionnaire d'événement. Il n'ouvre donc aucune frontière de plus, et son
+ * `<ViewTransition>` se rend aussi bien au rendu serveur de ces pages qu'au
+ * navigateur.
  */
 export function KitPhoto({
   slug,
