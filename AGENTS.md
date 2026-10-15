@@ -457,10 +457,10 @@ aucun `blurDataURL` tout seul : il faut le fournir. `blurDataUrl()`
 **n'est appelée que par `getProduct`, sur la première photo**.
 
 Jamais dans `getCatalog()`. Le catalogue entier part au client par le layout
-boutique : ~500 octets de base64 par maillot, c'est ~100 Ko de plus sur la
-page dont le LCP se joue sur le fil principal — pour flouter des cartes que
-`StaticGrid` a déjà peintes. Et jamais un `fetch` vers une URL venue de la
-base sans `isOwnUrl()`.
+boutique : 324 octets de data URI par maillot (mesuré au build du
+2026-10-15), c'est ~65 Ko de plus sur la page dont le LCP se joue sur le fil
+principal — pour flouter des cartes que `StaticGrid` a déjà peintes. Et
+jamais un `fetch` vers une URL venue de la base sans `isOwnUrl()`.
 
 Même logique pour `canvas-confetti` : il n'existe que sur la page de
 confirmation, en import dynamique après le rendu (`OrderCelebration`), et il

@@ -357,11 +357,11 @@ restait de la phase, c'est le flou d'attente.
    `f-jpg` : nos photos sont détourées, un JPEG leur collerait un fond.
 2. **Sur la fiche produit, pas dans `getCatalog()`** — contrairement à ce
    qu'annonçait le § 3.5. Le catalogue entier est remis au client par le
-   layout boutique : à ~500 octets de base64 par maillot, 200 maillots
-   ajouteraient ~100 Ko au payload de la page dont le LCP se joue sur le fil
-   principal, et ce pour flouter des cartes que `StaticGrid` a déjà peintes.
-   Le budget JavaScript du catalogue est fermé ; la fiche, elle, ne paie que
-   ses propres photos.
+   layout boutique : à 324 octets de data URI par maillot (mesuré au build),
+   200 maillots ajouteraient ~65 Ko au payload de la page dont le LCP se joue
+   sur le fil principal, et ce pour flouter des cartes que `StaticGrid` a
+   déjà peintes. Le budget JavaScript du catalogue est fermé ; la fiche, elle,
+   ne paie que ses propres photos.
 3. **La première photo seulement.** C'est celle qu'on attend, et celle qui
    arrive en glissant depuis la grille ; les suivantes restent hors écran
    jusqu'au premier balayage. Une vignette par maillot, c'est aussi une seule
@@ -376,10 +376,14 @@ restait de la phase, c'est le flou d'attente.
    contrariété — une fiche sans flou reste une fiche. Chercher `[blur]` dans
    les logs si le flou disparaît partout à la fois.
 
-**Non vérifié** : aucun `next build` n'a été lancé ici, donc `blurDataUrl()`
-n'a jamais tourné contre ImageKit, et le « flou puis net » ne se voit de toute
-façon que sur une connexion lente. À regarder au premier déploiement, en 4G
-bridée.
+**Vérifié au build**, le 2026-10-15, contre la vraie base et le vrai
+ImageKit : les **33 fiches prérendues portent leur vignette**, à 324 octets de
+data URI chacune — c'est cette mesure qui chiffre le point 2 — et le HTML
+porte bien `background-size: contain`, donc le point 4 tient. Aucun `[blur]`
+dans la sortie du build.
+
+**Reste à voir** : le « flou puis net » lui-même, qui ne se montre que sur une
+connexion lente. À regarder au premier déploiement, en 4G bridée.
 
 ### Phase 5 — Le décor ✅ faite le 2026-10-15
 
@@ -418,9 +422,10 @@ Une entorse assumée au garde-fou : `stroke-dashoffset` n'est ni `transform` ni
 `opacity`. Elle ne déclenche aucun calcul de mise en page, et elle repeint un
 SVG de 48 px sur la seule page du site qui n'a aucun enjeu de LCP.
 
-**Non vérifié** : ni les confettis ni l'éclat n'ont été vus tourner — aucun
-build lancé ici. Le code est typé et lint-propre, ce qui ne dit rien d'une
-animation.
+**Non vérifié** : le `next build` prérend bien ces pages, mais ni les
+confettis, ni l'éclat, ni le roulement des montants n'ont été vus tourner.
+Compiler n'est pas animer — comme la vibration de la phase 3, ça demande un
+écran et un doigt.
 
 ---
 
