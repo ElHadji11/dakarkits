@@ -1,6 +1,7 @@
 import Link from 'next/link'
 
 import { Logo } from '@/components/shop/logo'
+import { HEADER_NAME, NAV_BACK } from '@/lib/view-transitions'
 
 /**
  * L'en-tête du tunnel de commande : le mot-symbole, et rien.
@@ -17,9 +18,10 @@ import { Logo } from '@/components/shop/logo'
  */
 export function CheckoutHeader() {
   return (
-    <header className="border-b border-border">
+    // Ancré comme celui de la boutique, et sous le même nom : voir `SiteHeader`.
+    <header className="border-b border-border" style={{ viewTransitionName: HEADER_NAME }}>
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-center px-4">
-        <Link href="/" className="flex items-center gap-2">
+        <Link href="/" transitionTypes={NAV_BACK} className="flex items-center gap-2">
           <Logo className="h-6 w-auto" />
           <span className="font-display text-2xl leading-none tracking-wide">DakarKits</span>
         </Link>

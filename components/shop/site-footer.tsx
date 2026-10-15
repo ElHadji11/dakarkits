@@ -4,6 +4,7 @@ import { DeliveryZoneNotice } from '@/components/shop/delivery-zone'
 import { Logo } from '@/components/shop/logo'
 import { formatPhone } from '@/lib/constants'
 import type { ShopSettings } from '@/lib/shop-types'
+import { NAV_BACK } from '@/lib/view-transitions'
 
 /**
  * Pied de page de la boutique, présent sur toutes les pages — donc sur le
@@ -84,6 +85,7 @@ export function SiteFooter({ settings }: { settings: ShopSettings }) {
           <div className="space-y-2 lg:justify-self-start">
             <Link
               href="/"
+              transitionTypes={NAV_BACK}
               className="group inline-flex items-center gap-2 transition-transform duration-300 hover:scale-[1.03]"
             >
               <Logo className="h-6 w-auto transition-colors duration-300 group-hover:text-primary" />

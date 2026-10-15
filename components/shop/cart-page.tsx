@@ -9,6 +9,7 @@ import { DeliveryZoneNotice } from '@/components/shop/delivery-zone'
 import { Button } from '@/components/ui/button'
 import { useCartLines } from '@/hooks/use-cart-lines'
 import { shippingRange } from '@/lib/pricing'
+import { BUY_BAR_NAME, NAV_BACK, NAV_FORWARD } from '@/lib/view-transitions'
 
 export function CartPage() {
   const { hydrated, lines, pricing, nudge, settings } = useCartLines()
@@ -28,7 +29,7 @@ export function CartPage() {
           </p>
         </div>
         <Button asChild className="h-12">
-          <Link href="/">Voir les maillots</Link>
+          <Link href="/" transitionTypes={NAV_BACK}>Voir les maillots</Link>
         </Button>
       </div>
     )
@@ -54,14 +55,18 @@ export function CartPage() {
               lit comme deux frais qui s'ajoutent. */}
           <DeliveryZoneNotice withOutside={false} className="text-xs" />
           <Button asChild variant="cta" className="hidden h-12 w-full sm:flex">
-            <Link href="/commande">Commander</Link>
+            <Link href="/commande" transitionTypes={NAV_FORWARD}>Commander</Link>
           </Button>
         </div>
       </div>
 
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/95 p-4 backdrop-blur sm:hidden">
+      {/* Ancrée pendant les transitions de page — voir `ProductPurchase`. */}
+      <div
+        className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/95 p-4 backdrop-blur sm:hidden"
+        style={{ viewTransitionName: BUY_BAR_NAME }}
+      >
         <Button asChild variant="cta" className="h-12 w-full">
-          <Link href="/commande">Commander</Link>
+          <Link href="/commande" transitionTypes={NAV_FORWARD}>Commander</Link>
         </Button>
       </div>
     </div>

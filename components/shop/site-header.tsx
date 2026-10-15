@@ -11,6 +11,7 @@ import { useHideOnScroll } from '@/hooks/use-hide-on-scroll'
 import { useHydrated } from '@/hooks/use-hydrated'
 import { deliveryPromise, type ShopSettings } from '@/lib/shop-types'
 import { useFavorites } from '@/stores/favorites'
+import { HEADER_NAME, NAV_BACK, NAV_FORWARD } from '@/lib/view-transitions'
 
 /**
  * L'en-tête collé, et le compromis qu'il règle.
@@ -43,6 +44,12 @@ export function SiteHeader({ settings }: { settings: ShopSettings }) {
     <header
       ref={ref}
       data-hidden="false"
+      /* Ancré pendant les glissements de page : le contenu bouge, l'en-tête
+         reste le point fixe qui dit que c'est la page qui a changé, pas
+         l'écran entier (voir `::view-transition-group(site-header)` dans
+         globals.css). Même nom que l'en-tête du tunnel : entre le panier et
+         la commande, l'un remplace l'autre sans fondu croisé. */
+      style={{ viewTransitionName: HEADER_NAME }}
       className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur transition-transform duration-200 ease-out data-[hidden=true]:-translate-y-full"
     >
       {/* L’argument de vente qui décide un panier, au-dessus du logo. La
@@ -65,7 +72,7 @@ export function SiteHeader({ settings }: { settings: ShopSettings }) {
       <div className="mx-auto flex h-12 max-w-6xl items-center gap-2 px-4 sm:h-14">
         {/* Le monogramme est `aria-hidden` : le nom accessible du lien vient du
             texte, et vaut donc « DakarKits » sans qu'il faille un aria-label. */}
-        <Link href="/" className="flex shrink-0 items-center gap-2">
+        <Link href="/" transitionTypes={NAV_BACK} className="flex shrink-0 items-center gap-2">
           <Logo className="h-6 w-auto" />
           {/* Bebas n'a qu'une graisse : `font-semibold` n'aurait rien donné.
               Capitales condensées, donc `tracking-wide` pour les aérer. */}
@@ -80,7 +87,7 @@ export function SiteHeader({ settings }: { settings: ShopSettings }) {
 
         <div className="ml-auto flex items-center gap-1">
           <Button asChild variant="ghost" size="icon" className="relative size-11">
-            <Link href="/favoris" aria-label="Favoris">
+            <Link href="/favoris" transitionTypes={NAV_FORWARD} aria-label="Favoris">
               <Heart className="size-5" aria-hidden />
               {hydrated && favorites > 0 ? (
                 <span className="absolute right-1 top-1 flex size-4 items-center justify-center rounded-full bg-primary text-[10px] font-semibold tabular-nums text-primary-foreground">

@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/sheet'
 import { useCartLines } from '@/hooks/use-cart-lines'
 import { shippingRange } from '@/lib/pricing'
+import { NAV_BACK, NAV_FORWARD } from '@/lib/view-transitions'
 
 /** Mounted by CartButton on first tap, so nothing here loads before then. */
 export function CartSheet({
@@ -42,7 +43,7 @@ export function CartSheet({
             <ShoppingBag className="size-8 text-muted-foreground" aria-hidden />
             <p className="text-sm text-muted-foreground">Ton panier est vide.</p>
             <Button asChild variant="outline" className="h-11" onClick={() => setOpen(false)}>
-              <Link href="/">Voir les maillots</Link>
+              <Link href="/" transitionTypes={NAV_BACK}>Voir les maillots</Link>
             </Button>
           </div>
         ) : (
@@ -69,7 +70,7 @@ export function CartSheet({
                   sous le total. */}
               <DeliveryZoneNotice withOutside={false} className="text-xs" />
               <Button asChild variant="cta" className="h-12 w-full" onClick={() => setOpen(false)}>
-                <Link href="/commande">Commander</Link>
+                <Link href="/commande" transitionTypes={NAV_FORWARD}>Commander</Link>
               </Button>
             </SheetFooter>
           </>

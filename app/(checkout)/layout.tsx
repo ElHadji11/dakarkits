@@ -3,6 +3,7 @@ import { Analytics } from '@vercel/analytics/next'
 import { CatalogProvider } from '@/components/shop/catalog-provider'
 import { CheckoutHeader } from '@/components/shop/checkout-header'
 import { MetaPixel } from '@/components/shop/meta-pixel'
+import { PageTransition } from '@/components/shop/page-transition'
 import { ShopToaster } from '@/components/shop/shop-toaster'
 import { getCatalog, getShopSettings } from '@/lib/shop'
 
@@ -38,10 +39,14 @@ export default async function CheckoutLayout({ children }: { children: React.Rea
     <CatalogProvider products={products} settings={settings}>
       <MetaPixel />
       <Analytics />
-      <div className="flex min-h-dvh flex-col">
-        <CheckoutHeader />
-        <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6">{children}</main>
-      </div>
+      {/* Voir le layout de la boutique : c'est ce `<PageTransition>` qui fait
+          glisser l'entrée dans le tunnel et la sortie vers la boutique. */}
+      <PageTransition>
+        <div className="flex min-h-dvh flex-col">
+          <CheckoutHeader />
+          <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6">{children}</main>
+        </div>
+      </PageTransition>
       <ShopToaster />
     </CatalogProvider>
   )

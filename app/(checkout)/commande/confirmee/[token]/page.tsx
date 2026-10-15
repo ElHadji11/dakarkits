@@ -6,6 +6,7 @@ import { Suspense } from 'react'
 
 import { ClearCartOnce } from '@/components/shop/clear-cart-once'
 import { DeliveryZoneNotice } from '@/components/shop/delivery-zone'
+import { PageTransition } from '@/components/shop/page-transition'
 import { PurchaseEvent } from '@/components/shop/purchase-event'
 import { Button } from '@/components/ui/button'
 import { formatCfa, formatCfaRange } from '@/lib/constants'
@@ -13,6 +14,7 @@ import { getOrderByToken } from '@/lib/orders'
 import { storedShippingMax } from '@/lib/pricing'
 import { getShopSettings } from '@/lib/shop'
 import { paymentPromise } from '@/lib/shop-types'
+import { NAV_BACK } from '@/lib/view-transitions'
 
 export const metadata: Metadata = {
   title: 'Commande confirmée',
@@ -23,9 +25,11 @@ export default function ConfirmationPage(
   props: PageProps<'/commande/confirmee/[token]'>,
 ) {
   return (
-    <Suspense fallback={<div className="h-80 animate-pulse rounded-lg bg-muted" aria-hidden />}>
-      <Confirmation params={props.params} />
-    </Suspense>
+    <PageTransition>
+      <Suspense fallback={<div className="h-80 animate-pulse rounded-lg bg-muted" aria-hidden />}>
+        <Confirmation params={props.params} />
+      </Suspense>
+    </PageTransition>
   )
 }
 
@@ -119,7 +123,7 @@ async function Confirmation({
       <DeliveryZoneNotice className="text-xs" />
 
       <Button asChild variant="outline" className="h-12 w-full">
-        <Link href="/">Continuer mes achats</Link>
+        <Link href="/" transitionTypes={NAV_BACK}>Continuer mes achats</Link>
       </Button>
     </div>
   )

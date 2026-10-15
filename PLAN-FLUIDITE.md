@@ -59,7 +59,7 @@ snap-mandatory` fait gratuitement serait une régression.
 
 ## 3. Ce qui manque, par ordre de ce que ça rapporte
 
-### 3.1 Aucune transition d'élément partagé — le manque n° 1
+### 3.1 Aucune transition d'élément partagé — le manque n° 1 — ✅ fait (phase 2)
 
 `grep -rn "ViewTransition"` ne renvoie **rien** dans tout le dépôt. Taper une
 carte fait disparaître la grille et apparaître la fiche : deux écrans sans lien
@@ -244,22 +244,73 @@ le mot-symbole en double depuis que le pied de page le porte aussi (`94f9457`),
 et « Confirmer ma commande » qui ne nomme que le bouton de bureau alors que le
 test tourne sur un Pixel 7. Corrections côté test uniquement.
 
-### Phase 2 — La continuité (un à deux jours)
+### Phase 2 — La continuité ✅ faite le 2026-10-15
 
-1. `<ViewTransition name={`maillot-${id}`}>` sur la photo de la carte et sur la
+*Vérifié dans Chromium 153 (375 × 812, build de production, base locale), en
+enregistrant chaque `startViewTransition` : ses types, les noms animés et la
+durée de chaque animation.*
+
+1. **La photo glisse de la carte à la fiche.** `<KitPhoto>`
+   (`components/shop/kit-photo.tsx`) porte le nom sur la carte et sur la
    première photo de la galerie, avec `share="morph"` et `default="none"`.
-2. Le **même `name` sur le bloc image de `ProductSkeleton`**, pour que la paire
-   se forme même quand le fallback passe (§ 3.1).
-3. Ancrage de `site-header` et de la barre d'achat collée.
-4. Glissements directionnels `nav-forward` / `nav-back` via `transitionTypes`
-   sur les liens, posés **dans chaque `page.tsx`** et non dans le layout.
-5. `::view-transition { pointer-events: none }` pour que les appuis pendant
-   l'animation ne soient pas perdus.
-6. Coupure complète sous `prefers-reduced-motion`, à ajouter au bloc qui existe
-   déjà dans `globals.css`.
+   Le nom est construit sur le **slug** et non sur l'`id`
+   (`kitPhotoName`, `lib/view-transitions.ts`) : le squelette ne connaît que
+   l'URL. Vérifié aussi de fiche à fiche, depuis « Dans le même esprit ».
+2. **Le squelette porte le même nom** (`components/shop/product-skeleton.tsx`,
+   client, slug lu par `useParams`). Sur une navigation qui passe par le
+   fallback, la photo glisse jusqu'au bloc gris, puis le bloc gris cède la
+   place à la photo au même endroit : deux transitions enregistrées, toutes
+   deux sur `maillot-<slug>`.
+3. **En-tête et barre d'achat ancrés** : `site-header` (porté aussi par
+   l'en-tête du tunnel, pour qu'ils se relaient sans fondu) et `barre-achat`
+   (fiche et page panier).
+4. **Glissements `nav-forward` / `nav-back`** : `<PageTransition>` dans
+   chaque `page.tsx` (dans `LegalArticle` pour les deux pages juridiques,
+   plutôt que de réindenter trois cents lignes). On avance vers un maillot,
+   les favoris, la commande ; on revient par les logos et « Voir
+   les maillots ». Les onglets, la bannière et les liens légaux sont latéraux
+   et ne glissent pas.
+5. `::view-transition { pointer-events: none }`.
+6. **Mouvement réduit** : vérifié, toutes les animations à 0,01 ms.
 
-*Mesure de contrôle obligatoire :* Lighthouse mobile sur le catalogue avant et
-après. Le score est à 81, il ne doit pas bouger.
+Trois surprises de la mesure, toutes corrigées :
+
+- **Entre la boutique et le tunnel, rien ne glissait.** `(shop)` et
+  `(checkout)` n'ont pas le même layout : en passant de l'un à l'autre,
+  `<main>` est réinséré, et React n'anime pas un `<ViewTransition>` placé sous
+  du DOM fraîchement inséré. Un `<PageTransition>` de plus en haut de chaque
+  layout de groupe prend le relais — dans ce seul cas, puisqu'à l'intérieur
+  d'un groupe le layout survit et ne joue jamais.
+- **La fiche jouait un morph à son premier chargement.** Le HTML arrive
+  squelette d'abord, et React 19.2 anime ce relais de streaming : avec le nom
+  sur le squelette, la photo du LCP glissait pendant le premier affichage. Le
+  squelette ne prend son nom qu'après l'hydratation (`useHydrated`). Vérifié :
+  plus aucune transition au chargement direct de `/`, `/clubs`, d'une fiche,
+  de `/panier` ou de `/cgv`.
+- **Changer d'onglet faisait glisser toute la grille**, chaque maillot présent
+  sur les deux pages formant une paire. Une capture par carte, hors écran
+  comprises, sur un catalogue qui monte à 200 maillots : les cartes ne
+  glissent que sur une navigation typée (`onlyWhenNavigating`). Un onglet ne
+  fait plus que le fondu par défaut du navigateur, une seule capture.
+
+Un choix de plus, et une limite :
+
+- **La grille statique ne porte aucun nom** (`shareTransition={false}`) :
+  remplacée par la grille interactive à l'hydratation, elle aurait déclenché
+  une transition sur la page du LCP. Une carte tapée avant la fin de
+  l'hydratation ouvre la fiche sans glissement.
+- **Le bouton retour du navigateur ne déclenche aucune transition** — ni
+  glissement, attendu puisqu'il n'a pas de type, ni morph, contrairement à ce
+  qu'annonce le guide de Next. Mesuré, pas corrigé : rien de cassé, la page
+  change simplement d'un coup, comme avant.
+
+*Mesure de contrôle* : Lighthouse mobile sur le catalogue, cinq passes avant
+et après, sur le même poste. **Le chiffre de 81 n'est pas reproductible
+ici** : polices Google bloquées, base de test à douze maillots, et un Chromium
+sans GPU dont le LCP varie de 2,4 à 8 s d'une passe à l'autre. La médiane
+n'a pas bougé au-delà de ce bruit (5,6 s avant, 3,9 s après), TBT 0 et
+CLS 0 des deux côtés, JavaScript +0,9 Ko (0,4 %). **À refaire sur
+louyomb.com après déploiement**, où le 81 a été mesuré.
 
 ### Phase 3 — Le doigt (une demi-journée)
 

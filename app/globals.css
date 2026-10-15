@@ -231,6 +231,18 @@
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+
+  /* Les transitions de vue ne passent pas par `*` : leurs pseudo-éléments
+     vivent hors de l'arbre du document. Sans cette règle, le glissement de
+     page — le mouvement qui touche le plus de surface, donc celui qui gêne
+     le plus — jouerait quand même. Même 0,01 ms que plus haut, et pour la
+     même raison : React attend la fin de l'animation pour rendre la main. */
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0s !important;
+  }
 }
 
 /* Apparition du pied de page quand il entre dans l'écran.
@@ -267,6 +279,104 @@
     opacity: 1;
     transform: none;
   }
+}
+
+/* Transitions de vue — la continuité entre deux pages (PLAN-FLUIDITE.md,
+   phase 2).
+
+   Tout ce qui suit habille les `<ViewTransition>` de React : aucune
+   bibliothèque, aucun JavaScript à nous. Là où le navigateur ne connaît pas
+   l'API, la navigation se fait comme avant, sans animation — jamais un écran
+   bloqué.
+
+   Les garde-fous du plan s'appliquent ici comme ailleurs : `transform` et
+   `opacity` seulement (pas de flou, que le guide de Next propose pendant le
+   morph — un `filter` sur une capture plein écran est exactement ce qu'un
+   Android d'entrée de gamme fait mal), 150 ms pour une sortie, 200 à 400 ms
+   pour une entrée ou un morph. */
+
+/* Pendant l'animation, la superposition du navigateur capte les appuis : un
+   tap sur « Commander » à la fin d'un glissement serait perdu. On la rend
+   transparente au doigt, la page en dessous répond. Les éléments nommés
+   (l'en-tête ancré) restent, eux, hors d'atteinte le temps de l'animation —
+   d'où des durées courtes. */
+::view-transition {
+  pointer-events: none;
+}
+
+/* 1. La photo du maillot, de la carte à la fiche (`KitPhoto`). 300 ms : assez
+   pour que l'œil suive le maillot, assez court pour que l'appui ne paraisse
+   pas réfléchir. */
+::view-transition-group(.morph) {
+  animation-duration: 300ms;
+  animation-timing-function: cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* 2. Le glissement directionnel (`PageTransition`). On avance : l'ancienne
+   page part à gauche, la nouvelle arrive de la droite. On revient : l'inverse.
+   La sortie est rapide pour ne pas disputer l'attention à ce qui arrive, et
+   l'entrée attend qu'elle soit finie pour apparaître. 40 px suffisent à dire
+   le sens sans faire suivre au regard un bloc qui traverse l'écran. */
+::view-transition-old(.nav-forward) {
+  --slide-offset: -40px;
+  animation:
+    150ms ease-in both vt-fade reverse,
+    300ms ease-in-out both vt-slide reverse;
+}
+::view-transition-new(.nav-forward) {
+  --slide-offset: 40px;
+  animation:
+    200ms ease-out 150ms both vt-fade,
+    300ms ease-in-out both vt-slide;
+}
+::view-transition-old(.nav-back) {
+  --slide-offset: 40px;
+  animation:
+    150ms ease-in both vt-fade reverse,
+    300ms ease-in-out both vt-slide reverse;
+}
+::view-transition-new(.nav-back) {
+  --slide-offset: -40px;
+  animation:
+    200ms ease-out 150ms both vt-fade,
+    300ms ease-in-out both vt-slide;
+}
+
+@keyframes vt-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes vt-slide {
+  from {
+    translate: var(--slide-offset);
+  }
+  to {
+    translate: 0;
+  }
+}
+
+/* 3. Les ancres : l'en-tête et la barre d'achat collée ne bougent pas
+   pendant un glissement. Il faut un point fixe pour comprendre que c'est le
+   contenu qui a changé, pas l'écran entier. L'ancienne capture est masquée,
+   sinon les deux en-têtes se superposent un instant ; l'index les garde
+   au-dessus du contenu qui glisse dessous. */
+::view-transition-group(site-header),
+::view-transition-group(barre-achat) {
+  animation: none;
+  z-index: 100;
+}
+::view-transition-old(site-header),
+::view-transition-old(barre-achat) {
+  display: none;
+}
+::view-transition-new(site-header),
+::view-transition-new(barre-achat) {
+  animation: none;
 }
 
 /* Dégradé du pied de page.

@@ -8,6 +8,7 @@ import { ProductGrid } from '@/components/shop/product-grid'
 import { Button } from '@/components/ui/button'
 import { useHydrated } from '@/hooks/use-hydrated'
 import { useFavorites } from '@/stores/favorites'
+import { NAV_BACK } from '@/lib/view-transitions'
 
 export function FavoritesPage() {
   const hydrated = useHydrated()
@@ -35,7 +36,7 @@ export function FavoritesPage() {
           </p>
         </div>
         <Button asChild className="h-12">
-          <Link href="/">Voir les maillots</Link>
+          <Link href="/" transitionTypes={NAV_BACK}>Voir les maillots</Link>
         </Button>
       </div>
     )

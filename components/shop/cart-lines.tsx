@@ -10,6 +10,7 @@ import { productName } from '@/lib/shop-types'
 import { toastUndo } from '@/lib/toast'
 import type { ResolvedLine } from '@/hooks/use-cart-lines'
 import { useCart } from '@/stores/cart'
+import { NAV_FORWARD } from '@/lib/view-transitions'
 
 export function CartLines({ lines, onNavigate }: { lines: ResolvedLine[]; onNavigate?: () => void }) {
   const setQuantity = useCart((state) => state.setQuantity)
@@ -47,6 +48,7 @@ export function CartLines({ lines, onNavigate }: { lines: ResolvedLine[]; onNavi
         <li key={`${line.productId}-${line.size ?? 'unique'}`} className="flex gap-4 py-4">
           <Link
             href={`/maillot/${line.product.slug}`}
+            transitionTypes={NAV_FORWARD}
             onClick={onNavigate}
             className="relative size-20 shrink-0 overflow-hidden rounded-md bg-card"
           >
@@ -68,6 +70,7 @@ export function CartLines({ lines, onNavigate }: { lines: ResolvedLine[]; onNavi
           <div className="min-w-0 flex-1 space-y-1">
             <Link
               href={`/maillot/${line.product.slug}`}
+            transitionTypes={NAV_FORWARD}
               onClick={onNavigate}
               className="block truncate text-sm font-medium"
             >

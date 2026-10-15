@@ -2,8 +2,10 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { Suspense } from 'react'
 
+import { PageTransition } from '@/components/shop/page-transition'
 import { ProductGallery } from '@/components/shop/product-gallery'
 import { ProductPurchase } from '@/components/shop/product-purchase'
+import { ProductSkeleton } from '@/components/shop/product-skeleton'
 import { RelatedRow } from '@/components/shop/related-row'
 import { ViewContentEvent } from '@/components/shop/view-content-event'
 import { formatCfa } from '@/lib/constants'
@@ -64,9 +66,11 @@ export async function generateMetadata(
  */
 export default function ProductPage(props: PageProps<'/maillot/[slug]'>) {
   return (
-    <Suspense fallback={<ProductSkeleton />}>
-      <ProductBody params={props.params} />
-    </Suspense>
+    <PageTransition>
+      <Suspense fallback={<ProductSkeleton />}>
+        <ProductBody params={props.params} />
+      </Suspense>
+    </PageTransition>
   )
 }
 
@@ -97,7 +101,11 @@ async function ProductBody({ params }: { params: PageProps<'/maillot/[slug]'>['p
         value={product.price}
       />
       <div className="grid gap-6 lg:grid-cols-2 lg:gap-8">
-        <ProductGallery images={product.images} title={productName(product)} />
+        <ProductGallery
+          images={product.images}
+          title={productName(product)}
+          slug={product.slug}
+        />
         <ProductPurchase product={product} settings={settings} />
       </div>
 
@@ -139,20 +147,6 @@ async function ProductBody({ params }: { params: PageProps<'/maillot/[slug]'>['p
           }),
         }}
       />
-    </div>
-  )
-}
-
-function ProductSkeleton() {
-  return (
-    <div className="grid gap-6 lg:grid-cols-2 lg:gap-8" aria-hidden>
-      <div className="aspect-square rounded-lg bg-muted" />
-      <div className="space-y-4">
-        <div className="h-8 w-3/4 rounded bg-muted" />
-        <div className="h-4 w-1/2 rounded bg-muted" />
-        <div className="h-10 w-40 rounded bg-muted" />
-        <div className="h-12 w-full rounded bg-muted" />
-      </div>
     </div>
   )
 }

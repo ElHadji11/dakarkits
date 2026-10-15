@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Suspense } from 'react'
 
 import { CatalogView } from '@/components/shop/catalog-view'
+import { PageTransition } from '@/components/shop/page-transition'
 import { ShopHeroBanner } from '@/components/shop/shop-hero'
 import { StaticGrid } from '@/components/shop/static-grid'
 import { getShopSettings } from '@/lib/shop'
@@ -29,10 +30,12 @@ export default async function AllKitsPage() {
   const settings = await getShopSettings()
 
   return (
-    <div className="space-y-6">
-      {settings.hero ? <ShopHeroBanner hero={settings.hero} /> : null}
-      <CatalogPage category="tous" />
-    </div>
+    <PageTransition>
+      <div className="space-y-6">
+        {settings.hero ? <ShopHeroBanner hero={settings.hero} /> : null}
+        <CatalogPage category="tous" />
+      </div>
+    </PageTransition>
   )
 }
 

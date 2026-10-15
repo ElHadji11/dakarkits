@@ -26,6 +26,7 @@ import {
 } from '@/lib/shop-types'
 import { useCart } from '@/stores/cart'
 import { cn } from '@/lib/utils'
+import { BUY_BAR_NAME, NAV_FORWARD } from '@/lib/view-transitions'
 
 // Comme le panneau Filtres : vaul n'arrive qu'au premier appui sur « Guide des
 // tailles ». La fiche produit est la page qui vend, elle ne paie pas d'avance
@@ -89,7 +90,7 @@ export function ProductPurchase({
   const orderNow = () => {
     add(product.id, size, 1)
     trackAddToCart(product.id, productName(product), size, product.price)
-    router.push('/commande')
+    router.push('/commande', { transitionTypes: NAV_FORWARD })
   }
 
   const blocked = soldOut || (hasSizes && selected === null)
@@ -256,8 +257,13 @@ export function ProductPurchase({
         </p>
       ) : null}
 
-      {/* Thumb-reach buy bar, phones only. */}
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/95 p-4 backdrop-blur sm:hidden">
+      {/* Thumb-reach buy bar, phones only. Ancrée pendant les transitions de
+          page, comme l'en-tête : une barre collée qui glisserait avec le
+          contenu se lirait comme un bouton qui s'échappe. */}
+      <div
+        className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/95 p-4 backdrop-blur sm:hidden"
+        style={{ viewTransitionName: BUY_BAR_NAME }}
+      >
         <div className="flex gap-2">
           <Button variant="cta" className="h-12 flex-1" disabled={blocked} onClick={orderNow}>
             Commander maintenant

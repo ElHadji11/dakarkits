@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 
 import { CartPage } from '@/components/shop/cart-page'
+import { PageTransition } from '@/components/shop/page-transition'
 
 export const metadata: Metadata = {
   title: 'Mon panier',
@@ -8,5 +9,9 @@ export const metadata: Metadata = {
 }
 
 export default function PanierPage() {
-  return <CartPage />
+  return (
+    <PageTransition>
+      <CartPage />
+    </PageTransition>
+  )
 }

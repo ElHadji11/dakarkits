@@ -21,6 +21,7 @@ import { idle } from '@/lib/action-state'
 import { trackInitiateCheckout } from '@/lib/pixel'
 import { useAttribution } from '@/stores/attribution'
 import { cn } from '@/lib/utils'
+import { NAV_BACK } from '@/lib/view-transitions'
 
 /**
  * Un placeholder doit se lire comme un exemple, pas comme une valeur déjà
@@ -101,7 +102,7 @@ export function OrderForm() {
           </p>
         </div>
         <Button asChild className="h-12">
-          <Link href="/">Voir les maillots</Link>
+          <Link href="/" transitionTypes={NAV_BACK}>Voir les maillots</Link>
         </Button>
       </div>
     )

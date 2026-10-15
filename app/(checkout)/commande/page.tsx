@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 
 import { OrderForm } from '@/components/shop/order-form'
+import { PageTransition } from '@/components/shop/page-transition'
 
 export const metadata: Metadata = {
   title: 'Commander',
@@ -8,5 +9,9 @@ export const metadata: Metadata = {
 }
 
 export default function CommandePage() {
-  return <OrderForm />
+  return (
+    <PageTransition>
+      <OrderForm />
+    </PageTransition>
+  )
 }

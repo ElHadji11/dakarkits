@@ -414,6 +414,29 @@ servi à dégager.
 0,01 ms et non à `none`, parce que Radix attend `animationend` pour démonter un
 Drawer. À `animation: none`, le panneau Filtres reste coincé à l'écran.
 
+### Les transitions de vue tiennent à des noms uniques
+
+Tout part de `lib/view-transitions.ts` : `kitPhotoName(slug)` pour la photo
+d'un maillot, `HEADER_NAME` et `BUY_BAR_NAME` pour les ancres, `NAV_FORWARD` /
+`NAV_BACK` pour le sens. **Jamais un nom écrit à la main** : une faute de
+frappe d'un côté ne casse rien de visible, l'effet cesse simplement de jouer.
+
+- **Un maillot n'a son nom qu'une fois par page.** Deux éléments visibles du
+  même nom annulent toute la transition, sans un mot en console. Si une
+  nouvelle vignette de maillot apparaît à côté de la grille (recherche,
+  panier…), elle ne passe pas par `<KitPhoto>`.
+- **`<PageTransition>` va dans chaque `page.tsx`**, et en haut de chaque
+  layout de groupe — `(shop)` et `(checkout)`. Le second ne joue qu'en
+  changeant de groupe : React n'anime pas un `<ViewTransition>` posé sous du
+  DOM fraîchement inséré, et c'est ce qui arrive aux pages quand le layout
+  entier change. Une nouvelle page sans le premier ne glisse pas ; un nouveau
+  groupe de routes sans le second non plus.
+- **Rien ne s'anime au premier chargement.** React 19.2 anime aussi les
+  relais de streaming : un nom posé sur un fallback de `<Suspense>` rendu par
+  le serveur fait jouer une transition pendant le premier affichage, sur la
+  photo du LCP. D'où `useHydrated` dans `ProductSkeleton`, et aucune carte
+  nommée dans `StaticGrid`.
+
 ### Une seule échelle d'espacement : 8 / 16 / 24 / 32
 
 Soit `2`, `4`, `6`, `8` en Tailwind. Pas de `3`, pas de `5`, pas de `1.5` pour

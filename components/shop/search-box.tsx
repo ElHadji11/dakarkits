@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input'
 import { formatCfa } from '@/lib/constants'
 import { searchItems } from '@/lib/search'
 import { productName, productSubtitle } from '@/lib/shop-types'
+import { NAV_FORWARD } from '@/lib/view-transitions'
 
 const MAX_RESULTS = 6
 
@@ -92,6 +93,7 @@ export function SearchBox() {
                 <li key={product.id}>
                   <Link
                     href={`/maillot/${product.slug}`}
+                    transitionTypes={NAV_FORWARD}
                     onClick={close}
                     className="flex items-center gap-4 p-2 hover:bg-accent/40"
                   >

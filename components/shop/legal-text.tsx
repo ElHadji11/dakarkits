@@ -6,6 +6,17 @@
  * `muted-foreground`.
  */
 
+import { PageTransition } from '@/components/shop/page-transition'
+
+/**
+ * L'article entier d'une page juridique.
+ *
+ * Il porte le `<PageTransition>` que les autres pages posent dans leur
+ * `page.tsx`. C'est la même chose — `LegalArticle` n'est rendu que par ces
+ * deux pages, il se monte et se démonte avec elles, contrairement à un
+ * layout — et ça évite de réindenter trois cents lignes de texte juridique
+ * dans chacune.
+ */
 export function LegalArticle({
   title,
   updated,
@@ -16,13 +27,15 @@ export function LegalArticle({
   children: React.ReactNode
 }) {
   return (
-    <article className="mx-auto max-w-prose space-y-8 py-6">
-      <header className="space-y-2">
-        <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
-        <p className="text-sm text-muted-foreground">Dernière mise à jour : {updated}</p>
-      </header>
-      {children}
-    </article>
+    <PageTransition>
+      <article className="mx-auto max-w-prose space-y-8 py-6">
+        <header className="space-y-2">
+          <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
+          <p className="text-sm text-muted-foreground">Dernière mise à jour : {updated}</p>
+        </header>
+        {children}
+      </article>
+    </PageTransition>
   )
 }
 

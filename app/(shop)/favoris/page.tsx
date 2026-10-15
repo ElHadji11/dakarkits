@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 
 import { FavoritesPage } from '@/components/shop/favorites-page'
+import { PageTransition } from '@/components/shop/page-transition'
 
 export const metadata: Metadata = {
   title: 'Mes favoris',
@@ -8,5 +9,9 @@ export const metadata: Metadata = {
 }
 
 export default function FavorisPage() {
-  return <FavoritesPage />
+  return (
+    <PageTransition>
+      <FavoritesPage />
+    </PageTransition>
+  )
 }

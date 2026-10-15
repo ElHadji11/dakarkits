@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 
 import { CatalogPage } from '@/app/(shop)/page'
+import { PageTransition } from '@/components/shop/page-transition'
 
 export const metadata: Metadata = {
   title: 'Maillots rétro',
@@ -8,5 +9,9 @@ export const metadata: Metadata = {
 }
 
 export default function Page() {
-  return <CatalogPage category="retro" />
+  return (
+    <PageTransition>
+      <CatalogPage category="retro" />
+    </PageTransition>
+  )
 }

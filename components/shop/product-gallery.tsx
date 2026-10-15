@@ -4,19 +4,27 @@ import { Shirt } from 'lucide-react'
 import NextImage from 'next/image'
 import { useState } from 'react'
 
+import { KitPhoto } from '@/components/shop/kit-photo'
 import { cn } from '@/lib/utils'
 
 /**
  * Swipeable on a phone through CSS scroll-snap — no carousel library, no
  * JavaScript on the critical path. The thumbnails are just anchors into the
  * same scroller.
+ *
+ * La première photo porte le nom de transition du maillot, comme sa carte
+ * dans le catalogue : c'est elle qui arrive en glissant depuis la grille. Les
+ * suivantes non — elles n'ont pas de carte d'où venir.
  */
 export function ProductGallery({
   images,
   title,
+  slug,
 }: {
   images: Array<{ id: number; url: string }>
   title: string
+  /** Le slug de la fiche, pour le nom de transition de la première photo. */
+  slug: string
 }) {
   const [active, setActive] = useState(0)
 
@@ -44,15 +52,17 @@ export function ProductGallery({
         {images.map((image, index) => (
           <li key={image.id} className="w-full shrink-0 snap-center">
             <div className="relative aspect-square overflow-hidden rounded-lg bg-card">
-              <NextImage
-                src={image.url}
-                alt={index === 0 ? title : `${title} — photo ${index + 1}`}
-                fill
-                sizes="(max-width: 1024px) 100vw, 560px"
-                priority={index === 0}
-                loading={index === 0 ? undefined : 'lazy'}
-                className="object-contain p-4"
-              />
+              <KitPhoto slug={slug} share={index === 0}>
+                <NextImage
+                  src={image.url}
+                  alt={index === 0 ? title : `${title} — photo ${index + 1}`}
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 560px"
+                  priority={index === 0}
+                  loading={index === 0 ? undefined : 'lazy'}
+                  className="object-contain p-4"
+                />
+              </KitPhoto>
             </div>
           </li>
         ))}
