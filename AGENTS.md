@@ -449,6 +449,24 @@ et l'absence d'API — iOS Safari ne l'implémente pas du tout, c'est une
 amélioration progressive — et il ne s'appelle que depuis un gestionnaire
 d'événement, sinon le navigateur refuse.
 
+### Le flou d'attente ne voyage pas avec le catalogue
+
+Le loader ImageKit est à nous (`lib/image-loader.ts`), donc Next ne fabrique
+aucun `blurDataURL` tout seul : il faut le fournir. `blurDataUrl()`
+(`lib/imagekit.ts`) va chercher la vignette et l'inline en data URI, et
+**n'est appelée que par `getProduct`, sur la première photo**.
+
+Jamais dans `getCatalog()`. Le catalogue entier part au client par le layout
+boutique : ~500 octets de base64 par maillot, c'est ~100 Ko de plus sur la
+page dont le LCP se joue sur le fil principal — pour flouter des cartes que
+`StaticGrid` a déjà peintes. Et jamais un `fetch` vers une URL venue de la
+base sans `isOwnUrl()`.
+
+Même logique pour `canvas-confetti` : il n'existe que sur la page de
+confirmation, en import dynamique après le rendu (`OrderCelebration`), et il
+n'est pas téléchargé du tout sous `prefers-reduced-motion`. Aucune des pages
+qui vendent ne paie une bibliothèque d'animation.
+
 ### Une seule échelle d'espacement : 8 / 16 / 24 / 32
 
 Soit `2`, `4`, `6`, `8` en Tailwind. Pas de `3`, pas de `5`, pas de `1.5` pour

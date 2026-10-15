@@ -243,6 +243,13 @@
     animation-duration: 0.01ms !important;
     animation-delay: 0s !important;
   }
+
+  /* Le trait de la coche de confirmation attend que le cercle soit tracé. À
+     0,01 ms de durée, ce retard de 350 ms serait tout ce qui resterait de
+     l'animation : la coche apparaîtrait en deux temps, sans raison. */
+  .success-check path {
+    animation-delay: 0s !important;
+  }
 }
 
 /* Apparition du pied de page quand il entre dans l'écran.
@@ -378,6 +385,92 @@
 ::view-transition-new(site-header),
 ::view-transition-new(barre-achat) {
   animation: none;
+}
+
+/* Les trois finitions de la phase 5 (PLAN-FLUIDITE.md) : un montant qui
+   roule, la coche de la confirmation, l'éclat du cœur. Tout en CSS — aucune
+   bibliothèque d'animation sur les pages qui vendent — et tout coupé par la
+   règle `prefers-reduced-motion` du haut de ce fichier.
+
+   Des classes ici plutôt que des utilitaires Tailwind parce qu'elles portent
+   des `@keyframes` : comme `.footer-reveal`, c'est du CSS que Tailwind
+   n'écrirait pas plus court. */
+
+/* 1. Un montant qui change roule au lieu de sauter. Le composant donne au
+      `<span>` une `key` égale à sa valeur : React le remonte, et l'animation
+      repart (voir `Amount` dans `cart-summary.tsx`). 200 ms, `transform` et
+      `opacity` seulement — la colonne des montants ne bouge pas d'un pixel,
+      donc aucun décalage cumulé. */
+.roll-in {
+  animation: roll-in 200ms ease-out;
+}
+
+@keyframes roll-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.35em);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* 2. La coche de la confirmation : le cercle se dessine, puis le trait. Seule
+      page du site où une animation a le droit de coûter — la vente est faite.
+
+      `stroke-dashoffset` n'est ni `transform` ni `opacity`, et c'est la seule
+      entorse au garde-fou du plan : la propriété ne déclenche aucun calcul de
+      mise en page, elle repeint un SVG de 48 px sur une page sans enjeu de
+      LCP. `forwards`, sinon le tracé se défait à la fin. */
+.success-check circle {
+  stroke-dasharray: 132; /* 2πr, avec r = 21 */
+  stroke-dashoffset: 132;
+  animation: check-draw 400ms ease-out forwards;
+}
+
+.success-check path {
+  stroke-dasharray: 28; /* la longueur des deux segments du trait */
+  stroke-dashoffset: 28;
+  animation: check-draw 250ms ease-out 350ms forwards;
+}
+
+@keyframes check-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* 3. L'éclat du cœur, quand un maillot entre dans les favoris : un anneau qui
+      se dilate et s'efface. En pseudo-élément, donc rien de plus dans le DOM
+      des cartes du catalogue — et rien du tout tant que personne n'a touché
+      le cœur.
+
+      `data-burst` est posé sur le nœud par `ref` au clic et retiré à
+      `animationend` : voir `FavoriteButton`. */
+.favorite-burst::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  border: 2px solid var(--primary);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.favorite-burst[data-burst='true']::after {
+  animation: favorite-burst 400ms ease-out;
+}
+
+@keyframes favorite-burst {
+  from {
+    opacity: 0.6;
+    transform: scale(0.6);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.6);
+  }
 }
 
 /* Dégradé du pied de page.

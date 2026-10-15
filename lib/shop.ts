@@ -3,6 +3,7 @@ import 'server-only'
 import { and, asc, desc, eq } from 'drizzle-orm'
 import { cacheLife, cacheTag } from 'next/cache'
 
+import { blurDataUrl } from '@/lib/imagekit'
 import { buildHaystack } from '@/lib/search'
 import { db } from '@/lib/db'
 import {
@@ -130,11 +131,22 @@ export async function getProduct(slug: string): Promise<ShopProductDetail | null
   const summary = catalog.find((product) => product.id === row.id)
   if (!summary) return null
 
-  const images = await db
+  const imageRows = await db
     .select({ id: productImages.id, url: productImages.url })
     .from(productImages)
     .where(eq(productImages.productId, row.id))
     .orderBy(asc(productImages.position), asc(productImages.id))
+
+  /* La vignette floue de la **première** photo seulement : c'est celle qu'on
+     attend sur une 4G, les suivantes sont hors écran jusqu'au premier
+     balayage. C'est aussi une requête ImageKit par maillot au build, où
+     `generateStaticParams` prérend tout le catalogue — trois fois plus pour
+     un flou que personne n'attend ne vaut pas le temps de construction. */
+  const images: ShopProductDetail['images'] = imageRows.map((image) => ({
+    ...image,
+    blurDataURL: null,
+  }))
+  if (images[0]) images[0].blurDataURL = await blurDataUrl(images[0].url)
 
   return { ...summary, description: row.description, images }
 }

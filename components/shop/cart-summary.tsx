@@ -59,7 +59,7 @@ export function CartSummary({
         <div className="flex items-baseline justify-between gap-3 border-t border-border pt-2">
           <dt className="font-medium">À payer à la livraison</dt>
           <dd className="text-right text-lg font-semibold tabular-nums">
-            {formatCfaRange(pricing.total, pricing.totalMax)}
+            <Amount value={formatCfaRange(pricing.total, pricing.totalMax)} />
           </dd>
         </div>
         {/* Le total porte la même réserve que la ligne qui le compose, sinon
@@ -83,8 +83,29 @@ function Row({ label, value, accent }: { label: string; value: string; accent?: 
   return (
     <div className="flex items-baseline justify-between">
       <dt className="text-muted-foreground">{label}</dt>
-      <dd className={accent ? 'tabular-nums text-primary' : 'tabular-nums'}>{value}</dd>
+      <dd className={accent ? 'tabular-nums text-primary' : 'tabular-nums'}>
+        <Amount value={value} />
+      </dd>
     </div>
+  )
+}
+
+/**
+ * Un montant qui roule au lieu de sauter.
+ *
+ * `key={value}` et rien d'autre : React remonte le `<span>` dès que le montant
+ * change, et l'animation CSS (`.roll-in`) repart — pas d'état, pas d'effet,
+ * rien à nettoyer, et zéro travail quand le panier ne bouge pas. Un montant
+ * qui ne change pas ne se rejoue jamais.
+ *
+ * `inline-block` parce qu'un `<span>` en ligne ne se laisse pas translater ;
+ * au passage, un montant ne se coupe plus au milieu en fin de ligne.
+ */
+function Amount({ value }: { value: string }) {
+  return (
+    <span key={value} className="roll-in inline-block">
+      {value}
+    </span>
   )
 }
 
@@ -104,8 +125,16 @@ function PackNudge({
 }) {
   if (nudge === null || pricing.subtotal === 0) return null
 
+  /* La relance entière roule, et pas seulement ses deux montants : quand
+     l'offre change, c'est la phrase qui change — « ajoute un maillot » devient
+     « ajoute 2 maillots », et le palier avec. Deux chiffres qui s'animent au
+     milieu d'un texte immobile se liraient comme un bug. La `key` est le
+     palier visé : la même offre ne se rejoue pas à chaque rendu. */
   return (
-    <p className="flex items-start gap-2 rounded-lg border border-primary/40 bg-primary/10 p-4 text-sm">
+    <p
+      key={nudge.totalItems}
+      className="roll-in flex items-start gap-2 rounded-lg border border-primary/40 bg-primary/10 p-4 text-sm"
+    >
       <Tag className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
       {/* Toute la phrase dans un seul enfant du flex : un montant sorti à nu y
           deviendrait un élément flex de plus, donc 8 px de gouttière avant le

@@ -37,7 +37,12 @@ export type ShopProduct = {
 
 export type ShopProductDetail = ShopProduct & {
   description: string | null
-  images: Array<{ id: number; url: string }>
+  /**
+   * Les photos, dans l'ordre d'affichage. `blurDataURL` n'est rempli que sur
+   * la première : c'est la seule qu'on attend, les autres restent hors écran
+   * jusqu'au premier balayage. Voir `blurDataUrl` dans `lib/imagekit.ts`.
+   */
+  images: Array<{ id: number; url: string; blurDataURL: string | null }>
 }
 
 /**

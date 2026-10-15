@@ -94,7 +94,9 @@ pour ne pas glisser avec le contenu.
 ### 3.2 Pas de visionneuse plein écran — **mise de côté**
 
 > Écartée par décision du 2026-10-15, à ne pas reprendre sans nouvelle
-> consigne. Le reste du § est conservé pour le jour où la question revient.
+> consigne. Reconfirmée le jour même, à l'ouverture de la phase 4 : celle-ci
+> a donc été livrée sans visionneuse. Le reste du § est conservé pour le jour
+> où la question revient.
 
 Taper la photo sur la fiche produit ne fait rien. Telegram, lui, ouvre la photo
 en plein écran et la laisse se refermer en la tirant vers le bas, le fond
@@ -130,7 +132,7 @@ Telegram, et c'est le poste le moins cher de toute cette liste : sonner est déj
 là et gère les toasts à action. Les stores zustand (`stores/favorites`,
 `stores/cart`) savent déjà remettre la ligne — l'annulation est un `add()`.
 
-### 3.5 Images sans montée progressive
+### 3.5 Images sans montée progressive — ✅ fait (phase 4)
 
 `placeholder="blur"` n'est utilisé nulle part, et **ce n'est pas un oubli
 anodin** : le loader ImageKit est personnalisé (`lib/image-loader.ts`), donc
@@ -143,7 +145,7 @@ Sur le catalogue l'effet sera discret (les cartes sont déjà dans le HTML), mai
 sur la fiche produit et la visionneuse plein écran c'est exactement le « flou
 puis net » de Telegram.
 
-### 3.6 Les montants sautent
+### 3.6 Les montants sautent — ✅ fait (phase 5)
 
 Le total du panier, la remise pack et la relance `nextPackStep()` passent d'une
 valeur à l'autre d'un coup. Les chiffres tabulaires sont déjà en place, donc le
@@ -153,7 +155,7 @@ Attention à la règle du projet : **aucun prix en `font-display`**, et pas de
 montant sorti dans son propre `<span>` à l'intérieur d'un flex à `gap` (le piège
 du 2026-10-07 — 8 px de gouttière parasites).
 
-### 3.7 La confirmation de commande ne célèbre rien
+### 3.7 La confirmation de commande ne célèbre rien — ✅ fait (phase 5)
 
 `app/(checkout)/commande/confirmee/[token]/page.tsx` affiche un `CheckCircle2`
 statique. C'est le seul moment de tout le parcours où l'on peut se permettre une
@@ -343,22 +345,82 @@ louyomb.com après déploiement**, où le 81 a été mesuré.
 doigt — rien de tout ça ne se voit dans un navigateur de bureau. À contrôler
 au prochain passage sur un appareil.
 
-### Phase 4 — La photo (un jour)
+### Phase 4 — La photo ✅ faite le 2026-10-15, sans la visionneuse
 
-1. Visionneuse plein écran avec vaul : tirer vers le bas pour fermer, fond qui
-   s'éclaircit à mesure, balayage horizontal entre les photos (le même
-   `scroll-snap` qu'aujourd'hui, repris tel quel).
-2. Chargement dynamique au premier appui, comme `SizeGuide`.
-3. `blurDataURL` fourni par ImageKit (`tr=w-20,bl-10`), porté par
-   `getCatalog()` / `getProduct()`.
+**La visionneuse plein écran n'en fait pas partie** : le § 3.2 l'a écartée le
+même jour, et la consigne a été reconfirmée avant d'écrire une ligne. Ce qui
+restait de la phase, c'est le flou d'attente.
 
-### Phase 5 — Le décor (une demi-journée)
+1. **`blurDataURL` fourni par ImageKit** — `blurDataUrl()` dans
+   `lib/imagekit.ts`, transformation `w-20,bl-10,q-50,f-webp`, inliné en data
+   URI pour qu'il ne coûte aucune requête au navigateur. `f-webp` et non
+   `f-jpg` : nos photos sont détourées, un JPEG leur collerait un fond.
+2. **Sur la fiche produit, pas dans `getCatalog()`** — contrairement à ce
+   qu'annonçait le § 3.5. Le catalogue entier est remis au client par le
+   layout boutique : à ~500 octets de base64 par maillot, 200 maillots
+   ajouteraient ~100 Ko au payload de la page dont le LCP se joue sur le fil
+   principal, et ce pour flouter des cartes que `StaticGrid` a déjà peintes.
+   Le budget JavaScript du catalogue est fermé ; la fiche, elle, ne paie que
+   ses propres photos.
+3. **La première photo seulement.** C'est celle qu'on attend, et celle qui
+   arrive en glissant depuis la grille ; les suivantes restent hors écran
+   jusqu'au premier balayage. Une vignette par maillot, c'est aussi une seule
+   requête ImageKit par maillot au build, où `generateStaticParams` prérend
+   tout le catalogue.
+4. **`objectFit` passe en style inline** sur cette image : Next relit ce style
+   pour poser le `background-size` de la vignette. En classe `object-contain`
+   il ne le voit pas, prend `cover`, et le flou déborde là où la photo, elle,
+   sera contenue.
+5. **Jamais de `fetch` sans garde** : `blurDataUrl()` exige `isOwnUrl()`,
+   plafonne la réponse à 4 Ko, coupe à 2 s et rend `null` à la moindre
+   contrariété — une fiche sans flou reste une fiche. Chercher `[blur]` dans
+   les logs si le flou disparaît partout à la fois.
 
-1. Montants qui roulent sur le total du panier et la remise pack, en CSS.
-2. Coche dessinée en SVG + `canvas-confetti` importé dynamiquement sur la page
-   de confirmation, coupés sous `prefers-reduced-motion`.
-3. Éclat sur le cœur des favoris (CSS, un pseudo-élément qui se dilate et
-   s'efface).
+**Non vérifié** : aucun `next build` n'a été lancé ici, donc `blurDataUrl()`
+n'a jamais tourné contre ImageKit, et le « flou puis net » ne se voit de toute
+façon que sur une connexion lente. À regarder au premier déploiement, en 4G
+bridée.
+
+### Phase 5 — Le décor ✅ faite le 2026-10-15
+
+1. **Les montants roulent** — `.roll-in` dans `globals.css`, `Amount` dans
+   `cart-summary.tsx` : 200 ms, `transform` et `opacity`. Le déclencheur est
+   une `key` égale à la valeur : React remonte le `<span>`, l'animation
+   repart, et un montant qui ne change pas ne joue jamais. Pas d'état, pas
+   d'effet, aucune bibliothèque de compteur.
+   **Les quatre lignes roulent, pas seulement deux** : sous-total, remise,
+   livraison et total changent ensemble quand on ajoute un maillot, et n'en
+   animer que deux se serait lu comme un défaut.
+   La relance pack roule **en entier**, paragraphe compris, parce que c'est la
+   phrase qui change (« ajoute un maillot » → « ajoute 2 maillots ») : deux
+   chiffres animés au milieu d'un texte immobile se lisent comme un bug. Sa
+   `key` est le palier visé, donc la même offre ne se rejoue pas.
+2. **La coche se dessine** : SVG et `stroke-dasharray`, zéro octet de
+   JavaScript — le cercle en 400 ms, le trait ensuite en 250 ms. Les confettis
+   (`canvas-confetti`, 25 Ko bruts ≈ 8 Ko gzippés) arrivent par un import
+   dynamique **après** le rendu : personne ne les télécharge avant d'avoir
+   commandé, et pas du tout sous `prefers-reduced-motion`, la préférence étant
+   lue avant l'import et pas seulement passée à la bibliothèque.
+   Leurs couleurs sont celles du thème, passées par un canvas qui les parse et
+   les resérialise : canvas-confetti ne lit que l'hexadécimal, et un `oklch()`
+   du thème en ressortirait en bouillie. Si rien n'est convertible, la
+   bibliothèque garde ses couleurs — des confettis un peu moins à la charte
+   valent mieux que des confettis noirs.
+3. **L'éclat du cœur** : un anneau en pseudo-élément qui se dilate et
+   s'efface, 400 ms. `data-burst` est posé sur le nœud par `ref` au clic et
+   retiré à `animationend` — même idiome que `data-hidden` dans
+   `useHideOnScroll`, et pour la même raison : un état React ici re-rendrait
+   chaque carte du catalogue. **Au clic et non sur `aria-pressed`**, sinon
+   tous les favoris déjà enregistrés éclateraient ensemble à l'hydratation. À
+   l'ajout seulement : le retrait a déjà son toast « Annuler ».
+
+Une entorse assumée au garde-fou : `stroke-dashoffset` n'est ni `transform` ni
+`opacity`. Elle ne déclenche aucun calcul de mise en page, et elle repeint un
+SVG de 48 px sur la seule page du site qui n'a aucun enjeu de LCP.
+
+**Non vérifié** : ni les confettis ni l'éclat n'ont été vus tourner — aucun
+build lancé ici. Le code est typé et lint-propre, ce qui ne dit rien d'une
+animation.
 
 ---
 

@@ -21,7 +21,7 @@ export function ProductGallery({
   title,
   slug,
 }: {
-  images: Array<{ id: number; url: string }>
+  images: Array<{ id: number; url: string; blurDataURL?: string | null }>
   title: string
   /** Le slug de la fiche, pour le nom de transition de la première photo. */
   slug: string
@@ -60,7 +60,15 @@ export function ProductGallery({
                   sizes="(max-width: 1024px) 100vw, 560px"
                   priority={index === 0}
                   loading={index === 0 ? undefined : 'lazy'}
-                  className="object-contain p-4"
+                  placeholder={image.blurDataURL ? 'blur' : 'empty'}
+                  blurDataURL={image.blurDataURL ?? undefined}
+                  /* `objectFit` en style et non en classe `object-contain` :
+                     Next relit ce style pour poser le `background-size` de la
+                     vignette floue. En classe il ne le voit pas, prend
+                     `cover`, et le flou déborde là où la photo, elle, sera
+                     contenue. */
+                  style={{ objectFit: 'contain' }}
+                  className="p-4"
                 />
               </KitPhoto>
             </div>

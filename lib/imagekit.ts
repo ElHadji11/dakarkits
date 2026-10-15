@@ -29,6 +29,49 @@ export function isOwnUrl(url: string): boolean {
   return endpoint.length > 0 && url.startsWith(`${endpoint}/`)
 }
 
+const BLUR_TRANSFORM = 'w-20,bl-10,q-50,f-webp'
+const BLUR_MAX_BYTES = 4096
+const BLUR_TIMEOUT_MS = 2000
+
+/**
+ * La vignette floue d'une photo, en data URI, pour `placeholder="blur"`.
+ *
+ * Next fabrique ce `blurDataURL` tout seul pour un import statique, jamais
+ * pour une URL distante servie par un loader maison (`lib/image-loader.ts`) :
+ * il faut donc le lui donner. ImageKit la produit (`w-20,bl-10`) et on
+ * l'inline — quelques centaines d'octets qui voyagent avec la fiche, plutôt
+ * qu'une requête de plus sur la 4G qui est déjà le goulot. `f-webp` et non
+ * `f-jpg` : nos photos sont détourées, et un JPEG leur collerait un fond.
+ *
+ * Appelée depuis `getProduct`, donc derrière `'use cache'` : la vignette est
+ * cherchée au remplissage du cache, pas à chaque visite.
+ *
+ * `null` à la moindre contrariété — une URL qui n'est pas la nôtre (jamais de
+ * `fetch` vers une adresse venue de la base sans ce garde), ImageKit qui ne
+ * répond pas, une vignette anormalement grosse. Une fiche sans flou reste une
+ * fiche ; une fiche qui ne se rend pas parce que la vignette a échoué, non.
+ * Chercher `[blur]` dans les logs si le flou disparaît partout à la fois.
+ */
+export async function blurDataUrl(url: string): Promise<string | null> {
+  if (!isOwnUrl(url)) return null
+
+  const [base] = url.split('?')
+  try {
+    const response = await fetch(`${base}?tr=${BLUR_TRANSFORM}`, {
+      signal: AbortSignal.timeout(BLUR_TIMEOUT_MS),
+    })
+    if (!response.ok) return null
+
+    const bytes = Buffer.from(await response.arrayBuffer())
+    if (bytes.byteLength === 0 || bytes.byteLength > BLUR_MAX_BYTES) return null
+
+    return `data:image/webp;base64,${bytes.toString('base64')}`
+  } catch {
+    console.warn('[blur] vignette indisponible', url)
+    return null
+  }
+}
+
 /**
  * Short-lived credentials so the phone uploads straight to ImageKit. Several
  * photos would blow past the Server Action body limit, and routing megabytes

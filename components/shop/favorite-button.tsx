@@ -1,6 +1,7 @@
 'use client'
 
 import { Heart } from 'lucide-react'
+import { useRef } from 'react'
 
 import { useHydrated } from '@/hooks/use-hydrated'
 import { toastUndo } from '@/lib/toast'
@@ -21,6 +22,7 @@ export function FavoriteButton({
   const hydrated = useHydrated()
   const favorite = useFavorites((state) => state.ids.includes(productId))
   const active = hydrated && favorite
+  const ref = useRef<HTMLButtonElement>(null)
 
   /**
    * Ajouter est sans conséquence ; retirer efface quelque chose que le
@@ -35,7 +37,16 @@ export function FavoriteButton({
     const { ids, toggle, restore } = useFavorites.getState()
     const index = ids.indexOf(productId)
     toggle(productId)
-    if (index === -1) return
+    if (index === -1) {
+      /* L'éclat, à l'ajout seulement : retirer a déjà son toast, et deux
+         réponses pour un même appui se marchent dessus. Écrit sur le nœud par
+         `ref`, comme `useHideOnScroll` écrit `data-hidden` — un état React
+         ici re-rendrait la carte, et il y en a une par maillot du catalogue.
+         Au clic et non sur `aria-pressed` : à l'hydratation, tous les favoris
+         déjà enregistrés éclateraient d'un coup. */
+      ref.current?.setAttribute('data-burst', 'true')
+      return
+    }
     void toastUndo('Retiré des favoris', {
       description: name,
       onUndo: () => restore(productId, index),
@@ -44,6 +55,7 @@ export function FavoriteButton({
 
   return (
     <button
+      ref={ref}
       type="button"
       // Inside a card link: stop the click from navigating.
       onClick={(event) => {
@@ -51,6 +63,9 @@ export function FavoriteButton({
         event.stopPropagation()
         onToggle()
       }}
+      // L'animation du pseudo-élément remonte jusqu'ici : on retire le
+      // marqueur à la fin pour que l'éclat puisse rejouer au prochain ajout.
+      onAnimationEnd={() => ref.current?.removeAttribute('data-burst')}
       aria-pressed={active}
       aria-label={active ? 'Retirer des favoris' : 'Ajouter aux favoris'}
       className={cn(
@@ -58,7 +73,7 @@ export function FavoriteButton({
         // transformation : le `active:scale-90` est le seul retour au doigt sur
         // un téléphone, où il n'y a pas de survol. 150 ms — au-delà, un appui
         // donne l'impression que l'interface réfléchit.
-        'flex size-11 items-center justify-center rounded-full text-muted-foreground',
+        'favorite-burst relative flex size-11 items-center justify-center rounded-full text-muted-foreground',
         'transition duration-150 hover:text-foreground active:scale-90',
         className,
       )}

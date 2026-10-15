@@ -1,4 +1,3 @@
-import { CheckCircle2 } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -6,6 +5,7 @@ import { Suspense } from 'react'
 
 import { ClearCartOnce } from '@/components/shop/clear-cart-once'
 import { DeliveryZoneNotice } from '@/components/shop/delivery-zone'
+import { OrderCelebration } from '@/components/shop/order-celebration'
 import { PageTransition } from '@/components/shop/page-transition'
 import { PurchaseEvent } from '@/components/shop/purchase-event'
 import { Button } from '@/components/ui/button'
@@ -71,7 +71,10 @@ async function Confirmation({
       />
 
       <div className="space-y-2 text-center">
-        <CheckCircle2 className="mx-auto size-12 text-primary" aria-hidden />
+        {/* Une coche qui se dessine et des confettis, plutôt qu'une icône
+            posée là. Voir `OrderCelebration` : c'est la seule page du site où
+            l'on peut se permettre la dépense. */}
+        <OrderCelebration />
         <h1 className="text-2xl font-semibold tracking-tight">Commande enregistrée</h1>
         <p className="text-sm text-muted-foreground">
           Numéro <strong className="text-foreground">{order.number}</strong>. On t’appelle très
