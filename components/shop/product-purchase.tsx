@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { DELIVERY_ETA, formatCfa, type Size } from '@/lib/constants'
 import { trackAddToCart } from '@/lib/pixel'
+import { tap } from '@/lib/tap'
 import { toastSuccess } from '@/lib/toast'
 import {
   deliveryPromise,
@@ -77,6 +78,10 @@ export function ProductPurchase({
   const size = hasSizes ? selected : null
 
   const addToCart = () => {
+    // Avant tout le reste : des trois retours de cet appui, la vibration est le
+    // seul qui parte dans la milliseconde — le toast attend sonner, et le
+    // compteur du panier attend le rendu. Voir `lib/tap.ts`.
+    tap()
     add(product.id, size, 1)
     trackAddToCart(product.id, productName(product), size, product.price)
     // `toastSuccess` et non `toast.success` : sonner n'entre dans le paquet
@@ -88,6 +93,7 @@ export function ProductPurchase({
   }
 
   const orderNow = () => {
+    tap()
     add(product.id, size, 1)
     trackAddToCart(product.id, productName(product), size, product.price)
     router.push('/commande', { transitionTypes: NAV_FORWARD })
@@ -166,9 +172,18 @@ export function ProductPurchase({
                 type="button"
                 disabled={!size.available}
                 aria-pressed={selected === size.size}
-                onClick={() => setSelected(size.size)}
+                onClick={() => {
+                  tap()
+                  setSelected(size.size)
+                }}
                 className={cn(
-                  'flex h-12 min-w-14 items-center justify-center rounded-md border px-4 text-sm font-medium transition-colors',
+                  /* `transition` et non `transition-colors` : c'est l'appui qui
+                     précède « Commander », et il n'avait aucun enfoncement.
+                     150 ms et 0,97 — assez pour se sentir sous le pouce, trop
+                     peu pour faire bouger la rangée. Même idiome que
+                     `FavoriteButton`. Une pastille indisponible est `disabled`,
+                     donc elle ne s'enfonce pas. */
+                  'flex h-12 min-w-14 items-center justify-center rounded-md border px-4 text-sm font-medium transition duration-150 active:scale-[0.97]',
                   !size.available && 'cursor-not-allowed border-dashed text-muted-foreground/50',
                   size.available && selected === size.size
                     ? 'border-primary bg-primary/15'
@@ -265,13 +280,23 @@ export function ProductPurchase({
         style={{ viewTransitionName: BUY_BAR_NAME }}
       >
         <div className="flex gap-2">
-          <Button variant="cta" className="h-12 flex-1" disabled={blocked} onClick={orderNow}>
+          {/* `duration-150` écrase le `duration-500` de la variante `cta`, qui
+              est là pour le dégradé qui glisse au survol : un enfoncement
+              étalé sur une demi-seconde donne un bouton mou. Cette barre
+              n'existe que sur téléphone, où il n'y a de toute façon pas de
+              survol à animer. */}
+          <Button
+            variant="cta"
+            className="h-12 flex-1 duration-150 active:scale-[0.97]"
+            disabled={blocked}
+            onClick={orderNow}
+          >
             Commander maintenant
           </Button>
           <Button
             variant="outline"
             size="icon"
-            className="size-12 shrink-0"
+            className="size-12 shrink-0 active:scale-[0.97]"
             disabled={blocked}
             onClick={addToCart}
             aria-label="Ajouter au panier"

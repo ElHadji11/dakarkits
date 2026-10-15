@@ -19,6 +19,7 @@ import { paymentPromise, type ShopSettings } from '@/lib/shop-types'
 import { useCartLines } from '@/hooks/use-cart-lines'
 import { idle } from '@/lib/action-state'
 import { trackInitiateCheckout } from '@/lib/pixel'
+import { tap } from '@/lib/tap'
 import { useAttribution } from '@/stores/attribution'
 import { cn } from '@/lib/utils'
 import { NAV_BACK } from '@/lib/view-transitions'
@@ -118,8 +119,16 @@ export function OrderForm() {
 
   const total = formatCfaRange(pricing.total, pricing.totalMax)
 
+  /* `onSubmit` sur le `<form>` plutôt que sur les boutons : il y en a deux,
+     celui de la barre du bas et celui de bureau, et l'envoi est le même. React
+     appelle le gestionnaire avant l'action, donc la vibration part sans
+     attendre l'aller-retour serveur — c'est tout l'intérêt. */
   return (
-    <form action={formAction} className="mx-auto w-full max-w-[1100px] pb-24 lg:pb-8">
+    <form
+      action={formAction}
+      onSubmit={() => tap()}
+      className="mx-auto w-full max-w-[1100px] pb-24 lg:pb-8"
+    >
       <input type="hidden" name="lines" value={payload} />
       <input type="hidden" name="utmSource" value={attribution.utmSource ?? ''} />
       <input type="hidden" name="utmCampaign" value={attribution.utmCampaign ?? ''} />

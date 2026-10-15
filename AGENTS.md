@@ -437,6 +437,18 @@ frappe d'un côté ne casse rien de visible, l'effet cesse simplement de jouer.
   photo du LCP. D'où `useHydrated` dans `ProductSkeleton`, et aucune carte
   nommée dans `StaticGrid`.
 
+### La vibration dit « c'est pris », et seulement ça
+
+`tap()` (`lib/tap.ts`) : 10 ms, sur **trois appuis** — la taille choisie,
+l'ajout au panier (les deux boutons de la fiche y ajoutent), la commande
+envoyée. Partout ailleurs, rien : un téléphone qui bourdonne à chaque tap
+fatigue, et la vibration cesse alors de vouloir dire quoi que ce soit.
+
+Jamais `navigator.vibrate` en direct. Le helper garde `prefers-reduced-motion`
+et l'absence d'API — iOS Safari ne l'implémente pas du tout, c'est une
+amélioration progressive — et il ne s'appelle que depuis un gestionnaire
+d'événement, sinon le navigateur refuse.
+
 ### Une seule échelle d'espacement : 8 / 16 / 24 / 32
 
 Soit `2`, `4`, `6`, `8` en Tailwind. Pas de `3`, pas de `5`, pas de `1.5` pour

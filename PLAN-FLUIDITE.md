@@ -109,7 +109,7 @@ vaul est déjà installé et sait faire le tirer-pour-fermer avec le fond qui
 s'éclaircit. Nouveau composant, chargé dynamiquement au premier appui, comme
 le guide des tailles.
 
-### 3.3 Retour au doigt incomplet, et zéro vibration
+### 3.3 Retour au doigt incomplet, et zéro vibration — ✅ fait (phase 3)
 
 - Les pastilles de taille n'ont que `transition-colors` : aucun enfoncement.
   C'est pourtant l'appui le plus important de la fiche, celui qui précède
@@ -312,12 +312,36 @@ n'a pas bougé au-delà de ce bruit (5,6 s avant, 3,9 s après), TBT 0 et
 CLS 0 des deux côtés, JavaScript +0,9 Ko (0,4 %). **À refaire sur
 louyomb.com après déploiement**, où le 81 a été mesuré.
 
-### Phase 3 — Le doigt (une demi-journée)
+### Phase 3 — Le doigt ✅ faite le 2026-10-15
 
-1. `active:scale-[0.97]` sur les pastilles de taille et sur la barre d'achat.
-2. Un helper `tap()` minuscule (`navigator.vibrate?.(10)`, sous garde de
-   `prefers-reduced-motion` et de l'existence de l'API) appelé sur : taille
-   choisie, ajout au panier, commande envoyée. Nulle part ailleurs.
+1. **Les pastilles de taille s'enfoncent** : `active:scale-[0.97]`, et
+   `transition duration-150` à la place de `transition-colors`. C'est l'appui
+   qui précède « Commander » et il n'avait aucun retour. Même idiome que
+   `FavoriteButton`. Une pastille indisponible est `disabled`, donc elle ne
+   bouge pas.
+2. **Les deux barres d'achat aussi** — la fiche et la page panier, qui portent
+   déjà le même nom de transition. Avec `duration-150` par-dessus le
+   `duration-500` de la variante `cta` : cette demi-seconde existe pour le
+   dégradé qui glisse au survol, et un enfoncement étalé sur elle donne un
+   bouton mou. Ces barres n'existent que sur téléphone, où il n'y a pas de
+   survol à animer de toute façon.
+3. **`tap()`** (`lib/tap.ts`) : 10 ms, coupée sous `prefers-reduced-motion`
+   (préférence relue à chaque appel, donc elle suit le réglage sans
+   rechargement) et absente là où l'API l'est — iOS Safari ne l'implémente pas
+   du tout, c'est une amélioration progressive pour le parc Android visé.
+4. **Trois moments, et nulle part ailleurs** : la taille choisie, l'ajout au
+   panier, la commande envoyée. « Commander maintenant » vibre aussi, parce
+   que ce bouton ajoute au panier avant de naviguer — sans quoi la barre du
+   bas aurait fait vibrer son petit bouton secondaire et pas le gros.
+   L'envoi est pris sur le `<form>` et non sur ses deux boutons : React
+   appelle `onSubmit` avant l'action, donc la vibration ne dépend pas de
+   l'aller-retour serveur.
+5. **Elle part avant le reste** dans `addToCart` : des trois retours de cet
+   appui, c'est le seul qui ne coûte ni un rendu ni le chargement de sonner.
+
+**Non vérifié** : la vibration demande un vrai Android et l'enfoncement un
+doigt — rien de tout ça ne se voit dans un navigateur de bureau. À contrôler
+au prochain passage sur un appareil.
 
 ### Phase 4 — La photo (un jour)
 

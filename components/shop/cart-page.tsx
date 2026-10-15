@@ -65,7 +65,10 @@ export function CartPage() {
         className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/95 p-4 backdrop-blur sm:hidden"
         style={{ viewTransitionName: BUY_BAR_NAME }}
       >
-        <Button asChild variant="cta" className="h-12 w-full">
+        {/* Même enfoncement que la barre de la fiche, `duration-150` compris :
+            les deux barres portent le même nom de transition, elles se
+            répondent, elles doivent répondre au doigt pareil. */}
+        <Button asChild variant="cta" className="h-12 w-full duration-150 active:scale-[0.97]">
           <Link href="/commande" transitionTypes={NAV_FORWARD}>Commander</Link>
         </Button>
       </div>
