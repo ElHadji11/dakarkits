@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { Bebas_Neue, Inter } from 'next/font/google'
+import { Analytics } from '@vercel/analytics/next'
 
 import { siteUrl } from '@/lib/constants'
 import { cn } from '@/lib/utils'
@@ -53,6 +54,7 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
     <html lang="fr" className={cn('dark', inter.variable, bebas.variable)}>
       <body className="min-h-dvh bg-background font-sans text-foreground antialiased">
         {children}
+        <Analytics />
       </body>
     </html>
   )
