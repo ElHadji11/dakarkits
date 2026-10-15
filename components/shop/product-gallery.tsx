@@ -31,7 +31,11 @@ export function ProductGallery({
   return (
     <div className="space-y-4">
       <ul
-        className="flex snap-x snap-mandatory gap-2 overflow-x-auto rounded-lg [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        /* `overscroll-x-contain` : arrivé à la dernière photo, un balayage de
+           plus partait dans le geste « retour » d'Android Chrome et quittait la
+           fiche. Regarder les photos est précisément ce qu'on vient faire ici —
+           ça ne doit pas pouvoir faire sortir de la page. */
+        className="flex snap-x snap-mandatory gap-2 overflow-x-auto overscroll-x-contain rounded-lg [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         onScroll={(event) => {
           const el = event.currentTarget
           setActive(Math.round(el.scrollLeft / Math.max(1, el.clientWidth)))

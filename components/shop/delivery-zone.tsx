@@ -20,9 +20,11 @@ import { cn } from '@/lib/utils'
  * « Ajouter ». Ils se déplient dans `BrtStationGrid`, là où on en a vraiment
  * besoin — au moment de déclarer sa zone — et ils sont énumérés dans les CGV.
  *
- * `withOutside` tombe à `false` au seul endroit où le prix d'en dehors est
- * déjà affiché en toutes lettres : le choix de zone du formulaire de
- * commande, et le récapitulatif qui en découle.
+ * `withOutside` tombe à `false` là où le prix d'en dehors est déjà affiché en
+ * toutes lettres à quelques lignes : sous le total du panier et de son
+ * panneau, où `CartSummary` le porte parce que la zone n'y est pas encore
+ * déclarée. Deux fois le même intervalle sur le même écran se lit comme deux
+ * frais qui s'ajoutent.
  */
 export function DeliveryZoneNotice({
   withOutside = true,

@@ -8,9 +8,10 @@ import { CartSummary } from '@/components/shop/cart-summary'
 import { DeliveryZoneNotice } from '@/components/shop/delivery-zone'
 import { Button } from '@/components/ui/button'
 import { useCartLines } from '@/hooks/use-cart-lines'
+import { shippingRange } from '@/lib/pricing'
 
 export function CartPage() {
-  const { hydrated, lines, pricing, nudge } = useCartLines()
+  const { hydrated, lines, pricing, nudge, settings } = useCartLines()
 
   if (!hydrated) {
     return <div className="h-64 animate-pulse rounded-lg bg-muted" aria-hidden />
@@ -41,10 +42,17 @@ export function CartPage() {
         <CartLines lines={lines} />
 
         <div className="space-y-4 lg:sticky lg:top-20 lg:self-start">
-          <CartSummary pricing={pricing} nudge={nudge} />
+          <CartSummary
+            pricing={pricing}
+            nudge={nudge}
+            outsideFee={shippingRange(settings, 'outside')}
+          />
           {/* Même place que dans le panneau du panier : juste sous la ligne
-              « Livraison », avant le bouton. */}
-          <DeliveryZoneNotice className="text-xs" />
+              « Livraison », avant le bouton. Sans le prix d'en dehors : le
+              récapitulatif vient de l'annoncer en toutes lettres sous le
+              total, et deux fois le même intervalle à trois lignes d'écart se
+              lit comme deux frais qui s'ajoutent. */}
+          <DeliveryZoneNotice withOutside={false} className="text-xs" />
           <Button asChild variant="cta" className="hidden h-12 w-full sm:flex">
             <Link href="/commande">Commander</Link>
           </Button>

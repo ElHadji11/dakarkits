@@ -23,9 +23,15 @@ import {
  *   - téléphone haché SHA-256 avant envoi à Meta (lib/meta.ts, `hashPhone`)
  *   - aucune suppression automatisée : il n'existe aucun `delete(orders)`
  *   - aucune purge de `rate_limits` hors connexion admin réussie
+ *   - vue de page envoyée à Vercel Web Analytics depuis les deux groupes de
+ *     routes publics (`<Analytics />` dans (shop)/layout.tsx et
+ *     (checkout)/layout.tsx, jamais dans /admin) : chemin visité, référent,
+ *     géolocalisation déduite, appareil, système, navigateur. Pas de `beforeSend`,
+ *     donc le chemin part tel quel — y compris le jeton de la page de
+ *     confirmation (app/(checkout)/commande/confirmee/[token]).
  */
 
-const UPDATED = '11 octobre 2026'
+const UPDATED = '15 octobre 2026'
 
 export const metadata: Metadata = {
   title: 'Confidentialité',
@@ -103,6 +109,16 @@ export default function PrivacyPage() {
           donnée de client.
         </P>
         <P>
+          <Strong>Pour compter les visites :</Strong> chaque page que tu ouvres est signalée à
+          Vercel Web Analytics, la mesure d&apos;audience de notre hébergeur web. Partent avec :
+          l&apos;adresse de la page visitée, la page qui t&apos;y a amené, le pays, la région et
+          la ville déduits de ta connexion, le type d&apos;appareil, le système et le navigateur.{' '}
+          <Strong>Ni ton nom, ni ton téléphone, ni ton adresse de livraison.</Strong> Si tu arrives
+          par une annonce, les paramètres publicitaires font partie de l&apos;adresse et partent
+          donc avec elle ; il en va de même de la clé de ta page de confirmation. Cette mesure ne
+          tourne que sur la boutique et le formulaire de commande.
+        </P>
+        <P>
           Lorsque la publicité est active, nous signalons tes achats à notre régie publicitaire pour
           mesurer nos annonces. Ton numéro de téléphone part{' '}
           <Strong>haché en SHA-256</Strong>, jamais en clair. En revanche, ton adresse IP,
@@ -127,6 +143,11 @@ export default function PrivacyPage() {
           de fonctionner normalement, commande comprise.
         </P>
         <P>
+          Notre mesure d&apos;audience, elle, ne dépose aucun cookie et n&apos;écrit aucun
+          identifiant durable sur ton appareil. Elle distingue les visites par un calcul fait sur la
+          requête, sans rien laisser chez toi : rien à bloquer, rien à accepter.
+        </P>
+        <P>
           Le seul cookie que nous posons nous-mêmes est celui de la session d&apos;administration de
           la boutique. Il ne concerne pas les clients.
         </P>
@@ -141,6 +162,11 @@ export default function PrivacyPage() {
         <P>
           Les compteurs anti-fraude contenant les adresses IP n&apos;ont pas aujourd&apos;hui de
           suppression automatique. Ils sont effacés lors de nos opérations de maintenance.
+        </P>
+        <P>
+          Côté mesure d&apos;audience, le calcul qui distingue les visites est jeté au bout de{' '}
+          <Strong>24 heures</Strong>. Ne restent ensuite que des totaux par page, par pays et par
+          appareil, où plus rien ne te désigne.
         </P>
       </Section>
 

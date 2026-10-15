@@ -22,7 +22,10 @@ test('de la publicité à la commande, puis dans l’admin', async ({ page }) =>
 
   // 1. Arrive from an advert, attribution and all.
   await page.goto('/?utm_source=meta&utm_campaign=e2e&utm_content=creative-e2e&fbclid=E2EFBCLID')
-  await expect(page.getByRole('link', { name: 'DakarKits' })).toBeVisible()
+  // Celui de l'en-tête, pas celui du pied de page : depuis que le pied porte
+  // lui aussi le mot-symbole (94f9457), un locator non qualifié en trouve deux
+  // et Playwright refuse de choisir.
+  await expect(page.getByRole('banner').getByRole('link', { name: 'DakarKits' })).toBeVisible()
 
   // 2. Instant search finds a jersey through its alias.
   await page.getByRole('combobox', { name: 'Chercher un maillot' }).first().fill('barca')
@@ -56,10 +59,21 @@ test('de la publicité à la commande, puis dans l’admin', async ({ page }) =>
   const summary = page.locator('dl').filter({ hasText: 'Sous-total' }).first()
   await page.getByText('Ailleurs dans Dakar').click()
   await expect(summary).toContainText(/2\s?000\s?à\s?3\s?000\s?F/)
-  await page.getByText('Sur l’axe du BRT').click()
+  // `exact` : le récapitulatif porte lui aussi « Livraison sur l'axe du BRT »
+  // depuis que la ligne annonce la zone, et un `getByText` par sous-chaîne
+  // attrape les deux. C'est la carte à cocher qu'on vise.
+  await page.getByText('Sur l’axe du BRT', { exact: true }).click()
   await expect(summary).toContainText('Gratuite')
 
-  await page.getByRole('button', { name: 'Confirmer ma commande' }).last().click()
+  // Le formulaire porte deux boutons d'envoi : « Confirmer ma commande » pour
+  // le bureau, « Confirmer » dans la barre collée du téléphone, et l'autre est
+  // toujours `hidden`. Le test tourne sur un Pixel 7, donc on vise celui qui
+  // est réellement à l'écran plutôt qu'un libellé précis.
+  await page
+    .getByRole('button', { name: /^Confirmer/ })
+    .filter({ visible: true })
+    .first()
+    .click()
 
   // 6. Confirmation, with a readable order number.
   await expect(page).toHaveURL(/\/commande\/confirmee\/[a-f0-9]{32}$/)

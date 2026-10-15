@@ -84,8 +84,15 @@ Tout part de `lib/constants.ts`, et **rien ne se réécrit ailleurs** :
   `DELIVERY_ETA` *quand* — celle-ci ne nomme plus la ville.
 
 `<DeliveryZoneNotice>` (`components/shop/delivery-zone.tsx`) rend les deux
-phrases au pied de page (donc sur tout le catalogue), sur la fiche produit,
-dans le panier et sur sa page, et sur la confirmation. **Pas de carte, et les
+phrases au pied de page (donc sur tout le catalogue), sur la fiche produit et
+sur la confirmation ; dans le panier et sur sa page, seulement la première
+(`withOutside={false}`), parce que `CartSummary` y annonce déjà le prix d'en
+dehors sous le total. **Le panier ne pose pas la question de la zone**, donc il
+chiffre au tarif de l'axe et sa ligne le dit : « Livraison sur l'axe du BRT »,
+avec sous le total ce que coûte une adresse en dehors. « Gratuite » tout seul
+se lisait comme un acquis, au-dessus d'un total que l'adresse pouvait encore
+faire monter de 2 000 à 3 000 F. Les deux bornes sortent de `shippingRange()`,
+jamais de `OUTSIDE_ZONE_FEE` relu à la main. **Pas de carte, et les
 23 noms seulement là où on en a besoin** : `<BrtStationGrid>` ne se déplie que
 sur demande, sous le choix de zone, par un lien porté par la carte « Sur l'axe
 du BRT » — la seule des deux où la question « suis-je dedans ? » se pose.

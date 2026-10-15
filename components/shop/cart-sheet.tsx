@@ -16,6 +16,7 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet'
 import { useCartLines } from '@/hooks/use-cart-lines'
+import { shippingRange } from '@/lib/pricing'
 
 /** Mounted by CartButton on first tap, so nothing here loads before then. */
 export function CartSheet({
@@ -25,7 +26,7 @@ export function CartSheet({
   open: boolean
   onOpenChange: (open: boolean) => void
 }) {
-  const { lines, pricing, nudge } = useCartLines()
+  const { lines, pricing, nudge, settings } = useCartLines()
   const setOpen = onOpenChange
 
   return (
@@ -46,17 +47,27 @@ export function CartSheet({
           </div>
         ) : (
           <>
-            <div className="flex-1 overflow-y-auto px-4">
+            {/* `overscroll-contain` : arrivé en bas de ses lignes, un geste
+                vers le bas de plus partait dans la page et déclenchait le
+                pull-to-refresh d'Android Chrome. Le panier lui-même survit (il
+                est en localStorage), mais le panneau se referme et le visiteur
+                est renvoyé en haut du catalogue. */}
+            <div className="flex-1 overflow-y-auto overscroll-contain px-4">
               <CartLines lines={lines} onNavigate={() => setOpen(false)} />
             </div>
             <SheetFooter className="gap-4 border-t border-border">
-              <CartSummary pricing={pricing} nudge={nudge} />
-              {/* Sous la ligne « Livraison : Gratuite », et pas ailleurs : le
-                  panier est le dernier écran avant le formulaire, et le
-                  récapitulatif de ‹ /commande › reprend déjà la notice sous le
-                  champ adresse — la répéter là-bas la ferait lire deux fois sur
-                  la même page. */}
-              <DeliveryZoneNotice className="text-xs" />
+              <CartSummary
+                pricing={pricing}
+                nudge={nudge}
+                outsideFee={shippingRange(settings, 'outside')}
+              />
+              {/* Sous la ligne « Livraison sur l'axe du BRT », et pas ailleurs :
+                  le panier est le dernier écran avant le formulaire, et le
+                  formulaire pose la question en deux cartes — reprendre la
+                  notice là-bas la ferait lire deux fois sur la même page. Sans
+                  le prix d'en dehors : le récapitulatif vient de l'annoncer
+                  sous le total. */}
+              <DeliveryZoneNotice withOutside={false} className="text-xs" />
               <Button asChild variant="cta" className="h-12 w-full" onClick={() => setOpen(false)}>
                 <Link href="/commande">Commander</Link>
               </Button>

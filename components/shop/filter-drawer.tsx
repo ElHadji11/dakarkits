@@ -77,12 +77,25 @@ export function FilterDrawer({
   return (
     <Drawer open={open} onOpenChange={show}>
       <DrawerContent>
-        <div className="mx-auto w-full max-w-lg">
+        {/* `flex min-h-0 flex-1 flex-col` et non un simple bloc : `DrawerContent`
+            est une colonne flex plafonnée à `max-h-[80vh]`, et un enfant sans
+            `min-h-0` refuse de rétrécir sous sa hauteur naturelle. Le panneau
+            faisait donc 1 947 px dans une boîte de 649 px : sur un téléphone de
+            812 px de haut, « Taille disponible », « Prix » et le bouton « Voir
+            les maillots » tombaient 367 px sous le bord de l'écran, sans aucun
+            moyen d'y accéder — rien ne défilait. Mesuré le 2026-10-15 sur
+            louyomb.com en 375 × 812. */}
+        <div className="mx-auto flex w-full min-h-0 max-w-lg flex-1 flex-col">
           <DrawerHeader>
             <DrawerTitle>Filtres</DrawerTitle>
           </DrawerHeader>
 
-          <div className="space-y-6 px-4 pb-2">
+          {/* Le corps défile, l'en-tête et le pied restent en place.
+              `overscroll-contain` arrête la chaîne au bord de la liste : sans
+              lui, continuer le geste vers le bas déclenche le
+              pull-to-refresh d'Android Chrome, qui recharge la page et ferme
+              le panneau au milieu d'un choix de filtres. */}
+          <div className="min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-contain px-4 pb-2">
             <Chooser
               label="Club ou sélection"
               options={teams}

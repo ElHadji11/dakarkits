@@ -133,6 +133,7 @@ export function ProductCard({
           un maillot blanc. */}
       <FavoriteButton
         productId={product.id}
+        name={productName(product)}
         className="absolute right-1 top-1 bg-background/70 hover:bg-background/90"
       />
     </li>

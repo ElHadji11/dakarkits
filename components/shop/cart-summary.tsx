@@ -8,13 +8,23 @@ import type { PackNudge as PackNudgeOffer, PricingResult } from '@/lib/pricing'
 /**
  * Always shows the four lines the brief asks for: sous-total, remise pack,
  * livraison, total à payer à la livraison.
+ *
+ * `outsideFee` n'est passé que là où la zone n'a pas été déclarée : le panier
+ * et son panneau, qui ne posent pas la question. Le récapitulatif y chiffre
+ * donc la livraison au tarif de l'axe, et **la ligne doit le dire** — « Gratuite »
+ * tout seul se lit comme un acquis, au-dessus d'un total que l'adresse peut
+ * encore faire monter de 2 000 à 3 000 F. Sur le formulaire de commande, où la
+ * zone est déclarée en deux cartes, la question est tranchée : rien à qualifier,
+ * `pricing` porte déjà l'intervalle s'il y en a un.
  */
 export function CartSummary({
   pricing,
   nudge,
+  outsideFee,
 }: {
   pricing: PricingResult
   nudge: PackNudgeOffer | null
+  outsideFee?: { min: number; max: number }
 }) {
   return (
     <div className="space-y-4">
@@ -33,9 +43,13 @@ export function CartSummary({
             annoncer « 7 500 F » en gros au-dessus d'une livraison à 2 000 à
             3 000 F, c'est préparer une discussion sur le pas de la porte.
             `formatCfaRange` rend le montant seul quand les bornes se
-            rejoignent, donc la zone n'a pas besoin d'un rendu à part. */}
+            rejoignent, donc la zone n'a pas besoin d'un rendu à part.
+
+            La réserve part dans l'intitulé et non dans le montant : « Gratuite
+            sur l'axe du BRT » en colonne de droite déborde sur deux lignes à
+            375 px, et casse l'alignement des quatre montants. */}
         <Row
-          label="Livraison"
+          label={outsideFee ? 'Livraison sur l’axe du BRT' : 'Livraison'}
           value={
             pricing.shippingFeeMax === 0
               ? 'Gratuite'
@@ -48,6 +62,18 @@ export function CartSummary({
             {formatCfaRange(pricing.total, pricing.totalMax)}
           </dd>
         </div>
+        {/* Le total porte la même réserve que la ligne qui le compose, sinon
+            c'est le gros chiffre qu'on retient. Les bornes sortent de
+            `shippingRange`, donc d'un seul endroit : sortir de la zone n'y
+            coûte jamais moins que d'y rester, même si la boutique repassait un
+            jour à une livraison payante. */}
+        {outsideFee ? (
+          <p className="text-xs text-muted-foreground">
+            Hors de cet axe, la livraison coûte{' '}
+            {formatCfaRange(outsideFee.min, outsideFee.max)}, fixés pendant l’appel de
+            confirmation.
+          </p>
+        ) : null}
       </dl>
     </div>
   )

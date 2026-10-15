@@ -30,7 +30,7 @@ import { BRT_STATIONS, formatCfa, formatCfaRange, OUTSIDE_ZONE_FEE } from '@/lib
  * tenir : c'est tout l'intérêt d'avoir audité le code avant de rédiger.
  */
 
-const UPDATED = '13 octobre 2026'
+const UPDATED = '15 octobre 2026'
 
 export const metadata: Metadata = {
   title: 'Conditions générales de vente',
@@ -276,7 +276,8 @@ export default function TermsPage() {
       <Section title="13. Services tiers">
         <P>
           Ce site s&apos;appuie sur des prestataires d&apos;hébergement, d&apos;images, d&apos;email,
-          de messagerie et de mesure publicitaire. Ils sont listés dans notre{' '}
+          de messagerie, de mesure d&apos;audience et de mesure publicitaire. Ils sont listés dans
+          notre{' '}
           <Link href="/confidentialite" className="underline underline-offset-4 hover:text-foreground">
             politique de confidentialité
           </Link>

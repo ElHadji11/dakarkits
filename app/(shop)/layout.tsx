@@ -1,9 +1,11 @@
+import { Analytics } from '@vercel/analytics/next'
 import { Suspense } from 'react'
 
 import { AttributionCapture } from '@/components/shop/attribution-capture'
 import { CatalogProvider } from '@/components/shop/catalog-provider'
 import { MetaPixel } from '@/components/shop/meta-pixel'
 import { PromoBanner } from '@/components/shop/promo-banner'
+import { ShopToaster } from '@/components/shop/shop-toaster'
 import { SiteFooter } from '@/components/shop/site-footer'
 import { SiteHeader } from '@/components/shop/site-header'
 import { getCatalog, getShopSettings } from '@/lib/shop'
@@ -25,6 +27,11 @@ export default async function ShopLayout({ children }: { children: React.ReactNo
         <AttributionCapture />
       </Suspense>
       <MetaPixel />
+      {/* Comme le pixel : ici et dans (checkout), jamais dans app/layout.tsx —
+          le layout racine enveloppe aussi /admin, et notre propre navigation
+          n'est pas du trafic. Le composant pose son propre Suspense, donc il ne
+          sort pas la coquille statique. */}
+      <Analytics />
       <div className="flex min-h-dvh flex-col">
         {/* Au-dessus de l'en-tête collé, pas dedans : la barre collée garde sa
             hauteur sur téléphone, et la promo défile hors de l'écran une fois
@@ -34,6 +41,9 @@ export default async function ShopLayout({ children }: { children: React.ReactNo
         <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-4">{children}</main>
         <SiteFooter settings={settings} />
       </div>
+      {/* Hors du `<div>` de mise en page : le toast est en `fixed`, il n'a rien
+          à voir avec la colonne qui porte l'en-tête, le contenu et le pied. */}
+      <ShopToaster />
     </CatalogProvider>
   )
 }

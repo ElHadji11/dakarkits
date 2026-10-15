@@ -7,12 +7,39 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { formatCfa } from '@/lib/constants'
 import { productName } from '@/lib/shop-types'
+import { toastUndo } from '@/lib/toast'
 import type { ResolvedLine } from '@/hooks/use-cart-lines'
 import { useCart } from '@/stores/cart'
 
 export function CartLines({ lines, onNavigate }: { lines: ResolvedLine[]; onNavigate?: () => void }) {
   const setQuantity = useCart((state) => state.setQuantity)
-  const remove = useCart((state) => state.remove)
+
+  /**
+   * Toute suppression passe par ici, et offre « Annuler ».
+   *
+   * Il y a **deux** façons de vider une ligne : la corbeille, et le « − » quand
+   * la quantité est à 1 — `setQuantity(…, 0)` supprime la ligne. Les deux
+   * étaient silencieuses et définitives ; un pouce qui vise le « − » une fois
+   * de trop perdait le maillot sans rien dire.
+   *
+   * On relit l'état au moment du clic pour figer la position de la ligne et sa
+   * quantité : `restore` les rend telles quelles, là où elles étaient.
+   */
+  const removeLine = (line: ResolvedLine) => {
+    const { lines: stored, remove, restore } = useCart.getState()
+    const index = stored.findIndex(
+      (other) => other.productId === line.productId && other.size === line.size,
+    )
+    const snapshot = { productId: line.productId, size: line.size, quantity: line.quantity }
+
+    remove(line.productId, line.size)
+    void toastUndo('Retiré du panier', {
+      description: line.size
+        ? `${productName(line.product)} · taille ${line.size}`
+        : productName(line.product),
+      onUndo: () => restore(snapshot, index),
+    })
+  }
 
   return (
     <ul className="divide-y divide-border">
@@ -57,8 +84,12 @@ export function CartLines({ lines, onNavigate }: { lines: ResolvedLine[]; onNavi
                 size="icon"
                 variant="outline"
                 className="size-11"
-                aria-label="Retirer un exemplaire"
-                onClick={() => setQuantity(line.productId, line.size, line.quantity - 1)}
+                aria-label={line.quantity === 1 ? 'Retirer du panier' : 'Retirer un exemplaire'}
+                onClick={() =>
+                  line.quantity === 1
+                    ? removeLine(line)
+                    : setQuantity(line.productId, line.size, line.quantity - 1)
+                }
               >
                 <Minus className="size-4" aria-hidden />
               </Button>
@@ -81,7 +112,7 @@ export function CartLines({ lines, onNavigate }: { lines: ResolvedLine[]; onNavi
                 variant="ghost"
                 className="ml-auto size-11 text-muted-foreground"
                 aria-label={`Supprimer ${productName(line.product)}`}
-                onClick={() => remove(line.productId, line.size)}
+                onClick={() => removeLine(line)}
               >
                 <Trash2 className="size-4" aria-hidden />
               </Button>

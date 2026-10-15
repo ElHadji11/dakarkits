@@ -41,7 +41,13 @@ export function SizeGuide({
           <DrawerTitle>Guide des tailles</DrawerTitle>
         </DrawerHeader>
 
-        <div className="space-y-4 px-4">
+        {/* Même correctif que le panneau Filtres : `DrawerContent` plafonne à
+            `max-h-[80vh]`, donc le corps doit pouvoir rétrécir (`min-h-0`) et
+            défiler lui-même, sinon le tableau pousse « J'ai compris » et le
+            bouton WhatsApp hors de l'écran. Ici ça tenait de justesse sur un
+            téléphone de 812 px, mais pas sur un écran de 667 px, où 80 vh ne
+            font plus que 533 px. */}
+        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain px-4">
           <p className="text-sm text-muted-foreground">
             Maillot posé à plat. <strong className="text-foreground">Largeur</strong> d&apos;une
             aisselle à l&apos;autre, <strong className="text-foreground">longueur</strong> depuis

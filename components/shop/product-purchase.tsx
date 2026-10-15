@@ -4,7 +4,6 @@ import { Ruler, ShoppingBag, Tag, Truck, Wallet } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
 import { Fragment, useState } from 'react'
-import { toast } from 'sonner'
 
 import { DeliveryZoneNotice } from '@/components/shop/delivery-zone'
 import { FavoriteButton } from '@/components/shop/favorite-button'
@@ -12,6 +11,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { DELIVERY_ETA, formatCfa, type Size } from '@/lib/constants'
 import { trackAddToCart } from '@/lib/pixel'
+import { toastSuccess } from '@/lib/toast'
 import {
   deliveryPromise,
   discountPercent,
@@ -78,7 +78,10 @@ export function ProductPurchase({
   const addToCart = () => {
     add(product.id, size, 1)
     trackAddToCart(product.id, productName(product), size, product.price)
-    toast.success('Ajouté au panier', {
+    // `toastSuccess` et non `toast.success` : sonner n'entre dans le paquet
+    // qu'au premier appui, pas au chargement de la page qui vend. Voir
+    // `lib/toast.ts`.
+    void toastSuccess('Ajouté au panier', {
       description: size ? `${productName(product)} · taille ${size}` : productName(product),
     })
   }
@@ -105,7 +108,11 @@ export function ProductPurchase({
           <h1 className="text-2xl font-semibold tracking-tight">{productName(product)}</h1>
           {subtitle ? <p className="text-sm text-muted-foreground">{subtitle}</p> : null}
         </div>
-        <FavoriteButton productId={product.id} className="-mr-2 shrink-0" />
+        <FavoriteButton
+          productId={product.id}
+          name={productName(product)}
+          className="-mr-2 shrink-0"
+        />
       </div>
 
       {/* La remise n'existait que sur les cartes du catalogue : le visiteur
